@@ -22,7 +22,7 @@ def query_neo4j(
     """
     driver = None
     try:
-        # 连接Neo4j数据库
+        # Connect to Neo4j database
         driver = GraphDatabase.driver(
             os.getenv("NEO4J_URI"),
             auth=(os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD")),
@@ -30,16 +30,13 @@ def query_neo4j(
 
         with driver.session(database="kggraph") as session:
             result = session.run(cypher_query, parameters or {})
-
-            # 将结果转换为字典列表
             records = []
             for record in result:
                 records.append(dict(record))
 
             return records
-
     except Exception as e:
-        return [{"error": f"查询失败: {str(e)}"}]
+        return [{"error": f"Query failed: {str(e)}"}]
 
     finally:
         if driver:
