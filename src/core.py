@@ -377,7 +377,7 @@ class Neo4jSchemaExtractor:
                 for label in labels:
                     # Get properties for this label
                     query = f"""
-                    MATCH (n:{label})
+                    MATCH (n:`{label}`)
                     WITH keys(n) as props
                     UNWIND props as prop
                     RETURN DISTINCT prop, 
@@ -388,7 +388,7 @@ class Neo4jSchemaExtractor:
 
                     # Use basic query if APOC plugin is not available
                     basic_query = f"""
-                    MATCH (n:{label})
+                    MATCH (n:`{label}`)
                     WITH keys(n) as props
                     UNWIND props as prop
                     RETURN DISTINCT prop, COUNT(*) as frequency
@@ -421,12 +421,12 @@ class Neo4jSchemaExtractor:
 
                     # Get node count
                     count_result = session.run(
-                        f"MATCH (n:{label}) RETURN COUNT(n) as count"
+                        f"MATCH (n:`{label}`) RETURN COUNT(n) as count"
                     )
                     node_count = count_result.single()["count"]
 
                     # Get sample data
-                    sample_result = session.run(f"MATCH (n:{label}) RETURN n LIMIT 3")
+                    sample_result = session.run(f"MATCH (n:`{label}`) RETURN n LIMIT 3")
                     samples = []
                     for record in sample_result:
                         node = record["n"]
