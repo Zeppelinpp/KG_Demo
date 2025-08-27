@@ -28,7 +28,7 @@ def query_neo4j(
             auth=(os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD")),
         )
 
-        with driver.session(database="kggraph") as session:
+        with driver.session(database=os.getenv("NEO4J_DATABASE", "neo4j")) as session:
             result = session.run(cypher_query, parameters or {})
             records = []
             for record in result:
