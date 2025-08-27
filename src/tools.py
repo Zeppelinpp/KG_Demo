@@ -23,18 +23,16 @@ def query_neo4j(
     """
     driver = None
     # cypher preprocess
-    def wrap_label_with_backticks(match):
-        before = match.group(1)
-        label = match.group(2)
-        # Only wrap if not already wrapped in backticks
-        if not (label.startswith('`') and label.endswith('`')):
-            label = f"`{label}`"
-        return f"{before}{label}"
 
-    # Pattern: MATCH (anything:Label) or MATCH (n:Label), label can include dot and other non-parenthesis, non-colon, non-space chars
+    # Wrap xxx.csv with backticks if not already wrapped
+    def wrap_csv_with_backticks(match):
+        csv_name = match.group(1)
+        return f"`{csv_name}`"
+
+    # Only wrap xxx.csv that are not already wrapped in backticks
     cypher_query = re.sub(
-        r'(MATCH\s*\([^\)]*?:)([^\s\):]+)',
-        wrap_label_with_backticks,
+        r'(?<!`)(\b[^`\s\(\):]+\.csv\b)(?!`)',  # matches xxx.csv not surrounded by `
+        wrap_csv_with_backticks,
         cypher_query
     )
     # print(cypher_query)
