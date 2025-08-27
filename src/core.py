@@ -1,6 +1,5 @@
 import os
 import json
-import inspect
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
 from typing import List, Callable, Dict, Any, Union
@@ -21,42 +20,8 @@ class FunctionCallingAgent:
             tool.__name__: tool for tool in tools
         }  # Map tool names to functions
 
-        # Convert callable functions to tool schema format for tools_to_openai_schema
-        tool_schemas = []
-        for tool in tools:
-            sig = inspect.signature(tool)
-            parameters = {"type": "object", "properties": {}, "required": []}
-
-            # Extract parameters from function signature
-            for param_name, param in sig.parameters.items():
-                param_type = "string"  # Default type
-                if param.annotation != inspect.Parameter.empty:
-                    if param.annotation == int:
-                        param_type = "integer"
-                    elif param.annotation == float:
-                        param_type = "number"
-                    elif param.annotation == bool:
-                        param_type = "boolean"
-                    elif param.annotation == list:
-                        param_type = "array"
-                    elif param.annotation == dict:
-                        param_type = "object"
-
-                parameters["properties"][param_name] = {"type": param_type}
-
-                # Add to required if no default value
-                if param.default == inspect.Parameter.empty:
-                    parameters["required"].append(param_name)
-
-            tool_schema = {
-                "name": tool.__name__,
-                "description": tool.__doc__ or f"Execute {tool.__name__}",
-                "parameters": parameters,
-            }
-            tool_schemas.append(tool_schema)
-
-        # Use existing tools_to_openai_schema function
-        self.tools = tools_to_openai_schema(tool_schemas)
+        # Use updated tools_to_openai_schema function that accepts callable list directly
+        self.tools = tools_to_openai_schema(tools)
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY"), base_url=os.getenv("OPENAI_BASE_URL")
         )
