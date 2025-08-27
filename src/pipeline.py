@@ -65,7 +65,6 @@ async def chat_session():
 
     # Initialize components
     try:
-        
         # Set initial system prompt
         agent.set_history(
             [{"role": "system", "content": KG_AGENT_PROMPT.format(schema=schema)}]

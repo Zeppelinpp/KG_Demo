@@ -2,7 +2,7 @@ import os
 import json
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
-from typing import List, Callable, Dict, Any, Union, AsyncGenerator
+from typing import List, Callable, Dict, Any, AsyncGenerator
 from openai import AsyncOpenAI
 from tools import tools_to_openai_schema
 from rich.console import Console
@@ -39,20 +39,26 @@ class FunctionCallingAgent:
 
             # Display tool call information
             self.console.print()
-            self.console.print(Panel(
-                f"[bold cyan]🔧 Tool Call: {function_name}[/bold cyan]",
-                border_style="cyan"
-            ))
+            self.console.print(
+                Panel(
+                    f"[bold cyan]🔧 Tool Call: {function_name}[/bold cyan]",
+                    border_style="cyan",
+                )
+            )
 
             # Special handling for Neo4j query tool to display Cypher
             if function_name == "query_neo4j" and "cypher_query" in function_args:
                 cypher_query = function_args["cypher_query"]
                 self.console.print()
-                self.console.print(Panel(
-                    Syntax(cypher_query, "cypher", theme="monokai", line_numbers=True),
-                    title="[bold yellow]🔍 Executing Cypher Query",
-                    border_style="yellow"
-                ))
+                self.console.print(
+                    Panel(
+                        Syntax(
+                            cypher_query, "cypher", theme="monokai", line_numbers=True
+                        ),
+                        title="[bold yellow]🔍 Executing Cypher Query",
+                        border_style="yellow",
+                    )
+                )
 
             # Get the actual function
             if function_name not in self.tool_functions:
@@ -66,14 +72,18 @@ class FunctionCallingAgent:
                 # Handle async functions if needed
                 if hasattr(result, "__await__"):
                     result = await result
-                
+
                 # Display result summary
                 self.console.print()
                 if isinstance(result, list):
-                    self.console.print(f"[dim green]✓ Query returned {len(result)} records[/dim green]")
+                    self.console.print(
+                        f"[dim green]✓ Query returned {len(result)} records[/dim green]"
+                    )
                 else:
-                    self.console.print(f"[dim green]✓ Tool execution completed[/dim green]")
-                
+                    self.console.print(
+                        f"[dim green]✓ Tool execution completed[/dim green]"
+                    )
+
                 return str(result)
             else:
                 return f"Error: '{function_name}' is not callable"
@@ -138,7 +148,9 @@ class FunctionCallingAgent:
 
         return "Maximum iterations reached without final answer"
 
-    async def run_stream(self, messages: List[Dict[str, Any]]) -> AsyncGenerator[str, None]:
+    async def run_stream(
+        self, messages: List[Dict[str, Any]]
+    ) -> AsyncGenerator[str, None]:
         """Run the agent with streaming output and tool calling"""
         current_messages = messages.copy()
         iteration = 0
@@ -161,7 +173,7 @@ class FunctionCallingAgent:
                 async for chunk in stream:
                     if chunk.choices and chunk.choices[0].delta:
                         delta = chunk.choices[0].delta
-                        
+
                         # Handle content streaming
                         if delta.content:
                             assistant_content += delta.content
@@ -171,7 +183,11 @@ class FunctionCallingAgent:
                         if delta.tool_calls:
                             for tool_call_delta in delta.tool_calls:
                                 # Initialize new tool call
-                                if current_tool_call is None or tool_call_delta.index != current_tool_call.get("index"):
+                                if (
+                                    current_tool_call is None
+                                    or tool_call_delta.index
+                                    != current_tool_call.get("index")
+                                ):
                                     if current_tool_call is not None:
                                         tool_calls.append(current_tool_call)
                                     current_tool_call = {
@@ -180,16 +196,21 @@ class FunctionCallingAgent:
                                         "type": tool_call_delta.type or "function",
                                         "function": {
                                             "name": tool_call_delta.function.name or "",
-                                            "arguments": tool_call_delta.function.arguments or ""
-                                        }
+                                            "arguments": tool_call_delta.function.arguments
+                                            or "",
+                                        },
                                     }
                                 else:
                                     # Append to existing tool call
                                     if tool_call_delta.function:
                                         if tool_call_delta.function.name:
-                                            current_tool_call["function"]["name"] += tool_call_delta.function.name
+                                            current_tool_call["function"]["name"] += (
+                                                tool_call_delta.function.name
+                                            )
                                         if tool_call_delta.function.arguments:
-                                            current_tool_call["function"]["arguments"] += tool_call_delta.function.arguments
+                                            current_tool_call["function"][
+                                                "arguments"
+                                            ] += tool_call_delta.function.arguments
 
                 # Add the last tool call if exists
                 if current_tool_call is not None:
@@ -235,74 +256,80 @@ class FunctionCallingAgent:
     async def run_query(self, user_query: str, system_prompt: str = None) -> str:
         """
         Run a single user query with automatic chat history management.
-        
+
         Args:
             user_query (str): The user's query string
-            system_prompt (str, optional): System prompt to set context. If provided, 
+            system_prompt (str, optional): System prompt to set context. If provided,
                                          it will replace any existing system message.
-        
+
         Returns:
             str: The agent's response
         """
         # Add or update system prompt if provided
         if system_prompt:
             # Remove existing system message if any
-            self.chat_history = [msg for msg in self.chat_history if msg["role"] != "system"]
+            self.chat_history = [
+                msg for msg in self.chat_history if msg["role"] != "system"
+            ]
             # Add new system message at the beginning
             self.chat_history.insert(0, {"role": "system", "content": system_prompt})
-        
+
         # Add user query to chat history
         self.chat_history.append({"role": "user", "content": user_query})
-        
+
         # Run the agent with current chat history
         response = await self.run(self.chat_history)
-        
+
         # Add assistant response to chat history
         self.chat_history.append({"role": "assistant", "content": response})
-        
+
         return response
 
-    async def run_query_stream(self, user_query: str, system_prompt: str = None) -> AsyncGenerator[str, None]:
+    async def run_query_stream(
+        self, user_query: str, system_prompt: str = None
+    ) -> AsyncGenerator[str, None]:
         """
         Run a single user query with streaming output and automatic chat history management.
-        
+
         Args:
             user_query (str): The user's query string
-            system_prompt (str, optional): System prompt to set context. If provided, 
+            system_prompt (str, optional): System prompt to set context. If provided,
                                          it will replace any existing system message.
-        
+
         Yields:
             str: Streaming response chunks
         """
         # Add or update system prompt if provided
         if system_prompt:
             # Remove existing system message if any
-            self.chat_history = [msg for msg in self.chat_history if msg["role"] != "system"]
+            self.chat_history = [
+                msg for msg in self.chat_history if msg["role"] != "system"
+            ]
             # Add new system message at the beginning
             self.chat_history.insert(0, {"role": "system", "content": system_prompt})
-        
+
         # Add user query to chat history
         self.chat_history.append({"role": "user", "content": user_query})
-        
+
         # Collect the full response for history
         full_response = ""
-        
+
         # Stream the agent response
         async for chunk in self.run_stream(self.chat_history):
             full_response += chunk
             yield chunk
-        
+
         # Add assistant response to chat history
         self.chat_history.append({"role": "assistant", "content": full_response})
-    
+
     def clear_history(self):
         """Clear the chat history"""
         self.chat_history = []
-    
+
     def get_history(self) -> List[Dict[str, Any]]:
         """Get the current chat history"""
         return self.chat_history.copy()
-    
+
     def set_history(self, history: List[Dict[str, Any]]):
         """Set the chat history"""
         self.chat_history = history.copy()
@@ -449,7 +476,9 @@ class Neo4jSchemaExtractor:
                     }
 
         except Exception as e:
-            self.console.print(f"[bold red]❌ Failed to extract node schema: {e}[/bold red]")
+            self.console.print(
+                f"[bold red]❌ Failed to extract node schema: {e}[/bold red]"
+            )
 
         return node_schema
 
@@ -544,7 +573,9 @@ class Neo4jSchemaExtractor:
                     }
 
         except Exception as e:
-            self.console.print(f"[bold red]❌ Failed to extract relationship schema: {e}[/bold red]")
+            self.console.print(
+                f"[bold red]❌ Failed to extract relationship schema: {e}[/bold red]"
+            )
 
         return relationship_schema
 
@@ -584,7 +615,7 @@ class Neo4jSchemaExtractor:
 
         except Exception as e:
             self.console.print(
-f"[bold yellow]⚠️ Failed to extract constraints and indexes: {e}[/bold yellow]"
+                f"[bold yellow]⚠️ Failed to extract constraints and indexes: {e}[/bold yellow]"
             )
 
         return constraints_indexes
@@ -601,10 +632,14 @@ f"[bold yellow]⚠️ Failed to extract constraints and indexes: {e}[/bold yello
             self.console.print("[bold cyan]Extracting node schema...[/bold cyan]")
             nodes_schema = self.extract_node_labels_and_properties()
 
-            self.console.print("[bold cyan]Extracting relationship schema...[/bold cyan]")
+            self.console.print(
+                "[bold cyan]Extracting relationship schema...[/bold cyan]"
+            )
             relationships_schema = self.extract_relationship_types_and_properties()
 
-            self.console.print("[bold cyan]Extracting constraints and indexes...[/bold cyan]")
+            self.console.print(
+                "[bold cyan]Extracting constraints and indexes...[/bold cyan]"
+            )
             constraints_indexes = self.extract_database_constraints_and_indexes()
 
             # Combine complete schema
