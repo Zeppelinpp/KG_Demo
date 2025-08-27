@@ -1,5 +1,6 @@
 import os
 import inspect
+import re
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
 from typing import List, Dict, Any, Optional, Callable, Union
@@ -21,6 +22,22 @@ def query_neo4j(
         Query results list
     """
     driver = None
+    # cypher preprocess
+    def wrap_label_with_backticks(match):
+        before = match.group(1)
+        label = match.group(2)
+        # Only wrap if not already wrapped in backticks
+        if not (label.startswith('`') and label.endswith('`')):
+            label = f"`{label}`"
+        return f"{before}{label}"
+
+    # Pattern: MATCH (anything:Label) or MATCH (n:Label), label can include dot and other non-parenthesis, non-colon, non-space chars
+    cypher_query = re.sub(
+        r'(MATCH\s*\([^\)]*?:)([^\s\):]+)',
+        wrap_label_with_backticks,
+        cypher_query
+    )
+    # print(cypher_query)
     try:
         # Connect to Neo4j database
         driver = GraphDatabase.driver(
@@ -154,3 +171,14 @@ def _get_json_type(python_type) -> str:
     }
 
     return type_mapping.get(python_type, "string")
+
+
+if __name__ == "__main__":
+    query = """
+MATCH (v:凭证记录表.csv)
+WHERE v.科目全名 = '其他应付款_员工往来' 
+RETURN v.`部门.名称` AS department, SUM(toFloat(replace(v.借方, ",", ""))) AS total_expense
+ORDER BY total_expense DESC
+LIMIT 3
+    """
+    query_neo4j(query)
