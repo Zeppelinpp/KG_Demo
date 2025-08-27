@@ -110,63 +110,73 @@ class FunctionCallingAgent:
 
 
 class Neo4jSchemaExtractor:
-    """Neo4j Schema提取器"""
-    
-    def __init__(self, uri: str, database: str, username: str = "neo4j", password: str = "password", console: Console = None):
+    """Neo4j Schema Extractor"""
+
+    def __init__(
+        self,
+        uri: str,
+        database: str,
+        username: str = "neo4j",
+        password: str = "password",
+        console: Console = None,
+    ):
         self.uri = uri
         self.database = database
         self.username = username
         self.password = password
         self.console = console or Console()
         self.driver = None
-        
+
     def connect(self) -> bool:
-        """连接到Neo4j数据库"""
+        """Connect to Neo4j database"""
         try:
             self.driver = GraphDatabase.driver(
-                self.uri, 
-                auth=(self.username, self.password)
+                self.uri, auth=(self.username, self.password)
             )
-            
-            # 测试连接
+
+            # Test connection
             with self.driver.session(database=self.database) as session:
                 session.run("RETURN 1")
-            
-            self.console.print(Panel(
-                f"[green]✓[/green] 成功连接到Neo4j数据库！\n"
-                f"[bold cyan]连接URI:[/bold cyan] {self.uri}\n"
-                f"[bold cyan]数据库:[/bold cyan] {self.database}",
-                title="[bold green]数据库连接",
-                border_style="green"
-            ))
+
+            self.console.print(
+                Panel(
+                    f"[green]✓[/green] Successfully connected to Neo4j database!\n"
+                    f"[bold cyan]Connection URI:[/bold cyan] {self.uri}\n"
+                    f"[bold cyan]Database:[/bold cyan] {self.database}",
+                    title="[bold green]Database Connection",
+                    border_style="green",
+                )
+            )
             return True
-            
+
         except Exception as e:
-            self.console.print(Panel(
-                f"[bold red]❌ 连接Neo4j数据库失败！[/bold red]\n"
-                f"[yellow]错误信息:[/yellow] {str(e)}",
-                title="[bold red]连接失败",
-                border_style="red"
-            ))
+            self.console.print(
+                Panel(
+                    f"[bold red]❌ Failed to connect to Neo4j database![/bold red]\n"
+                    f"[yellow]Error message:[/yellow] {str(e)}",
+                    title="[bold red]Connection Failed",
+                    border_style="red",
+                )
+            )
             return False
-    
+
     def close(self):
-        """关闭数据库连接"""
+        """Close database connection"""
         if self.driver:
             self.driver.close()
-    
+
     def extract_node_labels_and_properties(self) -> Dict[str, Dict]:
-        """提取节点标签和属性"""
+        """Extract node labels and properties"""
         node_schema = {}
-        
+
         try:
             with self.driver.session(database=self.database) as session:
-                # 获取所有节点标签
+                # Get all node labels
                 result = session.run("CALL db.labels()")
                 labels = [record["label"] for record in result]
-                
+
                 for label in labels:
-                    # 获取该标签的属性
+                    # Get properties for this label
                     query = f"""
                     MATCH (n:{label})
                     WITH keys(n) as props
@@ -176,8 +186,8 @@ class Neo4jSchemaExtractor:
                            COUNT(*) as frequency
                     ORDER BY frequency DESC
                     """
-                    
-                    # 如果没有APOC插件，使用基础查询
+
+                    # Use basic query if APOC plugin is not available
                     basic_query = f"""
                     MATCH (n:{label})
                     WITH keys(n) as props
@@ -185,68 +195,77 @@ class Neo4jSchemaExtractor:
                     RETURN DISTINCT prop, COUNT(*) as frequency
                     ORDER BY frequency DESC
                     """
-                    
+
                     try:
                         result = session.run(query)
                         properties = []
                         for record in result:
-                            properties.append({
-                                'name': record['prop'],
-                                'type': record.get('type', 'unknown'),
-                                'frequency': record['frequency']
-                            })
+                            properties.append(
+                                {
+                                    "name": record["prop"],
+                                    "type": record.get("type", "unknown"),
+                                    "frequency": record["frequency"],
+                                }
+                            )
                     except:
-                        # fallback到基础查询
+                        # fallback to basic query
                         result = session.run(basic_query)
                         properties = []
                         for record in result:
-                            properties.append({
-                                'name': record['prop'],
-                                'type': 'unknown',
-                                'frequency': record['frequency']
-                            })
-                    
-                    # 获取节点计数
-                    count_result = session.run(f"MATCH (n:{label}) RETURN COUNT(n) as count")
-                    node_count = count_result.single()['count']
-                    
-                    # 获取示例数据
+                            properties.append(
+                                {
+                                    "name": record["prop"],
+                                    "type": "unknown",
+                                    "frequency": record["frequency"],
+                                }
+                            )
+
+                    # Get node count
+                    count_result = session.run(
+                        f"MATCH (n:{label}) RETURN COUNT(n) as count"
+                    )
+                    node_count = count_result.single()["count"]
+
+                    # Get sample data
                     sample_result = session.run(f"MATCH (n:{label}) RETURN n LIMIT 3")
                     samples = []
                     for record in sample_result:
-                        node = record['n']
+                        node = record["n"]
                         sample = dict(node)
-                        # 转换值为字符串以便JSON序列化
+                        # Convert values to strings for JSON serialization
                         for key, value in sample.items():
-                            if isinstance(value, (int, float, str, bool)) or value is None:
+                            if (
+                                isinstance(value, (int, float, str, bool))
+                                or value is None
+                            ):
                                 continue
                             else:
                                 sample[key] = str(value)
                         samples.append(sample)
-                    
+
                     node_schema[label] = {
-                        'count': node_count,
-                        'properties': properties,
-                        'samples': samples
+                        "count": node_count,
+                        "properties": properties,
+                        "samples": samples,
                     }
-                    
+
         except Exception as e:
-            self.console.print(f"[bold red]❌ 提取节点schema失败: {e}[/bold red]")
-        
+            self.console.print(f"[bold red]❌ Failed to extract node schema: {e}[/bold red]")
+
         return node_schema
-    
+
     def extract_relationship_types_and_properties(self) -> Dict[str, Dict]:
-        """提取关系类型和属性"""
+        """Extract relationship types and properties"""
         relationship_schema = {}
-        
+
         try:
             with self.driver.session(database=self.database) as session:
-                # 获取所有关系类型
+                # Get all relationship types
                 result = session.run("CALL db.relationshipTypes()")
                 rel_types = [record["relationshipType"] for record in result]
-                
+
                 for rel_type in rel_types:
-                    # 获取关系属性
+                    # Get relationship properties
                     query = f"""
                     MATCH ()-[r:{rel_type}]-()
                     WITH keys(r) as props
@@ -254,20 +273,21 @@ class Neo4jSchemaExtractor:
                     RETURN DISTINCT prop, COUNT(*) as frequency
                     ORDER BY frequency DESC
                     """
-                    
+
                     result = session.run(query)
                     properties = []
                     for record in result:
-                        properties.append({
-                            'name': record['prop'],
-                            'frequency': record['frequency']
-                        })
-                    
-                    # 获取关系计数
-                    count_result = session.run(f"MATCH ()-[r:{rel_type}]-() RETURN COUNT(r) as count")
-                    rel_count = count_result.single()['count']
-                    
-                    # 获取关系的源节点和目标节点类型
+                        properties.append(
+                            {"name": record["prop"], "frequency": record["frequency"]}
+                        )
+
+                    # Get relationship count
+                    count_result = session.run(
+                        f"MATCH ()-[r:{rel_type}]-() RETURN COUNT(r) as count"
+                    )
+                    rel_count = count_result.single()["count"]
+
+                    # Get source and target node types for relationships
                     pattern_result = session.run(f"""
                     MATCH (source)-[r:{rel_type}]->(target)
                     RETURN DISTINCT labels(source) as source_labels, 
@@ -276,16 +296,18 @@ class Neo4jSchemaExtractor:
                     ORDER BY frequency DESC
                     LIMIT 10
                     """)
-                    
+
                     patterns = []
                     for record in pattern_result:
-                        patterns.append({
-                            'source_labels': record['source_labels'],
-                            'target_labels': record['target_labels'],
-                            'frequency': record['frequency']
-                        })
-                    
-                    # 获取示例关系
+                        patterns.append(
+                            {
+                                "source_labels": record["source_labels"],
+                                "target_labels": record["target_labels"],
+                                "frequency": record["frequency"],
+                            }
+                        )
+
+                    # Get sample relationships
                     sample_result = session.run(f"""
                     MATCH (source)-[r:{rel_type}]->(target)
                     RETURN labels(source) as source_labels, 
@@ -293,133 +315,138 @@ class Neo4jSchemaExtractor:
                            r as relationship
                     LIMIT 3
                     """)
-                    
+
                     samples = []
                     for record in sample_result:
-                        rel_data = dict(record['relationship'])
-                        # 转换值为字符串以便JSON序列化
+                        rel_data = dict(record["relationship"])
+                        # Convert values to strings for JSON serialization
                         for key, value in rel_data.items():
-                            if isinstance(value, (int, float, str, bool)) or value is None:
+                            if (
+                                isinstance(value, (int, float, str, bool))
+                                or value is None
+                            ):
                                 continue
                             else:
                                 rel_data[key] = str(value)
-                        
-                        samples.append({
-                            'source_labels': record['source_labels'],
-                            'target_labels': record['target_labels'],
-                            'properties': rel_data
-                        })
-                    
+
+                        samples.append(
+                            {
+                                "source_labels": record["source_labels"],
+                                "target_labels": record["target_labels"],
+                                "properties": rel_data,
+                            }
+                        )
+
                     relationship_schema[rel_type] = {
-                        'count': rel_count,
-                        'properties': properties,
-                        'patterns': patterns,
-                        'samples': samples
+                        "count": rel_count,
+                        "properties": properties,
+                        "patterns": patterns,
+                        "samples": samples,
                     }
-                    
+
         except Exception as e:
-            self.console.print(f"[bold red]❌ 提取关系schema失败: {e}[/bold red]")
-        
+            self.console.print(f"[bold red]❌ Failed to extract relationship schema: {e}[/bold red]")
+
         return relationship_schema
-    
+
     def extract_database_constraints_and_indexes(self) -> Dict[str, List]:
-        """提取数据库约束和索引"""
-        constraints_indexes = {
-            'constraints': [],
-            'indexes': []
-        }
-        
+        """Extract database constraints and indexes"""
+        constraints_indexes = {"constraints": [], "indexes": []}
+
         try:
             with self.driver.session(database=self.database) as session:
-                # 获取约束
+                # Get constraints
                 try:
                     result = session.run("SHOW CONSTRAINTS")
                     for record in result:
-                        constraints_indexes['constraints'].append(dict(record))
+                        constraints_indexes["constraints"].append(dict(record))
                 except:
-                    # 旧版本Neo4j
+                    # Older Neo4j version
                     try:
                         result = session.run("CALL db.constraints()")
                         for record in result:
-                            constraints_indexes['constraints'].append(dict(record))
+                            constraints_indexes["constraints"].append(dict(record))
                     except:
                         pass
-                
-                # 获取索引
+
+                # Get indexes
                 try:
                     result = session.run("SHOW INDEXES")
                     for record in result:
-                        constraints_indexes['indexes'].append(dict(record))
+                        constraints_indexes["indexes"].append(dict(record))
                 except:
-                    # 旧版本Neo4j
+                    # Older Neo4j version
                     try:
                         result = session.run("CALL db.indexes()")
                         for record in result:
-                            constraints_indexes['indexes'].append(dict(record))
+                            constraints_indexes["indexes"].append(dict(record))
                     except:
                         pass
-                        
+
         except Exception as e:
-            self.console.print(f"[bold yellow]⚠️ 提取约束和索引信息失败: {e}[/bold yellow]")
-        
+            self.console.print(
+f"[bold yellow]⚠️ Failed to extract constraints and indexes: {e}[/bold yellow]"
+            )
+
         return constraints_indexes
-    
+
     def extract_full_schema(self, output_file: str = None) -> Dict:
-        """提取完整的数据库schema"""
+        """Extract complete database schema"""
         self.console.print()
-        self.console.rule("[bold green]🔍 Neo4j Schema提取", style="green")
-        
+        self.console.rule("[bold green]🔍 Neo4j Schema Extraction", style="green")
+
         if not self.connect():
             return {}
-        
+
         try:
-            self.console.print("[bold cyan]正在提取节点schema...[/bold cyan]")
+            self.console.print("[bold cyan]Extracting node schema...[/bold cyan]")
             nodes_schema = self.extract_node_labels_and_properties()
-            
-            self.console.print("[bold cyan]正在提取关系schema...[/bold cyan]")
+
+            self.console.print("[bold cyan]Extracting relationship schema...[/bold cyan]")
             relationships_schema = self.extract_relationship_types_and_properties()
-            
-            self.console.print("[bold cyan]正在提取约束和索引...[/bold cyan]")
+
+            self.console.print("[bold cyan]Extracting constraints and indexes...[/bold cyan]")
             constraints_indexes = self.extract_database_constraints_and_indexes()
-            
-            # 组合完整schema
+
+            # Combine complete schema
             full_schema = {
-                'database_info': {
-                    'uri': self.uri,
-                    'database': self.database,
-                    'extraction_time': str(__import__('datetime').datetime.now())
+                "database_info": {
+                    "uri": self.uri,
+                    "database": self.database,
+                    "extraction_time": str(__import__("datetime").datetime.now()),
                 },
-                'nodes': nodes_schema,
-                'relationships': relationships_schema,
-                'constraints': constraints_indexes['constraints'],
-                'indexes': constraints_indexes['indexes']
+                "nodes": nodes_schema,
+                "relationships": relationships_schema,
+                "constraints": constraints_indexes["constraints"],
+                "indexes": constraints_indexes["indexes"],
             }
-            
-            # 保存到文件
+
+            # Save to file
             if output_file:
                 output_path = Path(output_file)
                 output_path.parent.mkdir(exist_ok=True)
-                
-                # 保存JSON格式的schema
-                json_file = output_path.with_suffix('.json')
-                with open(json_file, 'w', encoding='utf-8') as f:
+
+                # Save schema in JSON format
+                json_file = output_path.with_suffix(".json")
+                with open(json_file, "w", encoding="utf-8") as f:
                     json.dump(full_schema, f, ensure_ascii=False, indent=2)
-                
-                self.console.print(Panel(
-                    f"[green]✓[/green] Schema提取完成！\n"
-                    f"[bold cyan]JSON文件:[/bold cyan] {json_file}\n"
-                    f"[bold cyan]节点类型:[/bold cyan] {len(nodes_schema)}\n"
-                    f"[bold cyan]关系类型:[/bold cyan] {len(relationships_schema)}",
-                    title="[bold green]提取完成",
-                    border_style="green"
-                ))
-            
+
+                self.console.print(
+                    Panel(
+                        f"[green]✓[/green] Schema extraction completed!\n"
+                        f"[bold cyan]JSON file:[/bold cyan] {json_file}\n"
+                        f"[bold cyan]Node types:[/bold cyan] {len(nodes_schema)}\n"
+                        f"[bold cyan]Relationship types:[/bold cyan] {len(relationships_schema)}",
+                        title="[bold green]Extraction Complete",
+                        border_style="green",
+                    )
+                )
+
             return full_schema
-            
+
         except Exception as e:
-            self.console.print(f"[bold red]❌ Schema提取失败: {e}[/bold red]")
+            self.console.print(f"[bold red]❌ Schema extraction failed: {e}[/bold red]")
             return {}
-        
+
         finally:
             self.close()
-
