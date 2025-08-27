@@ -430,12 +430,6 @@ class Neo4jSchemaExtractor:
                 'indexes': constraints_indexes['indexes']
             }
             
-            # 显示摘要
-            self.display_schema_summary(full_schema)
-            
-            # 生成LLM提示模板
-            llm_template = self.generate_llm_prompt_template(full_schema)
-            
             # 保存到文件
             if output_file:
                 output_path = Path(output_file)
@@ -446,15 +440,9 @@ class Neo4jSchemaExtractor:
                 with open(json_file, 'w', encoding='utf-8') as f:
                     json.dump(full_schema, f, ensure_ascii=False, indent=2)
                 
-                # 保存LLM提示模板
-                template_file = output_path.with_suffix('.md')
-                with open(template_file, 'w', encoding='utf-8') as f:
-                    f.write(llm_template)
-                
                 self.console.print(Panel(
                     f"[green]✓[/green] Schema提取完成！\n"
                     f"[bold cyan]JSON文件:[/bold cyan] {json_file}\n"
-                    f"[bold cyan]LLM模板:[/bold cyan] {template_file}\n"
                     f"[bold cyan]节点类型:[/bold cyan] {len(nodes_schema)}\n"
                     f"[bold cyan]关系类型:[/bold cyan] {len(relationships_schema)}",
                     title="[bold green]提取完成",
