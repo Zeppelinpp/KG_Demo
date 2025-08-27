@@ -1,0 +1,13 @@
+[project]
+name = "kg-demo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastexcel>=0.14.0",
+    "neo4j>=5.28.2",
+    "openai>=1.102.0",
+    "polars>=1.32.3",
+    "python-dotenv>=1.1.1",
+]
