@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from prompts import CYPHER_GEN_PROMPT
-from core import Neo4jSchemaExtractor
+from src.prompts import CYPHER_GEN_PROMPT
+from src.core import Neo4jSchemaExtractor
 
 load_dotenv()
 
@@ -12,7 +12,7 @@ extractor = Neo4jSchemaExtractor(
     username=os.getenv("NEO4J_USER"),
     password=os.getenv("NEO4J_PASSWORD"),
 )
-schema = extractor.extract_full_schema()
+schema = extractor.extract_full_schema("config/schema.json")
 
 client = OpenAI(
     base_url=os.getenv("OPENAI_BASE_URL"),

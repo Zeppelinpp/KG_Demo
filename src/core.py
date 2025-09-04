@@ -1,16 +1,16 @@
 import os
 import json
+import datetime
+import json
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
 from typing import List, Callable, Dict, Any, AsyncGenerator
 from openai import AsyncOpenAI
-from tools import tools_to_openai_schema
 from rich.console import Console
 from rich.panel import Panel
 from rich.syntax import Syntax
 from pathlib import Path
-import datetime
-import json
+from src.utils import tools_to_openai_schema
 
 load_dotenv()
 

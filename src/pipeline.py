@@ -1,14 +1,14 @@
 import os
 import asyncio
 from dotenv import load_dotenv
-from tools import query_neo4j
-from prompts import KG_AGENT_PROMPT
-from core import FunctionCallingAgent, Neo4jSchemaExtractor
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.markdown import Markdown
 from rich.rule import Rule
+from src.tools import query_neo4j
+from src.prompts import KG_AGENT_PROMPT
+from src.core import FunctionCallingAgent, Neo4jSchemaExtractor
 
 load_dotenv()
 
