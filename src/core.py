@@ -1,8 +1,8 @@
 import os
 import json
 import datetime
-import json
 from neo4j import GraphDatabase
+from neo4j.time import DateTime, Date, Time, Duration
 from dotenv import load_dotenv
 from typing import List, Callable, Dict, Any, AsyncGenerator
 from openai import AsyncOpenAI
@@ -13,6 +13,23 @@ from pathlib import Path
 from src.utils import tools_to_openai_schema
 
 load_dotenv()
+
+
+def serialize_neo4j_value(value):
+    """Convert Neo4j values to JSON-serializable format"""
+    if isinstance(value, (DateTime, Date, Time)):
+        return str(value)
+    elif isinstance(value, Duration):
+        return str(value)
+    elif isinstance(value, (int, float, str, bool)) or value is None:
+        return value
+    elif isinstance(value, list):
+        return [serialize_neo4j_value(item) for item in value]
+    elif isinstance(value, dict):
+        return {k: serialize_neo4j_value(v) for k, v in value.items()}
+    else:
+        # For any other type, convert to string
+        return str(value)
 
 
 class FunctionCallingAgent:
@@ -458,15 +475,10 @@ class Neo4jSchemaExtractor:
                     for record in sample_result:
                         node = record["n"]
                         sample = dict(node)
-                        # Convert values to strings for JSON serialization
-                        for key, value in sample.items():
-                            if (
-                                isinstance(value, (int, float, str, bool))
-                                or value is None
-                            ):
-                                continue
-                            else:
-                                sample[key] = str(value)
+                        # Convert values using the serialization function
+                        sample = {
+                            k: serialize_neo4j_value(v) for k, v in sample.items()
+                        }
                         samples.append(sample)
 
                     node_schema[label] = {
@@ -547,15 +559,10 @@ class Neo4jSchemaExtractor:
                     samples = []
                     for record in sample_result:
                         rel_data = dict(record["relationship"])
-                        # Convert values to strings for JSON serialization
-                        for key, value in rel_data.items():
-                            if (
-                                isinstance(value, (int, float, str, bool))
-                                or value is None
-                            ):
-                                continue
-                            else:
-                                rel_data[key] = str(value)
+                        # Convert values using the serialization function
+                        rel_data = {
+                            k: serialize_neo4j_value(v) for k, v in rel_data.items()
+                        }
 
                         samples.append(
                             {
@@ -589,13 +596,24 @@ class Neo4jSchemaExtractor:
                 try:
                     result = session.run("SHOW CONSTRAINTS")
                     for record in result:
-                        constraints_indexes["constraints"].append(dict(record))
+                        constraint_data = dict(record)
+                        # Serialize constraint data
+                        constraint_data = {
+                            k: serialize_neo4j_value(v)
+                            for k, v in constraint_data.items()
+                        }
+                        constraints_indexes["constraints"].append(constraint_data)
                 except:
                     # Older Neo4j version
                     try:
                         result = session.run("CALL db.constraints()")
                         for record in result:
-                            constraints_indexes["constraints"].append(dict(record))
+                            constraint_data = dict(record)
+                            constraint_data = {
+                                k: serialize_neo4j_value(v)
+                                for k, v in constraint_data.items()
+                            }
+                            constraints_indexes["constraints"].append(constraint_data)
                     except:
                         pass
 
@@ -603,13 +621,23 @@ class Neo4jSchemaExtractor:
                 try:
                     result = session.run("SHOW INDEXES")
                     for record in result:
-                        constraints_indexes["indexes"].append(dict(record))
+                        index_data = dict(record)
+                        # Serialize index data
+                        index_data = {
+                            k: serialize_neo4j_value(v) for k, v in index_data.items()
+                        }
+                        constraints_indexes["indexes"].append(index_data)
                 except:
                     # Older Neo4j version
                     try:
                         result = session.run("CALL db.indexes()")
                         for record in result:
-                            constraints_indexes["indexes"].append(dict(record))
+                            index_data = dict(record)
+                            index_data = {
+                                k: serialize_neo4j_value(v)
+                                for k, v in index_data.items()
+                            }
+                            constraints_indexes["indexes"].append(index_data)
                     except:
                         pass
 
