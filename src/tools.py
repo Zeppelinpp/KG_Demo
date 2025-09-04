@@ -57,6 +57,23 @@ def query_neo4j(
             driver.close()
 
 
+def execute_cypher(cypher: str):
+    driver = GraphDatabase.driver(
+        os.getenv("NEO4J_URI"),
+        auth=(os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD")),
+    )
+    with driver.session(database=os.getenv("NEO4J_DATABASE")) as session:
+        try:
+            result = session.run(cypher)
+        except Exception as e:
+            return f"Failed to execute cypher: {str(e)}"
+
+        properties = []
+        for property in result:
+            properties.append(property["prop"])
+        return properties
+
+
 def get_schema():
     """
     Get schema of Knowledge Graph
@@ -79,12 +96,16 @@ def get_relation(entites: List[str], hops: int = 2):
     pass
 
 
-if __name__ == "__main__":
-    query = """
-MATCH (v:凭证记录表.csv)
-WHERE v.科目全名 = '其他应付款_员工往来' 
-RETURN v.`部门.名称` AS department, SUM(toFloat(replace(v.借方, ",", ""))) AS total_expense
-ORDER BY total_expense DESC
-LIMIT 3
+def get_node_properties(node_type: str):
+    cypher = """
+    MATCH (n:`{node_type}`)
+    UNWIND keys(n) AS prop
+    RETURN DISTINCT prop
     """
-    query_neo4j(query)
+    result = execute_cypher(cypher.format(node_type=node_type))
+    return result
+
+
+if __name__ == "__main__":
+    result = get_node_properties("Entry")
+    print(result)
