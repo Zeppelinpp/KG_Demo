@@ -1,0 +1,181 @@
+schema:
+  indexes:
+  - INDEX ON :InventoryCategory(name)
+  - INDEX ON :Supplier(name)
+  - INDEX ON :CashAccount(name)
+  - INDEX ON :BankAccount(name)
+  - INDEX ON :SalesGroup(name)
+  - INDEX ON :Customer(name)
+  - INDEX ON :Voucher(voucher_id)
+  - INDEX ON :OtherParty(name)
+  - INDEX ON :Account(code)
+  - INDEX ON :CostSubelement(name)
+  - INDEX ON :Entry(entry_id)
+  - INDEX ON :Bank(name)
+  - INDEX ON :Project(name)
+  - INDEX ON :UseDepartment(name)
+  - INDEX ON :AssetCategory(name)
+  - INDEX ON :BusinessMode(name)
+  - INDEX ON :Org(name)
+  - INDEX ON :Employee(name)
+  - INDEX ON :Department(name)
+  - INDEX ON :ExpenseItem(name)
+  - INDEX ON :AssetCard(name)
+  - INDEX ON :Warehouse(name)
+  - INDEX ON :ManualInput(name)
+  - CONSTRAINT 'UNIQUENESS' ON :InventoryCategory(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Supplier(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :CashAccount(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :BankAccount(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :SalesGroup(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Voucher(PROPERTY voucher_id)
+  - CONSTRAINT 'UNIQUENESS' ON :OtherParty(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Account(PROPERTY code)
+  - CONSTRAINT 'UNIQUENESS' ON :CostSubelement(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Entry(PROPERTY entry_id)
+  - CONSTRAINT 'UNIQUENESS' ON :Bank(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Project(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :UseDepartment(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :AssetCategory(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :BusinessMode(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Org(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Employee(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Department(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :ExpenseItem(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :AssetCard(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Warehouse(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :ManualInput(PROPERTY name)
+  nodeLabels:
+  - Voucher
+  - Entry
+  - Account
+  - SalesGroup
+  - ExpenseItem
+  - CostSubelement
+  - AssetCategory
+  - Warehouse
+  - Customer
+  - Project
+  - ManualInput
+  - Department
+  - Supplier
+  - OtherParty
+  - Org
+  - AssetCard
+  - Bank
+  - BusinessMode
+  - Employee
+  - InventoryCategory
+  - BankAccount
+  - UseDepartment
+  - CashAccount
+  nodeProperties:
+    Account: []
+    AssetCard: []
+    AssetCategory:
+    - 'name: string'
+    Bank: []
+    BankAccount: []
+    BusinessMode: []
+    CashAccount: []
+    CostSubelement:
+    - 'name: string'
+    Customer:
+    - 'name: string'
+    Department:
+    - 'name: string'
+    Employee:
+    - 'name: string'
+    Entry:
+    - '原币金额: float'
+    - '币种: string'
+    - '摘要: string'
+    - 'entry_id: string'
+    - '附件数: string'
+    - '序号: string'
+    - '借方: float'
+    - '原币借方: float'
+    - '贷方: float'
+    - '原币贷方: float'
+    - '主表项目金额: string'
+    - '主表项目: string'
+    - '参考消息: string'
+    - '附表项目: string'
+    ExpenseItem:
+    - 'name: string'
+    InventoryCategory:
+    - 'name: string'
+    ManualInput: []
+    Org: []
+    OtherParty:
+    - 'name: string'
+    Project:
+    - 'name: string'
+    SalesGroup:
+    - 'name: string'
+    Supplier:
+    - 'name: string'
+    UseDepartment: []
+    Voucher:
+    - '创建时间: datetime'
+    - '过账人: string'
+    - '期间: string'
+    - '审核日期: datetime'
+    - '创建人: string'
+    - '来源系统: string'
+    - '来源类型: string'
+    - '记账日期: datetime'
+    - '修改时间: datetime'
+    - '凭证摘要: string'
+    - '过账: string'
+    - '审核人: string'
+    - '账簿: string'
+    - '凭证字: string'
+    - '制单人: string'
+    - '状态: string'
+    - 'voucher_id: string'
+    - '凭证号: string'
+    - '来源表单类型: string'
+    - '借方合计: float'
+    - '贷方合计: float'
+    - '复核人: string'
+    - '审核驳回: string'
+    Warehouse: []
+  relationships:
+  - from: Voucher
+    to: Entry
+    type: HAS_ENTRY
+  - from: Entry
+    to: Customer
+    type: FOR_CUSTOMER
+  - from: Entry
+    to: Supplier
+    type: FOR_SUPPLIER
+  - from: Entry
+    to: Department
+    type: IN_DEPARTMENT
+  - from: Entry
+    to: ExpenseItem
+    type: FOR_EXPENSE_ITEM
+  - from: Entry
+    to: Project
+    type: FOR_PROJECT
+  - from: Entry
+    to: SalesGroup
+    type: IN_SALES_GROUP
+  - from: Entry
+    to: InventoryCategory
+    type: IN_INVENTORY_CATEGORY
+  - from: Entry
+    to: CostSubelement
+    type: IN_COST_SUBELEM
+  - from: Entry
+    to: AssetCategory
+    type: IN_ASSET_CATEGORY
+  - from: Entry
+    to: OtherParty
+    type: FOR_OTHER_PARTY
+  - from: Entry
+    to: Employee
+    type: BY_EMPLOYEE

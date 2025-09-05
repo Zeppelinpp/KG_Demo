@@ -1,0 +1,26 @@
+schema:
+  nodeLabels:
+    - User
+    - Product
+    - Purchase
+  relationships:
+    - type: PURCHASED
+      from: User
+      to: Product
+      properties:
+        date: datetime
+        price: float
+  nodeProperties:
+    User:
+      - userId: string (unique)
+      - name: string
+    Product:
+      - productId: string (unique)
+      - name: string
+    Purchase:
+      - date: datetime
+      - price: float
+  indexes:
+    - ON (u:User) ASSERT u.userId IS UNIQUE
+    - ON (p:Product) ASSERT p.productId IS UNIQUE
+    - INDEX ON :User(name)
