@@ -1,6 +1,7 @@
 import os
 import json
 import datetime
+import yaml
 from neo4j import GraphDatabase
 from neo4j.time import DateTime, Date, Time, Duration
 from dotenv import load_dotenv
@@ -30,6 +31,131 @@ def serialize_neo4j_value(value):
     else:
         # For any other type, convert to string
         return str(value)
+
+
+def convert_schema_to_yaml_format(extracted_schema: Dict) -> Dict:
+    """Convert extracted Neo4j schema to YAML format similar to schema.yaml"""
+    yaml_schema = {
+        "schema": {
+            "nodeLabels": [],
+            "relationships": [],
+            "nodeProperties": {},
+            "indexes": []
+        }
+    }
+    
+    # Extract node labels
+    if "nodes" in extracted_schema:
+        yaml_schema["schema"]["nodeLabels"] = list(extracted_schema["nodes"].keys())
+        
+        # Extract node properties
+        for node_label, node_info in extracted_schema["nodes"].items():
+            properties = []
+            if "properties" in node_info:
+                for prop in node_info["properties"]:
+                    prop_name = prop["name"]
+                    # Try to infer type from samples
+                    prop_type = infer_property_type(node_info.get("samples", []), prop_name)
+                    # Create as dict to avoid YAML quoting issues
+                    prop_entry = {prop_name: prop_type}
+                    properties.append(prop_entry)
+            yaml_schema["schema"]["nodeProperties"][node_label] = properties
+    
+    # Extract relationships
+    if "relationships" in extracted_schema:
+        for rel_type, rel_info in extracted_schema["relationships"].items():
+            relationship = {"type": rel_type}
+            
+            # Determine from and to node labels from patterns
+            if "patterns" in rel_info and rel_info["patterns"]:
+                pattern = rel_info["patterns"][0]  # Use most frequent pattern
+                if pattern["source_labels"]:
+                    relationship["from"] = pattern["source_labels"][0]
+                if pattern["target_labels"]:
+                    relationship["to"] = pattern["target_labels"][0]
+            
+            # Extract relationship properties
+            if "properties" in rel_info and rel_info["properties"]:
+                rel_properties = {}
+                for prop in rel_info["properties"]:
+                    prop_name = prop["name"]
+                    # Try to infer type from samples
+                    prop_type = infer_property_type(rel_info.get("samples", []), prop_name, is_relationship=True)
+                    rel_properties[prop_name] = prop_type
+                if rel_properties:
+                    relationship["properties"] = rel_properties
+            
+            yaml_schema["schema"]["relationships"].append(relationship)
+    
+    # Extract indexes and constraints
+    if "indexes" in extracted_schema:
+        for index in extracted_schema["indexes"]:
+            # Skip system indexes (LOOKUP type)
+            if index.get("type") == "LOOKUP":
+                continue
+                
+            # Format index description
+            if index.get("labelsOrTypes") and index.get("properties"):
+                labels = index["labelsOrTypes"]
+                properties = index["properties"]
+                if labels and properties:
+                    label = labels[0]
+                    prop = properties[0]
+                    yaml_schema["schema"]["indexes"].append(f"INDEX ON :{label}({prop})")
+    
+    if "constraints" in extracted_schema:
+        for constraint in extracted_schema["constraints"]:
+            # Format constraint description
+            constraint_desc = format_constraint(constraint)
+            if constraint_desc:
+                yaml_schema["schema"]["indexes"].append(constraint_desc)
+    
+    return yaml_schema
+
+
+def infer_property_type(samples: List[Dict], prop_name: str, is_relationship: bool = False) -> str:
+    """Infer property type from sample data"""
+    if not samples:
+        return "string"
+    
+    for sample in samples:
+        if is_relationship:
+            properties = sample.get("properties", {})
+        else:
+            properties = sample
+            
+        if prop_name in properties:
+            value = properties[prop_name]
+            if isinstance(value, int):
+                return "integer"
+            elif isinstance(value, float):
+                return "float"
+            elif isinstance(value, bool):
+                return "boolean"
+            elif isinstance(value, str):
+                # Check if it looks like a datetime
+                if any(keyword in value.lower() for keyword in ["date", "time", "t"]) and len(value) > 10:
+                    return "datetime"
+                return "string"
+    
+    return "string"
+
+
+def format_constraint(constraint: Dict) -> str:
+    """Format constraint information into readable string"""
+    try:
+        # This is a simplified formatter - actual format depends on Neo4j version
+        constraint_type = constraint["type"]
+        labelsOrTypes = constraint["labelsOrTypes"]
+        properties = constraint["properties"]
+        if labelsOrTypes and properties:
+            label = labelsOrTypes[0]
+            prop = properties[0]
+            return f"CONSTRAINT '{constraint_type}' ON :{label}(PROPERTY {prop})"
+        else:
+            return ""
+    except:
+        return ""
 
 
 class FunctionCallingAgent:
@@ -648,7 +774,7 @@ class Neo4jSchemaExtractor:
 
         return constraints_indexes
 
-    def extract_full_schema(self, output_file: str = None) -> Dict:
+    def extract_full_schema(self, output_file: str = None, format: str = "json") -> Dict:
         """Extract complete database schema"""
         self.console.print()
         self.console.rule("[bold green]🔍 Neo4j Schema Extraction", style="green")
@@ -688,21 +814,39 @@ class Neo4jSchemaExtractor:
                 output_path = Path(output_file)
                 output_path.parent.mkdir(exist_ok=True)
 
-                # Save schema in JSON format
-                json_file = output_path.with_suffix(".json")
-                with open(json_file, "w", encoding="utf-8") as f:
-                    json.dump(full_schema, f, ensure_ascii=False, indent=2)
+                if format.lower() == "yaml":
+                    # Convert to YAML format and save
+                    yaml_schema = convert_schema_to_yaml_format(full_schema)
+                    yaml_file = output_path.with_suffix(".yaml")
+                    with open(yaml_file, "w", encoding="utf-8") as f:
+                        yaml.dump(yaml_schema, f, default_flow_style=False, allow_unicode=True, indent=2, default_style=None)
 
-                self.console.print(
-                    Panel(
-                        f"[green]✓[/green] Schema extraction completed!\n"
-                        f"[bold cyan]JSON file:[/bold cyan] {json_file}\n"
-                        f"[bold cyan]Node types:[/bold cyan] {len(nodes_schema)}\n"
-                        f"[bold cyan]Relationship types:[/bold cyan] {len(relationships_schema)}",
-                        title="[bold green]Extraction Complete",
-                        border_style="green",
+                    self.console.print(
+                        Panel(
+                            f"[green]✓[/green] Schema extraction completed!\n"
+                            f"[bold cyan]YAML file:[/bold cyan] {yaml_file}\n"
+                            f"[bold cyan]Node types:[/bold cyan] {len(nodes_schema)}\n"
+                            f"[bold cyan]Relationship types:[/bold cyan] {len(relationships_schema)}",
+                            title="[bold green]Extraction Complete",
+                            border_style="green",
+                        )
                     )
-                )
+                else:
+                    # Save schema in JSON format (default)
+                    json_file = output_path.with_suffix(".json")
+                    with open(json_file, "w", encoding="utf-8") as f:
+                        json.dump(full_schema, f, ensure_ascii=False, indent=2)
+
+                    self.console.print(
+                        Panel(
+                            f"[green]✓[/green] Schema extraction completed!\n"
+                            f"[bold cyan]JSON file:[/bold cyan] {json_file}\n"
+                            f"[bold cyan]Node types:[/bold cyan] {len(nodes_schema)}\n"
+                            f"[bold cyan]Relationship types:[/bold cyan] {len(relationships_schema)}",
+                            title="[bold green]Extraction Complete",
+                            border_style="green",
+                        )
+                    )
 
             return full_schema
 
