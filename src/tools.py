@@ -64,14 +64,11 @@ def execute_cypher(cypher: str):
     )
     with driver.session(database=os.getenv("NEO4J_DATABASE")) as session:
         try:
-            result = session.run(cypher)
+            result = session.run(cypher).data()
         except Exception as e:
             return f"Failed to execute cypher: {str(e)}"
 
-        properties = []
-        for property in result:
-            properties.append(property["prop"])
-        return properties
+        return result
 
 
 def get_schema():
@@ -91,9 +88,23 @@ def get_schema():
     return schema
 
 
-def get_relation(entites: List[str], hops: int = 2):
-    # TODO Implement utility: Get relations of certain entities within certain hops
-    pass
+def get_relation_properties(relation_type: str):
+    cypher = """
+    MATCH (n)-[r:`{relation_type}`]-(m)
+    UNWIND keys(r) AS prop
+    RETURN DISTINCT prop
+    """
+    result = execute_cypher(cypher.format(relation_type=relation_type))
+    return result["prop"]
+
+
+def get_relation_count(relation_type: str):
+    cypher = """
+    MATCH ()-[r:`{relation_type}`]-()
+    RETURN COUNT(r) as count
+    """
+    result = execute_cypher(cypher.format(relation_type=relation_type))
+    return result[0]["count"]
 
 
 def get_node_properties(node_type: str):
@@ -103,9 +114,44 @@ def get_node_properties(node_type: str):
     RETURN DISTINCT prop
     """
     result = execute_cypher(cypher.format(node_type=node_type))
+    
+    if result:
+        return result["prop"]
+    else:
+        return []
+
+
+def get_relation_patterns(relation_type: str):
+    cypher = """
+    MATCH (source)-[r:`{relation_type}`]-(target)
+    RETURN DISTINCT labels(source) as source_labels, labels(target) as target_labels, COUNT(*) as frequency
+    ORDER BY frequency DESC
+    LIMIT 10
+    """
+    result = execute_cypher(cypher.format(relation_type=relation_type))
     return result
 
 
+def get_sample_relationships(relation_type: str):
+    cypher = """
+    MATCH (source)-[r:`{relation_type}`]-(target)
+    RETURN labels(source) as source_labels, labels(target) as target_labels, r as relationship
+    LIMIT 2
+    """
+    result = execute_cypher(cypher.format(relation_type=relation_type))
+    return result
+
 if __name__ == "__main__":
-    result = get_node_properties("Entry")
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--node_type", type=str, required=False)
+    parser.add_argument("--query", type=str, required=False)
+    args = parser.parse_args()
+    if args.node_type:
+        result = get_node_properties(args.node_type)
+    elif args.query:
+        result = execute_cypher(args.query)
+    else:
+        raise ValueError("Either node_type or query must be provided")
     print(result)

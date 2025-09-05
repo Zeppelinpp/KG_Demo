@@ -1,12 +1,29 @@
 schema:
   indexes:
+  - INDEX ON :Account(account_code)
+  - INDEX ON :Account(account_name)
+  - INDEX ON :Account(account_type)
+  - INDEX ON :Customer(customer_id)
+  - INDEX ON :Customer(customer_name)
+  - INDEX ON :Person(person_id)
+  - INDEX ON :Person(person_name)
+  - INDEX ON :Supplier(supplier_id)
+  - INDEX ON :Supplier(supplier_name)
+  - INDEX ON :VoucherEntry(credit_amount)
+  - INDEX ON :VoucherEntry(debit_amount)
+  - INDEX ON :VoucherEntry(entry_id)
+  - INDEX ON :Voucher(voucher_date)
+  - INDEX ON :Voucher(voucher_number)
   - INDEX ON :InventoryCategory(name)
   - INDEX ON :Supplier(name)
   - INDEX ON :CashAccount(name)
   - INDEX ON :BankAccount(name)
   - INDEX ON :SalesGroup(name)
+  - INDEX ON :Employee(uid)
+  - INDEX ON :Customer(uid)
   - INDEX ON :Customer(name)
   - INDEX ON :Voucher(voucher_id)
+  - INDEX ON :VoucherEntry(uid)
   - INDEX ON :OtherParty(name)
   - INDEX ON :Account(code)
   - INDEX ON :CostSubelement(name)
@@ -23,13 +40,21 @@ schema:
   - INDEX ON :AssetCard(name)
   - INDEX ON :Warehouse(name)
   - INDEX ON :ManualInput(name)
+  - CONSTRAINT 'UNIQUENESS' ON :Account(PROPERTY account_code)
+  - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY customer_id)
+  - CONSTRAINT 'UNIQUENESS' ON :Person(PROPERTY person_id)
+  - CONSTRAINT 'UNIQUENESS' ON :Supplier(PROPERTY supplier_id)
+  - CONSTRAINT 'UNIQUENESS' ON :VoucherEntry(PROPERTY entry_id)
   - CONSTRAINT 'UNIQUENESS' ON :InventoryCategory(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :Supplier(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :CashAccount(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :BankAccount(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :SalesGroup(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Employee(PROPERTY uid)
+  - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY uid)
   - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :Voucher(PROPERTY voucher_id)
+  - CONSTRAINT 'UNIQUENESS' ON :VoucherEntry(PROPERTY uid)
   - CONSTRAINT 'UNIQUENESS' ON :OtherParty(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :Account(PROPERTY code)
   - CONSTRAINT 'UNIQUENESS' ON :CostSubelement(PROPERTY name)
@@ -47,6 +72,7 @@ schema:
   - CONSTRAINT 'UNIQUENESS' ON :Warehouse(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :ManualInput(PROPERTY name)
   nodeLabels:
+  - Person
   - Voucher
   - Entry
   - Account
@@ -70,112 +96,31 @@ schema:
   - BankAccount
   - UseDepartment
   - CashAccount
+  - VoucherEntry
   nodeProperties:
     Account: []
     AssetCard: []
-    AssetCategory:
-    - 'name: string'
+    AssetCategory: []
     Bank: []
     BankAccount: []
     BusinessMode: []
     CashAccount: []
-    CostSubelement:
-    - 'name: string'
-    Customer:
-    - 'name: string'
-    Department:
-    - 'name: string'
-    Employee:
-    - 'name: string'
-    Entry:
-    - '原币金额: float'
-    - '币种: string'
-    - '摘要: string'
-    - 'entry_id: string'
-    - '附件数: string'
-    - '序号: string'
-    - '借方: float'
-    - '原币借方: float'
-    - '贷方: float'
-    - '原币贷方: float'
-    - '主表项目金额: string'
-    - '主表项目: string'
-    - '参考消息: string'
-    - '附表项目: string'
-    ExpenseItem:
-    - 'name: string'
-    InventoryCategory:
-    - 'name: string'
+    CostSubelement: []
+    Customer: []
+    Department: []
+    Employee: []
+    Entry: []
+    ExpenseItem: []
+    InventoryCategory: []
     ManualInput: []
     Org: []
-    OtherParty:
-    - 'name: string'
-    Project:
-    - 'name: string'
-    SalesGroup:
-    - 'name: string'
-    Supplier:
-    - 'name: string'
+    OtherParty: []
+    Person: []
+    Project: []
+    SalesGroup: []
+    Supplier: []
     UseDepartment: []
-    Voucher:
-    - '创建时间: datetime'
-    - '过账人: string'
-    - '期间: string'
-    - '审核日期: datetime'
-    - '创建人: string'
-    - '来源系统: string'
-    - '来源类型: string'
-    - '记账日期: datetime'
-    - '修改时间: datetime'
-    - '凭证摘要: string'
-    - '过账: string'
-    - '审核人: string'
-    - '账簿: string'
-    - '凭证字: string'
-    - '制单人: string'
-    - '状态: string'
-    - 'voucher_id: string'
-    - '凭证号: string'
-    - '来源表单类型: string'
-    - '借方合计: float'
-    - '贷方合计: float'
-    - '复核人: string'
-    - '审核驳回: string'
+    Voucher: []
+    VoucherEntry: []
     Warehouse: []
-  relationships:
-  - from: Voucher
-    to: Entry
-    type: HAS_ENTRY
-  - from: Entry
-    to: Customer
-    type: FOR_CUSTOMER
-  - from: Entry
-    to: Supplier
-    type: FOR_SUPPLIER
-  - from: Entry
-    to: Department
-    type: IN_DEPARTMENT
-  - from: Entry
-    to: ExpenseItem
-    type: FOR_EXPENSE_ITEM
-  - from: Entry
-    to: Project
-    type: FOR_PROJECT
-  - from: Entry
-    to: SalesGroup
-    type: IN_SALES_GROUP
-  - from: Entry
-    to: InventoryCategory
-    type: IN_INVENTORY_CATEGORY
-  - from: Entry
-    to: CostSubelement
-    type: IN_COST_SUBELEM
-  - from: Entry
-    to: AssetCategory
-    type: IN_ASSET_CATEGORY
-  - from: Entry
-    to: OtherParty
-    type: FOR_OTHER_PARTY
-  - from: Entry
-    to: Employee
-    type: BY_EMPLOYEE
+  relationships: []

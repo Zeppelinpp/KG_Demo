@@ -21,10 +21,7 @@ def extract_schema_as_yaml():
     
     # Extract schema in YAML format
     print("Extracting schema in YAML format...")
-    schema = extractor.extract_full_schema("extracted_schema", format="yaml")
-    
-    print("✅ Schema extracted successfully!")
-    print("📄 Check the file: extracted_schema.yaml")
+    schema = extractor.extract_full_schema("config/schema", format="yaml")
     
     return schema
 
