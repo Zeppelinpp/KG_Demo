@@ -6,6 +6,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.markdown import Markdown
 from rich.rule import Rule
+from src.model.graph import GraphSchema
 from src.tools import query_neo4j
 from src.prompts import KG_AGENT_PROMPT
 from src.core import FunctionCallingAgent, Neo4jSchemaExtractor
@@ -21,7 +22,8 @@ extractor = Neo4jSchemaExtractor(
     username=os.getenv("NEO4J_USER"),
     password=os.getenv("NEO4J_PASSWORD"),
 )
-schema = extractor.extract_full_schema()
+schema = extractor.extract_full_schema(return_structured=True)
+schema_md = schema.to_md()
 
 console.print("[dim]Initializing AI agent...[/dim]")
 agent = FunctionCallingAgent(
@@ -36,7 +38,7 @@ async def run(user_query: str):
     response = ""
     async for chunk in agent.run_query_stream(
         user_query=user_query,
-        system_prompt=KG_AGENT_PROMPT.format(schema=schema),
+        system_prompt=KG_AGENT_PROMPT.format(schema=schema_md),
     ):
         response += chunk
         print(chunk, end="")
@@ -151,7 +153,7 @@ async def chat_session():
 
             # Stream the response
             response_text = ""
-            async for chunk in agent.run_query_stream(user_input):
+            async for chunk in agent.run_query_stream(user_query=user_input):
                 response_text += chunk
                 console.print(chunk, end="")
 
