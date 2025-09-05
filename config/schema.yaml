@@ -1,120 +1,46 @@
 schema:
   indexes:
-  - INDEX ON :Account(account_code)
-  - INDEX ON :Account(account_name)
-  - INDEX ON :Account(account_type)
-  - INDEX ON :Customer(customer_id)
-  - INDEX ON :Customer(customer_name)
-  - INDEX ON :Person(person_id)
-  - INDEX ON :Person(person_name)
-  - INDEX ON :Supplier(supplier_id)
-  - INDEX ON :Supplier(supplier_name)
-  - INDEX ON :VoucherEntry(credit_amount)
-  - INDEX ON :VoucherEntry(debit_amount)
-  - INDEX ON :VoucherEntry(entry_id)
-  - INDEX ON :Voucher(voucher_date)
-  - INDEX ON :Voucher(voucher_number)
-  - INDEX ON :InventoryCategory(name)
-  - INDEX ON :Supplier(name)
-  - INDEX ON :CashAccount(name)
   - INDEX ON :业务单元(业务单元id)
-  - INDEX ON :BankAccount(name)
-  - INDEX ON :SalesGroup(name)
-  - INDEX ON :Employee(uid)
   - INDEX ON :人员(人员id)
-  - INDEX ON :Customer(uid)
-  - INDEX ON :Customer(name)
-  - INDEX ON :Voucher(voucher_id)
   - INDEX ON :供应商(供应商id)
-  - INDEX ON :VoucherEntry(uid)
-  - INDEX ON :OtherParty(name)
-  - INDEX ON :Account(code)
   - INDEX ON :费用(费用id)
-  - INDEX ON :CostSubelement(name)
   - INDEX ON :凭证(凭证id)
-  - INDEX ON :Entry(entry_id)
-  - INDEX ON :Bank(name)
-  - INDEX ON :Project(name)
   - INDEX ON :银行类别(银行类别id)
-  - INDEX ON :UseDepartment(name)
-  - INDEX ON :AssetCategory(name)
-  - INDEX ON :BusinessMode(name)
-  - INDEX ON :Org(name)
-  - INDEX ON :Employee(name)
   - INDEX ON :客户(客户id)
-  - INDEX ON :Department(name)
   - INDEX ON :银行账户(银行账户id)
-  - INDEX ON :ExpenseItem(name)
-  - INDEX ON :AssetCard(name)
+  - INDEX ON :余额(fbalance_id)
   - INDEX ON :仓库(仓库id)
-  - INDEX ON :Warehouse(name)
-  - INDEX ON :ManualInput(name)
-  - CONSTRAINT 'UNIQUENESS' ON :Account(PROPERTY account_code)
-  - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY customer_id)
-  - CONSTRAINT 'UNIQUENESS' ON :Person(PROPERTY person_id)
-  - CONSTRAINT 'UNIQUENESS' ON :Supplier(PROPERTY supplier_id)
-  - CONSTRAINT 'UNIQUENESS' ON :VoucherEntry(PROPERTY entry_id)
-  - CONSTRAINT 'UNIQUENESS' ON :InventoryCategory(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Supplier(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :CashAccount(PROPERTY name)
+  - INDEX ON :凭证(人员编码)
+  - INDEX ON :凭证(仓库编码)
+  - INDEX ON :费用(编码)
+  - INDEX ON :客户(客户编码)
+  - INDEX ON :供应商(编码)
+  - INDEX ON :凭证(银行账号)
+  - INDEX ON :人员(用户名)
+  - INDEX ON :人员(工号)
+  - INDEX ON :银行账户(银行账号)
+  - INDEX ON :仓库(编码)
+  - INDEX ON :科目(编码)
+  - INDEX ON :余额(客户编码)
+  - INDEX ON :凭证(银行账户编码)
+  - INDEX ON :凭证(客户编码)
+  - INDEX ON :余额(科目编码)
+  - INDEX ON :凭证(科目编码)
+  - INDEX ON :凭证(供应商编码)
+  - INDEX ON :凭证(费用编码)
+  - INDEX ON :余额(核算维度.客户编码)
+  - INDEX ON :凭证(核算维度.客户编码)
   - CONSTRAINT 'UNIQUENESS' ON :业务单元(PROPERTY 业务单元id)
-  - CONSTRAINT 'UNIQUENESS' ON :BankAccount(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :SalesGroup(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Employee(PROPERTY uid)
   - CONSTRAINT 'UNIQUENESS' ON :人员(PROPERTY 人员id)
-  - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY uid)
-  - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Voucher(PROPERTY voucher_id)
   - CONSTRAINT 'UNIQUENESS' ON :供应商(PROPERTY 供应商id)
-  - CONSTRAINT 'UNIQUENESS' ON :VoucherEntry(PROPERTY uid)
-  - CONSTRAINT 'UNIQUENESS' ON :OtherParty(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Account(PROPERTY code)
   - CONSTRAINT 'UNIQUENESS' ON :费用(PROPERTY 费用id)
-  - CONSTRAINT 'UNIQUENESS' ON :CostSubelement(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :凭证(PROPERTY 凭证id)
-  - CONSTRAINT 'UNIQUENESS' ON :Entry(PROPERTY entry_id)
-  - CONSTRAINT 'UNIQUENESS' ON :Bank(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Project(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :银行类别(PROPERTY 银行类别id)
-  - CONSTRAINT 'UNIQUENESS' ON :UseDepartment(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :AssetCategory(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :BusinessMode(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Org(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Employee(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :客户(PROPERTY 客户id)
-  - CONSTRAINT 'UNIQUENESS' ON :Department(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :银行账户(PROPERTY 银行账户id)
-  - CONSTRAINT 'UNIQUENESS' ON :ExpenseItem(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :AssetCard(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :余额(PROPERTY fbalance_id)
   - CONSTRAINT 'UNIQUENESS' ON :仓库(PROPERTY 仓库id)
-  - CONSTRAINT 'UNIQUENESS' ON :Warehouse(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :ManualInput(PROPERTY name)
   nodeLabels:
-  - Person
-  - Voucher
-  - Entry
-  - Account
-  - SalesGroup
-  - ExpenseItem
-  - CostSubelement
-  - AssetCategory
-  - Warehouse
-  - Customer
-  - Project
-  - ManualInput
-  - Department
-  - Supplier
-  - OtherParty
-  - Org
-  - AssetCard
-  - Bank
-  - BusinessMode
-  - Employee
-  - InventoryCategory
-  - BankAccount
-  - UseDepartment
-  - CashAccount
-  - VoucherEntry
   - 人员
   - 仓库
   - 供应商
@@ -124,32 +50,9 @@ schema:
   - 费用
   - 银行类别
   - 凭证
+  - 余额
+  - 科目
   nodeProperties:
-    Account: []
-    AssetCard: []
-    AssetCategory: []
-    Bank: []
-    BankAccount: []
-    BusinessMode: []
-    CashAccount: []
-    CostSubelement: []
-    Customer: []
-    Department: []
-    Employee: []
-    Entry: []
-    ExpenseItem: []
-    InventoryCategory: []
-    ManualInput: []
-    Org: []
-    OtherParty: []
-    Person: []
-    Project: []
-    SalesGroup: []
-    Supplier: []
-    UseDepartment: []
-    Voucher: []
-    VoucherEntry: []
-    Warehouse: []
     业务单元:
     - 编码: string
     - 名称: string
@@ -195,6 +98,23 @@ schema:
     - 仓库id: string
     - 编码: string
     - 仓库负责人: string
+    余额:
+    - 期间: string
+    - 科目名称: string
+    - 本期发生额.贷方金额: float
+    - fbalance_id: string
+    - 科目编码: string
+    - 本年累计.借方金额: float
+    - 期末余额.贷方金额: float
+    - 本年累计.贷方金额: float
+    - 时间: datetime
+    - 序号: string
+    - 基础资料属性: string
+    - 本期发生额.借方金额: float
+    - 期末余额.借方金额: float
+    - 年初余额.贷方金额: string
+    - 期初余额.贷方金额: string
+    - 期初余额.借方金额: string
     供应商:
     - 医药供应商属性: string
     - 原创建组织: string
@@ -254,6 +174,12 @@ schema:
     - 核算维度.供应商.名称: string
     - 复核人: string
     - 核算维度.部门.名称: string
+    - 供应商编码: string
+    - 费用编码: string
+    - 仓库编码: string
+    - 人员编码: string
+    - 银行账号: string
+    - 客户编码: string
     客户:
     - 客户id: string
     - 业务职能: string
@@ -265,6 +191,9 @@ schema:
     - 序号: string
     - 医药客户属性: string
     - 创建组织: string
+    科目:
+    - 编码: string
+    - 名称: string
     费用:
     - 是否叶子: string
     - 叶子: string
@@ -308,4 +237,59 @@ schema:
     - 金融机构类别: string
     - 币别范围: string
     - 开户行: string
-  relationships: []
+  relationships:
+  - relation: 使用科目
+    source_labels:
+    - 凭证
+    target_labels:
+    - 科目
+  - relation: 对应科目
+    source_labels:
+    - 余额
+    target_labels:
+    - 科目
+  - relation: 由...制单
+    source_labels:
+    - 凭证
+    target_labels:
+    - 人员
+  - relation: 由...审核
+    source_labels:
+    - 凭证
+    target_labels:
+    - 人员
+  - relation: 属于客户
+    source_labels:
+    - 凭证
+    target_labels:
+    - 客户
+  - relation: 涉及银行
+    source_labels:
+    - 凭证
+    target_labels:
+    - 银行账户
+  - relation: 涉及供应商
+    source_labels:
+    - 凭证
+    target_labels:
+    - 供应商
+  - relation: 涉及费用
+    source_labels:
+    - 凭证
+    target_labels:
+    - 费用
+  - relation: 涉及仓库
+    source_labels:
+    - 凭证
+    target_labels:
+    - 仓库
+  - relation: 涉及人员
+    source_labels:
+    - 凭证
+    target_labels:
+    - 人员
+  - relation: 对应客户
+    source_labels:
+    - 余额
+    target_labels:
+    - 客户
