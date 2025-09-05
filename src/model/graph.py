@@ -1,6 +1,6 @@
 import yaml
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 
 
 class NodeProperty(BaseModel):
@@ -38,8 +38,7 @@ class RelationshipSample(BaseModel):
 
     source_labels: List[str]
     target_labels: List[str]
-    properties: Dict[str, Any]
-
+    relation: Tuple
 
 class DatabaseInfo(BaseModel):
     """Database connection and extraction metadata"""

@@ -131,7 +131,7 @@ def get_node_properties(node_type: str):
 
 def get_relation_patterns(relation_type: str):
     cypher = """
-    MATCH (source)-[r:`{relation_type}`]-(target)
+    MATCH (source)-[r:`{relation_type}`]->(target)
     RETURN DISTINCT labels(source) as source_labels, labels(target) as target_labels, COUNT(*) as frequency
     ORDER BY frequency DESC
     LIMIT 10
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     elif args.query:
         result = execute_cypher(args.query)
     elif args.relation_type:
-        result = get_relation_properties(args.relation_type)
+        result = get_relation_patterns(args.relation_type)
     else:
         raise ValueError("Either node_type or query must be provided")
     print(result)

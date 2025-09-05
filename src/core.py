@@ -12,16 +12,22 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from pathlib import Path
 from pydantic import ValidationError
-from src.tools import get_node_properties, get_relation_count, get_relation_patterns, get_relation_properties, get_sample_relationships
+from src.tools import (
+    get_node_properties,
+    get_relation_count,
+    get_relation_patterns,
+    get_relation_properties,
+    get_sample_relationships,
+)
 from src.utils import tools_to_openai_schema
 from src.model.graph import (
-    ExtractedGraphSchema, 
-    GraphSchema, 
-    NodesInfo, 
-    RelationsInfo, 
+    ExtractedGraphSchema,
+    GraphSchema,
+    NodesInfo,
+    RelationsInfo,
     DatabaseInfo,
     IndexInfo,
-    ConstraintInfo
+    ConstraintInfo,
 )
 
 load_dotenv()
@@ -51,14 +57,14 @@ def convert_schema_to_yaml_format(extracted_schema: Dict) -> Dict:
             "nodeLabels": [],
             "relationships": [],
             "nodeProperties": {},
-            "indexes": []
+            "indexes": [],
         }
     }
-    
+
     # Extract node labels
     if "nodes" in extracted_schema:
         yaml_schema["schema"]["nodeLabels"] = list(extracted_schema["nodes"].keys())
-        
+
         # Extract node properties
         for node_label, node_info in extracted_schema["nodes"].items():
             properties = []
@@ -66,45 +72,49 @@ def convert_schema_to_yaml_format(extracted_schema: Dict) -> Dict:
                 for prop in node_info["properties"]:
                     prop_name = prop
                     # Try to infer type from samples
-                    prop_type = infer_property_type(node_info.get("samples", []), prop_name)
+                    prop_type = infer_property_type(
+                        node_info.get("samples", []), prop_name
+                    )
                     # Create as dict to avoid YAML quoting issues
                     prop_entry = {prop_name: prop_type}
                     properties.append(prop_entry)
             yaml_schema["schema"]["nodeProperties"][node_label] = properties
-    
+
     # Extract relationships
     if "relationships" in extracted_schema:
         for rel_type, rel_info in extracted_schema["relationships"].items():
-            relationship = {"type": rel_type}
-            
+            relationship = {"relation": rel_type}
+
             # Determine from and to node labels from patterns
             if "patterns" in rel_info and rel_info["patterns"]:
                 pattern = rel_info["patterns"][0]  # Use most frequent pattern
                 if pattern["source_labels"]:
-                    relationship["from"] = pattern["source_labels"][0]
+                    relationship["source_labels"] = pattern["source_labels"]
                 if pattern["target_labels"]:
-                    relationship["to"] = pattern["target_labels"][0]
-            
+                    relationship["target_labels"] = pattern["target_labels"]
+
             # Extract relationship properties
             if "properties" in rel_info and rel_info["properties"]:
                 rel_properties = {}
                 for prop in rel_info["properties"]:
                     prop_name = prop["name"]
                     # Try to infer type from samples
-                    prop_type = infer_property_type(rel_info.get("samples", []), prop_name, is_relationship=True)
+                    prop_type = infer_property_type(
+                        rel_info.get("samples", []), prop_name, is_relationship=True
+                    )
                     rel_properties[prop_name] = prop_type
                 if rel_properties:
                     relationship["properties"] = rel_properties
-            
+
             yaml_schema["schema"]["relationships"].append(relationship)
-    
+
     # Extract indexes and constraints
     if "indexes" in extracted_schema:
         for index in extracted_schema["indexes"]:
             # Skip system indexes (LOOKUP type)
             if index.get("type") == "LOOKUP":
                 continue
-                
+
             # Format index description
             if index.get("labelsOrTypes") and index.get("properties"):
                 labels = index["labelsOrTypes"]
@@ -112,29 +122,33 @@ def convert_schema_to_yaml_format(extracted_schema: Dict) -> Dict:
                 if labels and properties:
                     label = labels[0]
                     prop = properties[0]
-                    yaml_schema["schema"]["indexes"].append(f"INDEX ON :{label}({prop})")
-    
+                    yaml_schema["schema"]["indexes"].append(
+                        f"INDEX ON :{label}({prop})"
+                    )
+
     if "constraints" in extracted_schema:
         for constraint in extracted_schema["constraints"]:
             # Format constraint description
             constraint_desc = format_constraint(constraint)
             if constraint_desc:
                 yaml_schema["schema"]["indexes"].append(constraint_desc)
-    
+
     return yaml_schema
 
 
-def infer_property_type(samples: List[Dict], prop_name: str, is_relationship: bool = False) -> str:
+def infer_property_type(
+    samples: List[Dict], prop_name: str, is_relationship: bool = False
+) -> str:
     """Infer property type from sample data"""
     if not samples:
         return "string"
-    
+
     for sample in samples:
         if is_relationship:
             properties = sample.get("properties", {})
         else:
             properties = sample
-            
+
         if prop_name in properties:
             value = properties[prop_name]
             if isinstance(value, int):
@@ -145,10 +159,13 @@ def infer_property_type(samples: List[Dict], prop_name: str, is_relationship: bo
                 return "boolean"
             elif isinstance(value, str):
                 # Check if it looks like a datetime
-                if any(keyword in value.lower() for keyword in ["date", "time", "t"]) and len(value) > 10:
+                if (
+                    any(keyword in value.lower() for keyword in ["date", "time", "t"])
+                    and len(value) > 10
+                ):
                     return "datetime"
                 return "string"
-    
+
     return "string"
 
 
@@ -545,41 +562,53 @@ class Neo4jSchemaExtractor:
         if self.driver:
             self.driver.close()
 
-    def validate_extraction_result(self, extraction_result: Dict) -> tuple[bool, Optional[ExtractedGraphSchema], Optional[str]]:
+    def validate_extraction_result(
+        self, extraction_result: Dict
+    ) -> tuple[bool, Optional[ExtractedGraphSchema], Optional[str]]:
         """
         Validate extraction result using Pydantic models
-        
+
         Args:
             extraction_result: Raw extraction result dictionary
-            
+
         Returns:
             tuple: (is_valid, validated_schema, error_message)
         """
         try:
             # Validate the complete extraction result
-            validated_schema = ExtractedGraphSchema.from_extraction_result(extraction_result)
-            
+            validated_schema = ExtractedGraphSchema.from_extraction_result(
+                extraction_result
+            )
+
             # Additional validation - check that nodes and relationships have expected structure
             validation_errors = []
-            
+
             # Validate node structure
             for node_label, node_data in validated_schema.nodes.items():
                 try:
                     NodesInfo.from_extracted_data(node_label, node_data)
                 except ValidationError as e:
-                    validation_errors.append(f"Node '{node_label}' validation error: {e}")
+                    validation_errors.append(
+                        f"Node '{node_label}' validation error: {e}"
+                    )
                 except Exception as e:
-                    validation_errors.append(f"Node '{node_label}' unexpected error: {e}")
-            
+                    validation_errors.append(
+                        f"Node '{node_label}' unexpected error: {e}"
+                    )
+
             # Validate relationship structure
             for rel_type, rel_data in validated_schema.relationships.items():
                 try:
                     RelationsInfo.from_extracted_data(rel_type, rel_data)
                 except ValidationError as e:
-                    validation_errors.append(f"Relationship '{rel_type}' validation error: {e}")
+                    validation_errors.append(
+                        f"Relationship '{rel_type}' validation error: {e}"
+                    )
                 except Exception as e:
-                    validation_errors.append(f"Relationship '{rel_type}' unexpected error: {e}")
-            
+                    validation_errors.append(
+                        f"Relationship '{rel_type}' unexpected error: {e}"
+                    )
+
             # Validate indexes and constraints
             try:
                 for index_data in validated_schema.indexes:
@@ -588,7 +617,7 @@ class Neo4jSchemaExtractor:
                 validation_errors.append(f"Index validation error: {e}")
             except Exception as e:
                 validation_errors.append(f"Index unexpected error: {e}")
-                
+
             try:
                 for constraint_data in validated_schema.constraints:
                     ConstraintInfo(**constraint_data)
@@ -596,15 +625,21 @@ class Neo4jSchemaExtractor:
                 validation_errors.append(f"Constraint validation error: {e}")
             except Exception as e:
                 validation_errors.append(f"Constraint unexpected error: {e}")
-            
+
             if validation_errors:
                 error_msg = "; ".join(validation_errors)
-                self.console.print(f"[yellow]⚠️ Validation warnings: {error_msg}[/yellow]")
-                return True, validated_schema, error_msg  # Still valid but with warnings
-            
+                self.console.print(
+                    f"[yellow]⚠️ Validation warnings: {error_msg}[/yellow]"
+                )
+                return (
+                    True,
+                    validated_schema,
+                    error_msg,
+                )  # Still valid but with warnings
+
             self.console.print("[green]✓ Schema validation successful[/green]")
             return True, validated_schema, None
-            
+
         except ValidationError as e:
             error_msg = f"Schema validation failed: {e}"
             self.console.print(f"[bold red]❌ {error_msg}[/bold red]")
@@ -699,17 +734,12 @@ class Neo4jSchemaExtractor:
                     sample_result = get_sample_relationships(rel_type)
                     samples = []
                     for record in sample_result:
-                        rel_data = dict(record["relationship"])
                         # Convert values using the serialization function
-                        rel_data = {
-                            k: serialize_neo4j_value(v) for k, v in rel_data.items()
-                        }
-
                         samples.append(
                             {
                                 "source_labels": record["source_labels"],
                                 "target_labels": record["target_labels"],
-                                "properties": rel_data,
+                                "relation": record["relationship"],
                             }
                         )
 
@@ -790,21 +820,21 @@ class Neo4jSchemaExtractor:
         return constraints_indexes
 
     def extract_full_schema(
-        self, 
-        output_file: str = None, 
-        format: str = "json", 
+        self,
+        output_file: str = None,
+        format: str = "json",
         return_structured: bool = False,
-        validate: bool = True
+        validate: bool = True,
     ) -> Union[Dict, ExtractedGraphSchema, GraphSchema]:
         """
         Extract complete database schema
-        
+
         Args:
             output_file: Path to save the schema file
             format: Output format ("json" or "yaml")
             return_structured: If True, return structured Pydantic models instead of raw dict
             validate: If True, validate the extraction result using Pydantic models
-            
+
         Returns:
             Dict: Raw extraction result (default)
             ExtractedGraphSchema: Validated raw schema (if return_structured=True and validate=True)
@@ -846,22 +876,32 @@ class Neo4jSchemaExtractor:
             # Validate extraction result if requested
             validated_schema = None
             structured_schema = None
-            
+
             if validate:
-                self.console.print("[bold cyan]Validating extraction result...[/bold cyan]")
-                is_valid, validated_schema, error_msg = self.validate_extraction_result(full_schema)
-                
+                self.console.print(
+                    "[bold cyan]Validating extraction result...[/bold cyan]"
+                )
+                is_valid, validated_schema, error_msg = self.validate_extraction_result(
+                    full_schema
+                )
+
                 if not is_valid:
-                    self.console.print(f"[bold red]❌ Schema validation failed: {error_msg}[/bold red]")
+                    self.console.print(
+                        f"[bold red]❌ Schema validation failed: {error_msg}[/bold red]"
+                    )
                     if return_structured:
                         return None
                 elif validated_schema and return_structured:
                     # Convert to fully structured schema if requested
                     try:
                         structured_schema = validated_schema.to_structured_schema()
-                        self.console.print("[green]✓ Schema converted to structured format[/green]")
+                        self.console.print(
+                            "[green]✓ Schema converted to structured format[/green]"
+                        )
                     except Exception as e:
-                        self.console.print(f"[yellow]⚠️ Failed to convert to structured format: {e}[/yellow]")
+                        self.console.print(
+                            f"[yellow]⚠️ Failed to convert to structured format: {e}[/yellow]"
+                        )
                         # Fall back to validated raw schema
                         structured_schema = validated_schema
 
@@ -875,7 +915,14 @@ class Neo4jSchemaExtractor:
                     yaml_schema = convert_schema_to_yaml_format(full_schema)
                     yaml_file = output_path.with_suffix(".yaml")
                     with open(yaml_file, "w", encoding="utf-8") as f:
-                        yaml.dump(yaml_schema, f, default_flow_style=False, allow_unicode=True, indent=2, default_style=None)
+                        yaml.dump(
+                            yaml_schema,
+                            f,
+                            default_flow_style=False,
+                            allow_unicode=True,
+                            indent=2,
+                            default_style=None,
+                        )
 
                     self.console.print(
                         Panel(
@@ -917,7 +964,7 @@ class Neo4jSchemaExtractor:
         except Exception as e:
             error_msg = f"Schema extraction failed: {e}"
             self.console.print(f"[bold red]❌ {error_msg}[/bold red]")
-            
+
             # Return appropriate error value based on return type
             if return_structured:
                 return None
@@ -927,14 +974,16 @@ class Neo4jSchemaExtractor:
         finally:
             self.close()
 
-    def extract_structured_schema(self, output_file: str = None, format: str = "json") -> Optional[GraphSchema]:
+    def extract_structured_schema(
+        self, output_file: str = None, format: str = "json"
+    ) -> Optional[GraphSchema]:
         """
         Convenience method to extract and return a fully structured GraphSchema
-        
+
         Args:
             output_file: Path to save the schema file
             format: Output format ("json" or "yaml")
-            
+
         Returns:
             GraphSchema: Fully structured schema with Pydantic models, or None if extraction failed
         """
@@ -942,11 +991,13 @@ class Neo4jSchemaExtractor:
             output_file=output_file,
             format=format,
             return_structured=True,
-            validate=True
+            validate=True,
         )
-        
+
         if isinstance(result, GraphSchema):
             return result
         else:
-            self.console.print("[bold red]❌ Failed to extract structured schema[/bold red]")
+            self.console.print(
+                "[bold red]❌ Failed to extract structured schema[/bold red]"
+            )
             return None
