@@ -64,7 +64,7 @@ def convert_schema_to_yaml_format(extracted_schema: Dict) -> Dict:
             properties = []
             if "properties" in node_info:
                 for prop in node_info["properties"]:
-                    prop_name = prop["name"]
+                    prop_name = prop
                     # Try to infer type from samples
                     prop_type = infer_property_type(node_info.get("samples", []), prop_name)
                     # Create as dict to avoid YAML quoting issues

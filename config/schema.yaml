@@ -17,27 +17,36 @@ schema:
   - INDEX ON :InventoryCategory(name)
   - INDEX ON :Supplier(name)
   - INDEX ON :CashAccount(name)
+  - INDEX ON :业务单元(业务单元id)
   - INDEX ON :BankAccount(name)
   - INDEX ON :SalesGroup(name)
   - INDEX ON :Employee(uid)
+  - INDEX ON :人员(人员id)
   - INDEX ON :Customer(uid)
   - INDEX ON :Customer(name)
   - INDEX ON :Voucher(voucher_id)
+  - INDEX ON :供应商(供应商id)
   - INDEX ON :VoucherEntry(uid)
   - INDEX ON :OtherParty(name)
   - INDEX ON :Account(code)
+  - INDEX ON :费用(费用id)
   - INDEX ON :CostSubelement(name)
+  - INDEX ON :凭证(凭证id)
   - INDEX ON :Entry(entry_id)
   - INDEX ON :Bank(name)
   - INDEX ON :Project(name)
+  - INDEX ON :银行类别(银行类别id)
   - INDEX ON :UseDepartment(name)
   - INDEX ON :AssetCategory(name)
   - INDEX ON :BusinessMode(name)
   - INDEX ON :Org(name)
   - INDEX ON :Employee(name)
+  - INDEX ON :客户(客户id)
   - INDEX ON :Department(name)
+  - INDEX ON :银行账户(银行账户id)
   - INDEX ON :ExpenseItem(name)
   - INDEX ON :AssetCard(name)
+  - INDEX ON :仓库(仓库id)
   - INDEX ON :Warehouse(name)
   - INDEX ON :ManualInput(name)
   - CONSTRAINT 'UNIQUENESS' ON :Account(PROPERTY account_code)
@@ -48,27 +57,36 @@ schema:
   - CONSTRAINT 'UNIQUENESS' ON :InventoryCategory(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :Supplier(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :CashAccount(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :业务单元(PROPERTY 业务单元id)
   - CONSTRAINT 'UNIQUENESS' ON :BankAccount(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :SalesGroup(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :Employee(PROPERTY uid)
+  - CONSTRAINT 'UNIQUENESS' ON :人员(PROPERTY 人员id)
   - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY uid)
   - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :Voucher(PROPERTY voucher_id)
+  - CONSTRAINT 'UNIQUENESS' ON :供应商(PROPERTY 供应商id)
   - CONSTRAINT 'UNIQUENESS' ON :VoucherEntry(PROPERTY uid)
   - CONSTRAINT 'UNIQUENESS' ON :OtherParty(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :Account(PROPERTY code)
+  - CONSTRAINT 'UNIQUENESS' ON :费用(PROPERTY 费用id)
   - CONSTRAINT 'UNIQUENESS' ON :CostSubelement(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :凭证(PROPERTY 凭证id)
   - CONSTRAINT 'UNIQUENESS' ON :Entry(PROPERTY entry_id)
   - CONSTRAINT 'UNIQUENESS' ON :Bank(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :Project(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :银行类别(PROPERTY 银行类别id)
   - CONSTRAINT 'UNIQUENESS' ON :UseDepartment(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :AssetCategory(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :BusinessMode(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :Org(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :Employee(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :客户(PROPERTY 客户id)
   - CONSTRAINT 'UNIQUENESS' ON :Department(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :银行账户(PROPERTY 银行账户id)
   - CONSTRAINT 'UNIQUENESS' ON :ExpenseItem(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :AssetCard(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :仓库(PROPERTY 仓库id)
   - CONSTRAINT 'UNIQUENESS' ON :Warehouse(PROPERTY name)
   - CONSTRAINT 'UNIQUENESS' ON :ManualInput(PROPERTY name)
   nodeLabels:
@@ -97,6 +115,15 @@ schema:
   - UseDepartment
   - CashAccount
   - VoucherEntry
+  - 人员
+  - 仓库
+  - 供应商
+  - 客户
+  - 银行账户
+  - 业务单元
+  - 费用
+  - 银行类别
+  - 凭证
   nodeProperties:
     Account: []
     AssetCard: []
@@ -123,4 +150,162 @@ schema:
     Voucher: []
     VoucherEntry: []
     Warehouse: []
+    业务单元:
+    - 编码: string
+    - 名称: string
+    - 使用状态: string
+    - 形态: string
+    - 资产职能: string
+    - 核算组织: string
+    - 采购职能: string
+    - 库存职能: string
+    - 结算职能: string
+    - 销售职能: string
+    - 收付职能: string
+    - 质检职能: string
+    - 生产职能: string
+    - 研发职能: string
+    - 业务单元id: string
+    - 核算组织类型: string
+    - 税务职能: string
+    - 资金职能: string
+    人员:
+    - 用户名: string
+    - 类型: string
+    - 人员id: string
+    - 工号: string
+    - 人员使用状态: string
+    - 姓名: string
+    - 序号: string
+    - 性别: string
+    - 用户禁用: string
+    - 手机号码: string
+    - 负责人: string
+    - 部门: string
+    - 职位: string
+    - 兼职: string
+    - 直接上级: string
+    仓库:
+    - 控制策略: string
+    - 使用状态: string
+    - 序号: string
+    - 名称: string
+    - 可发量控制: string
+    - 创建组织: string
+    - 仓库id: string
+    - 编码: string
+    - 仓库负责人: string
+    供应商:
+    - 医药供应商属性: string
+    - 原创建组织: string
+    - 供应商状态: string
+    - 使用状态: string
+    - 供应商id: datetime
+    - 编码: datetime
+    - 名称: string
+    - 序号: string
+    - 控制策略: string
+    - 创建组织: string
+    - 伙伴类型: string
+    - 可VMI: string
+    - 统一社会信用代码: string
+    - 简称: string
+    - 内部业务单元: string
+    凭证:
+    - 科目名称: string
+    - 修改人: string
+    - 科目全名: string
+    - 原币借方: string
+    - 科目编码: string
+    - 币种: string
+    - 原币金额: float
+    - 摘要: string
+    - 借方: string
+    - 凭证id: string
+    - 附件数: float
+    - 序号: string
+    - 期间: string
+    - 创建时间: datetime
+    - 审核日期: datetime
+    - 过账人: string
+    - 来源系统: string
+    - 借方合计: string
+    - 修改时间: datetime
+    - 创建人: string
+    - 来源类型: string
+    - 过账: string
+    - 凭证摘要: string
+    - 凭证字: string
+    - 审核人: string
+    - 记账日期: datetime
+    - 状态: string
+    - 凭证号: string
+    - 账簿: string
+    - 贷方合计: string
+    - 制单人: string
+    - 贷方: string
+    - 原币贷方: string
+    - 附表项目: string
+    - 来源表单类型: string
+    - 审核驳回: string
+    - 核算维度.客户.编码: string
+    - 核算维度.销售组.名称: string
+    - 核算维度.客户.名称: string
+    - 核算维度.供应商.名称: string
+    - 复核人: string
+    - 核算维度.部门.名称: string
+    客户:
+    - 客户id: string
+    - 业务职能: string
+    - 控制策略: string
+    - 客户名称: string
+    - 客户编码: string
+    - 可用状态: string
+    - 伙伴类型: string
+    - 序号: string
+    - 医药客户属性: string
+    - 创建组织: string
+    费用:
+    - 是否叶子: string
+    - 叶子: string
+    - 名称: string
+    - 关联单据: string
+    - 编码: string
+    - 使用状态: string
+    - 控制策略: string
+    - 费用id: string
+    - 级次: string
+    - 级次.1: string
+    - 创建组织: string
+    - 序号: string
+    - 上级: string
+    - 上级.编码: string
+    银行类别:
+    - 最后更新时间: datetime
+    - 使用状态: string
+    - 序号: string
+    - 名称: string
+    - 最后更新人: string
+    - 编码: string
+    - 银行类别id: string
+    - 行别代码: string
+    - 简码: string
+    银行账户:
+    - 银行账户id: string
+    - 账户状态: string
+    - 使用状态: string
+    - 控制策略: string
+    - 账户性质: string
+    - 申请公司: string
+    - 序号: string
+    - 最后更新时间: datetime
+    - 账户类型: string
+    - 最后更新人: string
+    - 账户简称: string
+    - 银行类别: string
+    - 开户公司: string
+    - 银行账号: string
+    - 金融机构类别: string
+    - 币别范围: string
+    - 开户行: string
   relationships: []

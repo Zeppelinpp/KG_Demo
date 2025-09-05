@@ -95,7 +95,11 @@ def get_relation_properties(relation_type: str):
     RETURN DISTINCT prop
     """
     result = execute_cypher(cypher.format(relation_type=relation_type))
-    return result["prop"]
+
+    if result:
+        return [prop["prop"] for prop in result]
+    else:
+        return []
 
 
 def get_relation_count(relation_type: str):
@@ -104,7 +108,11 @@ def get_relation_count(relation_type: str):
     RETURN COUNT(r) as count
     """
     result = execute_cypher(cypher.format(relation_type=relation_type))
-    return result[0]["count"]
+
+    if result:
+        return result[0]["count"]
+    else:
+        return []
 
 
 def get_node_properties(node_type: str):
@@ -116,7 +124,7 @@ def get_node_properties(node_type: str):
     result = execute_cypher(cypher.format(node_type=node_type))
     
     if result:
-        return result["prop"]
+        return [prop["prop"] for prop in result]
     else:
         return []
 
@@ -129,7 +137,11 @@ def get_relation_patterns(relation_type: str):
     LIMIT 10
     """
     result = execute_cypher(cypher.format(relation_type=relation_type))
-    return result
+
+    if result:
+        return result
+    else:
+        return []
 
 
 def get_sample_relationships(relation_type: str):
@@ -139,7 +151,10 @@ def get_sample_relationships(relation_type: str):
     LIMIT 2
     """
     result = execute_cypher(cypher.format(relation_type=relation_type))
-    return result
+    if result:
+        return result
+    else:
+        return []
 
 if __name__ == "__main__":
     import argparse
@@ -147,11 +162,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--node_type", type=str, required=False)
     parser.add_argument("--query", type=str, required=False)
+    parser.add_argument("--relation_type", type=str, required=False)
     args = parser.parse_args()
     if args.node_type:
         result = get_node_properties(args.node_type)
     elif args.query:
         result = execute_cypher(args.query)
+    elif args.relation_type:
+        result = get_relation_properties(args.relation_type)
     else:
         raise ValueError("Either node_type or query must be provided")
     print(result)
