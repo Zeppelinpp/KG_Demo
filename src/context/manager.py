@@ -23,6 +23,7 @@ class ContextManager:
                 password=os.getenv("NEO4J_PASSWORD"),
             )
             self.graph_schema = extractor.extract_full_schema(schema_path)
-            
 
-    def load_context(self, query)
+
+    def load_context(self, query):
+        pass
