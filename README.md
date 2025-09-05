@@ -78,7 +78,7 @@ graph TD
 
 ## Documentation
 
-- **[Schema Extraction Guide](schema_extraction.md)** - Detailed explanation of the schema extraction process, data structures, and Cypher queries used
+- **[Schema Extraction Guide](docs/schema_extraction.md)** - Detailed explanation of the schema extraction process, data structures, and Cypher queries used
 
 ## Quick Start
 
