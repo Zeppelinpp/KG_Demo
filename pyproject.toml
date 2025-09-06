@@ -6,9 +6,13 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastexcel>=0.14.0",
+    "milvus>=2.3.9",
     "neo4j>=5.28.2",
+    "numpy>=2.3.2",
+    "ollama>=0.5.3",
     "openai>=1.102.0",
     "polars>=1.32.3",
+    "pymilvus>=2.6.1",
     "python-dotenv>=1.1.1",
     "pyyaml>=6.0.1",
     "rich>=14.1.0",
