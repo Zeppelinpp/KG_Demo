@@ -27,3 +27,5 @@ BUSSINESS_MAPPING = {
     "现金账户": "CashAccount",
     "核算维度": ["Account", "其关联维度关系"],
 }
+
+MAX_CONTEXT_WINDOW = 20
