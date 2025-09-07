@@ -10,6 +10,7 @@ from src.model.graph import GraphSchema
 from src.tools import query_neo4j
 from src.prompts import KG_AGENT_PROMPT
 from src.core import FunctionCallingAgent, Neo4jSchemaExtractor
+from src.context.manager import ContextManager
 
 load_dotenv()
 
@@ -30,6 +31,13 @@ agent = FunctionCallingAgent(
     model="qwen-max-latest",
     tools=[query_neo4j],
     console=console,
+)
+
+console.print("[dim]Initializing context manager...[/dim]")
+context_manager = ContextManager(
+    resources=["mapping"],
+    schema=schema_md,
+    llm_client=agent.client,  # Share LLM client with agent
 )
 
 
@@ -69,7 +77,7 @@ async def chat_session():
     try:
         # Set initial system prompt
         agent.set_history(
-            [{"role": "system", "content": KG_AGENT_PROMPT.format(schema=schema)}]
+            [{"role": "system", "content": KG_AGENT_PROMPT.format(schema=schema_md)}]
         )
 
         console.print("[bold green]✓ Ready to chat![/bold green]")
@@ -106,7 +114,7 @@ async def chat_session():
                     [
                         {
                             "role": "system",
-                            "content": KG_AGENT_PROMPT.format(schema=schema),
+                            "content": KG_AGENT_PROMPT.format(schema=schema_md),
                         }
                     ]
                 )
@@ -151,6 +159,28 @@ async def chat_session():
             console.print("[bold green]🤖 Assistant[/bold green]")
             console.print()
 
+            # Load context before processing query
+            try:
+                console.print("[dim]Loading context...[/dim]")
+                context_messages = context_manager.load_context(
+                    query=user_input,
+                    from_resources=["mapping"]
+                )
+                
+                # Add context to agent's history if available
+                if context_messages:
+                    current_history = agent.get_history()
+                    enhanced_history = context_manager.add_context_to_history(
+                        current_history, context_messages
+                    )
+                    agent.set_history(enhanced_history)
+                    console.print("[dim]✓ Context loaded[/dim]")
+                else:
+                    console.print("[dim]No relevant context found[/dim]")
+                    
+            except Exception as e:
+                console.print(f"[dim]Warning: Context loading failed: {e}[/dim]")
+
             # Stream the response
             response_text = ""
             async for chunk in agent.run_query_stream(user_query=user_input):
@@ -167,6 +197,12 @@ async def chat_session():
             console.print()
             console.print(f"[bold red]❌ Error: {e}[/bold red]")
             continue
+    
+    # Cleanup resources
+    try:
+        context_manager.cleanup()
+    except Exception as e:
+        console.print(f"[dim]Warning: Cleanup failed: {e}[/dim]")
 
 
 def main():
