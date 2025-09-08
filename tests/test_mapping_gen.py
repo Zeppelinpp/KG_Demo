@@ -29,14 +29,26 @@ query_samples = [
     "xx账簿和xx账簿在xx期间不包含客户维度的按期间列示/按期间融合的明细账",
     "xx账簿和xx账簿在xx期间不包含xx科目，按第一维度编码排序并小计的明细账"
 ]
-这是我的知识图谱schema：
-{schema}
 
-帮我生成一个常见问句中一些业务词汇与图谱中节点和属性名称的对应关系， 以 "业务名称": ["图谱字段名称1", "图谱字段名称2", ...] 输出, 以json格式输出
+<图谱schema>
+{schema}
+</图谱schema>
 """
 response = client.chat.completions.create(
     model="qwen-max",
-    messages=[{"role": "user", "content": prompt}],
+    messages=[
+        {
+            "role": "system",
+            "content": """
+你是一个ERP和财务系统专家，你可以准确分析用户的业务问题并根据图谱schema找到用户问题和schema中字段的对应关系
+请严格按照以下步骤：
+1. 分析图谱schema，理解图谱中节点和属性的含义
+2. 分析常见问句，理解常见问句中业务词汇的含义
+3. 生成一个常见问句中一些业务词汇与图谱中节点和属性名称的对应关系， 以 "业务名称": ["图谱字段名称1", "图谱字段名称2", ...] 输出, 以json格式输出
+            """,
+        },
+        {"role": "user", "content": prompt},
+    ],
     response_format={"type": "json_object"},
 )
 
