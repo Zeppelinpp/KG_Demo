@@ -11,8 +11,10 @@ schema:
   - INDEX ON :余额(fbalance_id)
   - INDEX ON :仓库(仓库id)
   - INDEX ON :凭证(人员编码)
+  - INDEX ON :项目(项目编码)
   - INDEX ON :凭证(仓库编码)
   - INDEX ON :费用(编码)
+  - INDEX ON :产品线(产品线编码)
   - INDEX ON :客户(客户编码)
   - INDEX ON :供应商(编码)
   - INDEX ON :凭证(银行账号)
@@ -20,6 +22,7 @@ schema:
   - INDEX ON :人员(工号)
   - INDEX ON :银行账户(银行账号)
   - INDEX ON :仓库(编码)
+  - INDEX ON :部门(部门编码)
   - INDEX ON :科目(编码)
   - INDEX ON :余额(客户编码)
   - INDEX ON :凭证(银行账户编码)
@@ -52,6 +55,9 @@ schema:
   - 凭证
   - 余额
   - 科目
+  - 部门
+  - 产品线
+  - 项目
   nodeProperties:
     业务单元:
     - 编码: string
@@ -72,6 +78,10 @@ schema:
     - 核算组织类型: string
     - 税务职能: string
     - 资金职能: string
+    产品线:
+    - 产品线编码: string
+    - demo: integer
+    - 产品线名称: string
     人员:
     - 用户名: string
     - 类型: string
@@ -88,6 +98,7 @@ schema:
     - 职位: string
     - 兼职: string
     - 直接上级: string
+    - demo: string
     仓库:
     - 控制策略: string
     - 使用状态: string
@@ -115,6 +126,17 @@ schema:
     - 年初余额.贷方金额: string
     - 期初余额.贷方金额: string
     - 期初余额.借方金额: string
+    - 账簿: string
+    - demo: string
+    - 客户编码: string
+    - 客户名称: string
+    - 供应商编码: string
+    - 供应商名称: string
+    - 银行账户简称: string
+    - 银行账号: string
+    - 固定资产.累计折旧: string
+    - 固定资产.净值: string
+    - 固定资产.原值: string
     供应商:
     - 医药供应商属性: string
     - 原创建组织: string
@@ -131,6 +153,7 @@ schema:
     - 统一社会信用代码: string
     - 简称: string
     - 内部业务单元: string
+    - demo: string
     凭证:
     - 科目名称: string
     - 修改人: string
@@ -180,6 +203,20 @@ schema:
     - 人员编码: string
     - 银行账号: string
     - 客户编码: string
+    - 供应商名称: string
+    - demo: string
+    - 部门编码: string
+    - 部门名称: string
+    - 产品线编码: string
+    - 客户名称: string
+    - 产品线名称: string
+    - 银行账户简称: string
+    - 员工姓名: string
+    - 员工工号: string
+    - 项目编码: string
+    - 项目名称: string
+    - 费用类型: string
+    - 现金流量项目: string
     客户:
     - 客户id: string
     - 业务职能: string
@@ -191,9 +228,11 @@ schema:
     - 序号: string
     - 医药客户属性: string
     - 创建组织: string
+    - demo: string
     科目:
     - 编码: string
     - 名称: string
+    - demo: string
     费用:
     - 是否叶子: string
     - 叶子: string
@@ -209,6 +248,10 @@ schema:
     - 序号: string
     - 上级: string
     - 上级.编码: string
+    部门:
+    - demo: integer
+    - 名称: string
+    - 部门编码: string
     银行类别:
     - 最后更新时间: datetime
     - 使用状态: string
@@ -237,59 +280,89 @@ schema:
     - 金融机构类别: string
     - 币别范围: string
     - 开户行: string
+    - demo: string
+    项目:
+    - 项目名称: string
+    - demo: integer
+    - 项目编码: string
   relationships:
-  - relation: 使用科目
-    source_labels:
-    - 凭证
-    target_labels:
-    - 科目
-  - relation: 对应科目
-    source_labels:
-    - 余额
-    target_labels:
-    - 科目
-  - relation: 由...制单
-    source_labels:
-    - 凭证
-    target_labels:
-    - 人员
-  - relation: 由...审核
-    source_labels:
-    - 凭证
-    target_labels:
-    - 人员
-  - relation: 属于客户
-    source_labels:
-    - 凭证
-    target_labels:
-    - 客户
-  - relation: 涉及银行
-    source_labels:
-    - 凭证
-    target_labels:
-    - 银行账户
-  - relation: 涉及供应商
+  - relation: 凭证涉及供应商
     source_labels:
     - 凭证
     target_labels:
     - 供应商
-  - relation: 涉及费用
+  - relation: 凭证涉及费用
     source_labels:
     - 凭证
     target_labels:
     - 费用
-  - relation: 涉及仓库
-    source_labels:
-    - 凭证
-    target_labels:
-    - 仓库
-  - relation: 涉及人员
+  - relation: 凭证涉及人员
     source_labels:
     - 凭证
     target_labels:
     - 人员
-  - relation: 对应客户
+  - relation: 凭证涉及银行
+    source_labels:
+    - 凭证
+    target_labels:
+    - 银行账户
+  - relation: 凭证涉及仓库
+    source_labels:
+    - 凭证
+    target_labels:
+    - 仓库
+  - relation: 余额对应科目
+    source_labels:
+    - 余额
+    target_labels:
+    - 科目
+  - relation: 余额对应客户
     source_labels:
     - 余额
     target_labels:
     - 客户
+  - relation: 余额对应供应商
+    source_labels:
+    - 余额
+    target_labels:
+    - 供应商
+  - relation: 凭证由人员制单
+    source_labels:
+    - 凭证
+    target_labels:
+    - 人员
+  - relation: 凭证由人员审核
+    source_labels:
+    - 凭证
+    target_labels:
+    - 人员
+  - relation: 凭证使用科目
+    source_labels:
+    - 凭证
+    target_labels:
+    - 科目
+  - relation: 凭证涉及客户
+    source_labels:
+    - 凭证
+    target_labels:
+    - 客户
+  - relation: 余额对应银行
+    source_labels:
+    - 余额
+    target_labels:
+    - 银行账户
+  - relation: 余额对应人员
+    source_labels:
+    - 余额
+    target_labels:
+    - 人员
+  - relation: 余额对应仓库
+    source_labels:
+    - 余额
+    target_labels:
+    - 仓库
+  - relation: 余额对应费用
+    source_labels:
+    - 余额
+    target_labels:
+    - 费用
