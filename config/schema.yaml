@@ -110,22 +110,22 @@ schema:
     - 编码: string
     - 仓库负责人: string
     余额:
+    - 本年累计_贷方金额: float
+    - 本期发生额_借方金额: float
+    - 本年累计_借方金额: float
+    - 期末余额_贷方金额: float
     - 期间: string
+    - 本期发生额_贷方金额: float
     - 科目名称: string
-    - 本期发生额.贷方金额: float
-    - fbalance_id: string
     - 科目编码: string
-    - 本年累计.借方金额: float
-    - 期末余额.贷方金额: float
-    - 本年累计.贷方金额: float
+    - fbalance_id: string
     - 时间: datetime
     - 序号: string
     - 基础资料属性: string
-    - 本期发生额.借方金额: float
-    - 期末余额.借方金额: float
-    - 年初余额.贷方金额: string
-    - 期初余额.贷方金额: string
-    - 期初余额.借方金额: string
+    - 期末余额_借方金额: float
+    - 年初余额_贷方金额: string
+    - 期初余额_贷方金额: string
+    - 期初余额_借方金额: string
     - 账簿: string
     - demo: string
     - 客户编码: string
@@ -134,9 +134,9 @@ schema:
     - 供应商名称: string
     - 银行账户简称: string
     - 银行账号: string
-    - 固定资产.累计折旧: string
-    - 固定资产.净值: string
-    - 固定资产.原值: string
+    - 固定资产_原值: string
+    - 固定资产_累计折旧: string
+    - 固定资产_净值: string
     供应商:
     - 医药供应商属性: string
     - 原创建组织: string
@@ -191,12 +191,9 @@ schema:
     - 附表项目: string
     - 来源表单类型: string
     - 审核驳回: string
-    - 核算维度.客户.编码: string
-    - 核算维度.销售组.名称: string
-    - 核算维度.客户.名称: string
-    - 核算维度.供应商.名称: string
+    - 核算维度_客户_编码: string
+    - 核算维度_销售组_名称: string
     - 复核人: string
-    - 核算维度.部门.名称: string
     - 供应商编码: string
     - 费用编码: string
     - 仓库编码: string
@@ -243,11 +240,11 @@ schema:
     - 控制策略: string
     - 费用id: string
     - 级次: string
-    - 级次.1: string
-    - 创建组织: string
     - 序号: string
+    - 创建组织: string
+    - 级次_1: string
+    - 上级_编码: string
     - 上级: string
-    - 上级.编码: string
     部门:
     - demo: integer
     - 名称: string

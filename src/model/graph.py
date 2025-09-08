@@ -280,7 +280,7 @@ class GraphSchema(BaseModel):
             # Add sample data if available
             if relation.samples and len(relation.samples) > 0:
                 sample = relation.samples[0]  # Show only one sample
-                md.append(f"  - Sample data: {sample.source_labels}- [{sample.relation}] -> {sample.target_labels}\n")
+                md.append(f"  - Sample data: {sample.source_labels}- [:{sample.relation[1]}] -> {sample.target_labels}\n")
 
         # Write the generated markdown to 'graph_schema.md'
         with open("config/graph_schema.md", "w", encoding="utf-8") as f:
