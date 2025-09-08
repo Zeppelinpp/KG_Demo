@@ -248,15 +248,6 @@ class GraphSchema(BaseModel):
         ]
         md.append("# Graph Schema\n")
 
-        # Add database info if available
-        if self.database_info:
-            md.append("## Database Information\n")
-            md.append(f"- **URI**: {self.database_info.uri}\n")
-            md.append(f"- **Database**: {self.database_info.database}\n")
-            md.append(
-                f"- **Extraction Time**: {self.database_info.extraction_time}\n\n"
-            )
-
         md.append("## Overall Node Types and Relations Types\n")
         md.append(f"**Node Types**:\n\n{node_types}\n\n")
         md.append(f"**Relation Types**:\n\n{relation_types}\n\n")

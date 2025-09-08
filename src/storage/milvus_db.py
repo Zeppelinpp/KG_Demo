@@ -44,6 +44,16 @@ def init_collection(collection_name: str):
     )
 
 
+def init_schema_collection(collection_name: str):
+    client = MilvusClient("milvus.db")
+    if client.has_collection(collection_name):
+        client.drop_collection(collection_name)
+    
+    fields = [
+        
+    ]
+
+
 class MilvusDB:
     def __init__(self, collection_name: str):
         self.client = MilvusClient("milvus.db")
