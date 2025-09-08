@@ -34,7 +34,45 @@ def query_neo4j(
         wrap_csv_with_backticks,
         cypher_query,
     )
-    # print(cypher_query)
+    
+    # Wrap property names with backticks using split approach
+    # First, temporarily replace already wrapped properties to protect them
+    protected_patterns = []
+    placeholder_pattern = "___PROTECTED_PROP_{}___"
+    
+    # Find and protect already wrapped properties
+    def protect_wrapped(match):
+        index = len(protected_patterns)
+        protected_patterns.append(match.group(0))
+        return placeholder_pattern.format(index)
+    
+    cypher_query = re.sub(r'\b[a-zA-Z_]\w*\.`[^`]+`', protect_wrapped, cypher_query)
+    
+    # Now process unprotected properties using split approach
+    def wrap_property_with_split(match):
+        full_match = match.group(0)
+        # Split by dot
+        parts = full_match.split('.')
+        if len(parts) >= 2:
+            # First part is variable name, rest are property parts
+            variable = parts[0]
+            property_parts = parts[1:]
+            # Join property parts with dots and wrap with backticks
+            property_name = '.'.join(property_parts)
+            return f"{variable}.`{property_name}`"
+        return full_match
+    
+    # Match variable.property patterns (including multi-level properties)
+    cypher_query = re.sub(
+        r"\b[a-zA-Z_]\w*(?:\.[^`\s\(\)\[\],;=<>!]+)+",  # matches var.prop1.prop2...
+        wrap_property_with_split,
+        cypher_query,
+    )
+    
+    # Restore protected patterns
+    for i, pattern in enumerate(protected_patterns):
+        cypher_query = cypher_query.replace(placeholder_pattern.format(i), pattern)
+    print(cypher_query)
     try:
         # Connect to Neo4j database
         driver = GraphDatabase.driver(
