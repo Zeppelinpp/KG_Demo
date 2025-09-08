@@ -6,7 +6,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.markdown import Markdown
 from rich.rule import Rule
-from src.model.graph import GraphSchema
+from src.model.graph import ExtractedGraphSchema, GraphSchema
 from src.tools import query_neo4j
 from src.prompts import KG_AGENT_PROMPT
 from src.core import FunctionCallingAgent, Neo4jSchemaExtractor
@@ -24,7 +24,8 @@ extractor = Neo4jSchemaExtractor(
     username=os.getenv("NEO4J_USER"),
     password=os.getenv("NEO4J_PASSWORD"),
 )
-schema = extractor.extract_full_schema(return_structured=True)
+schema = extractor.extract_full_schema("config/schema", format="yaml")
+schema = GraphSchema.from_extracted_schema(ExtractedGraphSchema.from_extraction_result(schema))
 schema_md = schema.to_md()
 
 # Log the schema information

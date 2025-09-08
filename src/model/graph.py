@@ -258,6 +258,11 @@ class GraphSchema(BaseModel):
             md.append(
                 f"- `{node.node_type}` ({node.count} nodes) has properties: {property_names}\n"
             )
+            
+            # Add sample data if available
+            if node.samples and len(node.samples) > 0:
+                sample = node.samples[0]  # Show only one sample
+                md.append(f"  - Sample data: {sample.properties}\n")
 
         md.append("\n## Relationship Details\n")
         for relation in self.relations:
@@ -271,6 +276,11 @@ class GraphSchema(BaseModel):
                     md.append(
                         f"    - {pattern.source_labels} -> {pattern.target_labels} (frequency: {pattern.frequency})\n"
                     )
+            
+            # Add sample data if available
+            if relation.samples and len(relation.samples) > 0:
+                sample = relation.samples[0]  # Show only one sample
+                md.append(f"  - Sample data: {sample.source_labels}- [{sample.relation}] -> {sample.target_labels}\n")
 
         # Write the generated markdown to 'graph_schema.md'
         with open("config/graph_schema.md", "w", encoding="utf-8") as f:
