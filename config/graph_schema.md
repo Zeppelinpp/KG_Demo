@@ -6,7 +6,7 @@
 
 **Relation Types**:
 
-['凭证涉及供应商', '凭证涉及费用', '凭证涉及人员', '凭证涉及银行', '凭证涉及仓库', '余额对应科目', '余额对应客户', '余额对应供应商', '凭证由人员制单', '凭证由人员审核', '凭证使用科目', '凭证涉及客户', '余额对应银行', '余额对应人员', '余额对应仓库', '余额对应费用']
+['由...制单', '由...审核', '属于客户', '涉及银行', '涉及供应商', '涉及费用', '涉及仓库', '涉及人员', '凭证涉及供应商', '凭证涉及费用', '凭证涉及人员', '凭证涉及银行', '凭证涉及仓库', '余额对应科目', '余额对应客户', '余额对应供应商', '凭证由人员制单', '凭证由人员审核', '凭证使用科目', '凭证涉及客户', '余额对应银行', '余额对应人员', '余额对应仓库', '余额对应费用']
 
 ## Node Details
 - `人员` (463 nodes) has properties: ['用户名', '类型', '人员id', '工号', '人员使用状态', '姓名', '序号', '性别', '用户禁用', '手机号码', '负责人', '部门', '职位', '兼职', '直接上级', 'demo']
@@ -39,6 +39,38 @@
   - Sample data: {'项目名称': '新产品临床试验', 'demo': True, '项目编码': 'PRJ-001'}
 
 ## Relationship Details
+- `由...制单` (200 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['人员'] (frequency: 100)
+  - Sample data: ['人员']- [:由...制单] -> ['凭证']
+- `由...审核` (200 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['人员'] (frequency: 100)
+  - Sample data: ['人员']- [:由...审核] -> ['凭证']
+- `属于客户` (18 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['客户'] (frequency: 9)
+  - Sample data: ['客户']- [:属于客户] -> ['凭证']
+- `涉及银行` (34 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['银行账户'] (frequency: 17)
+  - Sample data: ['银行账户']- [:涉及银行] -> ['凭证']
+- `涉及供应商` (14 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['供应商'] (frequency: 7)
+  - Sample data: ['供应商']- [:涉及供应商] -> ['凭证']
+- `涉及费用` (6 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['费用'] (frequency: 3)
+  - Sample data: ['费用']- [:涉及费用] -> ['凭证']
+- `涉及仓库` (6 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['仓库'] (frequency: 3)
+  - Sample data: ['仓库']- [:涉及仓库] -> ['凭证']
+- `涉及人员` (6 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['人员'] (frequency: 3)
+  - Sample data: ['人员']- [:涉及人员] -> ['凭证']
 - `凭证涉及供应商` (190 relationships) has properties: []
   - Common patterns:
     - ['凭证'] -> ['供应商'] (frequency: 95)

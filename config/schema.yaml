@@ -283,6 +283,46 @@ schema:
     - demo: integer
     - 项目编码: string
   relationships:
+  - relation: 由...制单
+    source_labels:
+    - 凭证
+    target_labels:
+    - 人员
+  - relation: 由...审核
+    source_labels:
+    - 凭证
+    target_labels:
+    - 人员
+  - relation: 属于客户
+    source_labels:
+    - 凭证
+    target_labels:
+    - 客户
+  - relation: 涉及银行
+    source_labels:
+    - 凭证
+    target_labels:
+    - 银行账户
+  - relation: 涉及供应商
+    source_labels:
+    - 凭证
+    target_labels:
+    - 供应商
+  - relation: 涉及费用
+    source_labels:
+    - 凭证
+    target_labels:
+    - 费用
+  - relation: 涉及仓库
+    source_labels:
+    - 凭证
+    target_labels:
+    - 仓库
+  - relation: 涉及人员
+    source_labels:
+    - 凭证
+    target_labels:
+    - 人员
   - relation: 凭证涉及供应商
     source_labels:
     - 凭证
