@@ -20,6 +20,7 @@ from src.tools import (
     get_sample_relationships,
 )
 from src.utils import tools_to_openai_schema
+from src.logger import kg_logger
 from src.model.graph import (
     ExtractedGraphSchema,
     GraphSchema,
@@ -244,6 +245,9 @@ class FunctionCallingAgent:
                 if hasattr(result, "__await__"):
                     result = await result
 
+                # Log tool call information
+                kg_logger.log_tool_call(function_name, function_args, str(result))
+
                 # Display result summary
                 self.console.print()
                 if isinstance(result, list):
@@ -260,6 +264,8 @@ class FunctionCallingAgent:
                 return f"Error: '{function_name}' is not callable"
 
         except Exception as e:
+            error_msg = f"Tool execution failed: {e}"
+            kg_logger.log_error(error_msg, {"tool_name": function_name, "tool_args": function_args})
             self.console.print(f"[bold red]❌ Tool execution failed: {e}[/bold red]")
             return f"Error executing tool call: {str(e)}"
 
@@ -270,6 +276,17 @@ class FunctionCallingAgent:
 
         while iteration < self.max_iterations:
             try:
+                # Log LLM call information
+                user_query = ""
+                system_prompt = ""
+                for msg in current_messages:
+                    if msg.get("role") == "user":
+                        user_query = msg.get("content", "")
+                    elif msg.get("role") == "system":
+                        system_prompt = msg.get("content", "")
+                
+                kg_logger.log_llm_call(system_prompt, user_query, self.model, current_messages)
+                
                 # Make API call to OpenAI
                 response = await self.client.chat.completions.create(
                     model=self.model,
@@ -311,8 +328,10 @@ class FunctionCallingAgent:
                     continue
 
                 else:
-                    # No tool calls, return the final response
-                    return assistant_message.content or "No response generated"
+                    # No tool calls, log and return the final response
+                    response_content = assistant_message.content or "No response generated"
+                    kg_logger.log_llm_response(response_content)
+                    return response_content
 
             except Exception as e:
                 return f"Error in agent execution: {str(e)}"
@@ -328,6 +347,17 @@ class FunctionCallingAgent:
 
         while iteration < self.max_iterations:
             try:
+                # Log LLM call information for streaming
+                user_query = ""
+                system_prompt = ""
+                for msg in current_messages:
+                    if msg.get("role") == "user":
+                        user_query = msg.get("content", "")
+                    elif msg.get("role") == "system":
+                        system_prompt = msg.get("content", "")
+                
+                kg_logger.log_llm_call(system_prompt, user_query, self.model, current_messages)
+                
                 # Make API call to OpenAI with streaming
                 stream = await self.client.chat.completions.create(
                     model=self.model,
@@ -415,7 +445,9 @@ class FunctionCallingAgent:
                     continue
 
                 else:
-                    # No tool calls, we're done
+                    # No tool calls, log final response and we're done
+                    if assistant_content:
+                        kg_logger.log_llm_response(assistant_content)
                     return
 
             except Exception as e:

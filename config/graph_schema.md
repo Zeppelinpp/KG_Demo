@@ -6,7 +6,7 @@
 
 **Relation Types**:
 
-['使用科目', '对应科目', '由...制单', '由...审核', '属于客户', '涉及银行', '涉及供应商', '涉及费用', '涉及仓库', '涉及人员', '对应客户']
+['使用科目', '对应科目', '由...制单', '由...审核', '属于客户', '涉及银行', '涉及供应商', '涉及费用', '涉及仓库', '涉及人员', '对应客户', '对应供应商', '属于银行']
 
 ## Node Details
 - `人员` (460 nodes) has properties: ['用户名', '类型', '人员id', '工号', '人员使用状态', '姓名', '序号', '性别', '用户禁用', '手机号码', '负责人', '部门', '职位', '兼职', '直接上级']
@@ -55,3 +55,9 @@
 - `对应客户` (720 relationships) has properties: []
   - Common patterns:
     - ['余额'] -> ['客户'] (frequency: 360)
+- `对应供应商` (600 relationships) has properties: []
+  - Common patterns:
+    - ['余额'] -> ['供应商'] (frequency: 300)
+- `属于银行` (26 relationships) has properties: []
+  - Common patterns:
+    - ['余额'] -> ['银行账户'] (frequency: 13)

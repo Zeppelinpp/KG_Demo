@@ -8,6 +8,7 @@ from config.constants import BUSSINESS_MAPPING, MAX_CONTEXT_WINDOW
 from src.core import Neo4jSchemaExtractor
 from src.storage.milvus_db import MilvusDB
 from src.prompts import KG_AGENT_PROMPT, COMPRESS_PROMPT
+from src.logger import kg_logger
 
 load_dotenv()
 
@@ -118,6 +119,7 @@ class ContextManager:
         Load context from specified resources and return context messages
         """
         if not from_resources or not any(res in self.collections for res in from_resources):
+            kg_logger.log_context_loading(query, from_resources, {})
             return []
         
         # Load extra information from available collections
@@ -127,6 +129,7 @@ class ContextManager:
         ]
         
         if not available_collections:
+            kg_logger.log_context_loading(query, from_resources, {})
             return []
         
         try:
@@ -144,7 +147,15 @@ class ContextManager:
                 if result and len(result) > 0:
                     for hit in result[0]:
                         if "entity" in hit and "term" in hit["entity"]:
-                            combined_results[hit["entity"]["term"]] = hit["entity"].get("attributes", {})
+                            # Convert attributes from RepeatedScalarContainer to list
+                            attributes = hit["entity"].get("attributes", [])
+                            if hasattr(attributes, '__iter__') and not isinstance(attributes, (str, dict)):
+                                # Convert to list if it's a RepeatedScalarContainer or similar
+                                attributes = list(attributes)
+                            combined_results[hit["entity"]["term"]] = attributes
+
+            # Log context loading information
+            kg_logger.log_context_loading(query, from_resources, combined_results)
 
             # Generate context messages
             context_messages = []
@@ -155,7 +166,9 @@ class ContextManager:
             return context_messages
             
         except Exception as e:
-            print(f"Warning: Failed to load context from resources {from_resources}: {e}")
+            error_msg = f"Failed to load context from resources {from_resources}: {e}"
+            kg_logger.log_error(error_msg, {"query": query, "resources": from_resources})
+            print(f"Warning: {error_msg}")
             return []
 
 
@@ -163,11 +176,7 @@ class ContextManager:
         """
         Clean up resources
         """
-        for collection in self.collections.values():
-            try:
-                collection.close()
-            except Exception as e:
-                print(f"Warning: Failed to close collection: {e}")
+        pass
 
 
 if __name__ == "__main__":

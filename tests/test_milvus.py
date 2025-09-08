@@ -19,9 +19,9 @@ def test_insert():
         db.insert(data)
 
 def test_search():
-    results = db.search("江西银涛药业股份有限公司主账簿账簿在2024年3期期所有的应付账款发生额")
+    results = db.search("江西银涛药业股份有限公司主账簿在2024年3期应付职工薪酬支出TOP10的部门")
     print(results)
 
 if __name__ == "__main__":
-    test_insert()
+    # test_insert()
     test_search()

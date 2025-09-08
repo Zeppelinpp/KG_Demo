@@ -11,6 +11,7 @@ from src.tools import query_neo4j
 from src.prompts import KG_AGENT_PROMPT
 from src.core import FunctionCallingAgent, Neo4jSchemaExtractor
 from src.context.manager import ContextManager
+from src.logger import kg_logger
 
 load_dotenv()
 
@@ -26,9 +27,12 @@ extractor = Neo4jSchemaExtractor(
 schema = extractor.extract_full_schema(return_structured=True)
 schema_md = schema.to_md()
 
+# Log the schema information
+kg_logger.log_schema_usage(schema_md)
+
 console.print("[dim]Initializing AI agent...[/dim]")
 agent = FunctionCallingAgent(
-    model="qwen-max-latest",
+    model="qwen-max",
     tools=[query_neo4j],
     console=console,
 )
