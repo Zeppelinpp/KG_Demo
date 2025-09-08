@@ -107,6 +107,28 @@ class KGLogger:
         """Log LLM response"""
         self.logger.info(f"[LLM RESPONSE] {response}")
     
+    def log_info(self, info_msg: str, context: Dict[str, Any] = None):
+        """Log information"""
+        self.logger.info(f"[INFO] {info_msg}")
+        if context:
+            try:
+                serializable_context = self._make_serializable(context)
+                self.logger.info(f"[INFO] Context: {json.dumps(serializable_context, ensure_ascii=False, indent=2)}")
+            except Exception as e:
+                self.logger.info(f"[INFO] Context (raw): {str(context)}")
+                self.logger.warning(f"[INFO] Failed to serialize info context: {e}")
+    
+    def log_warning(self, warning_msg: str, context: Dict[str, Any] = None):
+        """Log warning information"""
+        self.logger.warning(f"[WARNING] {warning_msg}")
+        if context:
+            try:
+                serializable_context = self._make_serializable(context)
+                self.logger.warning(f"[WARNING] Context: {json.dumps(serializable_context, ensure_ascii=False, indent=2)}")
+            except Exception as e:
+                self.logger.warning(f"[WARNING] Context (raw): {str(context)}")
+                self.logger.warning(f"[WARNING] Failed to serialize warning context: {e}")
+
     def log_error(self, error_msg: str, context: Dict[str, Any] = None):
         """Log error information"""
         self.logger.error(f"[ERROR] {error_msg}")

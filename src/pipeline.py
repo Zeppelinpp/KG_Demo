@@ -11,25 +11,24 @@ from src.tools import query_neo4j
 from src.prompts import KG_AGENT_PROMPT
 from src.core import FunctionCallingAgent, Neo4jSchemaExtractor
 from src.context.manager import ContextManager
+from src.dynamic_schema import DynamicSchemaExtractor
 from src.logger import kg_logger
 
 load_dotenv()
 
 console = Console()
 
-console.print("[dim]Initializing connection to Neo4j...[/dim]")
-extractor = Neo4jSchemaExtractor(
+console.print("[dim]Initializing dynamic schema extractor...[/dim]")
+dynamic_extractor = DynamicSchemaExtractor(
     uri=os.getenv("NEO4J_URI"),
     database=os.getenv("NEO4J_DATABASE"),
     username=os.getenv("NEO4J_USER"),
     password=os.getenv("NEO4J_PASSWORD"),
+    console=console
 )
-schema = extractor.extract_full_schema("config/schema", format="yaml")
-schema = GraphSchema.from_extracted_schema(ExtractedGraphSchema.from_extraction_result(schema))
-schema_md = schema.to_md()
 
-# Log the schema information
-kg_logger.log_schema_usage(schema_md)
+# 初始化时不提取完整schema，而是在查询时动态提取
+schema_md = ""  # 将在查询时动态生成
 
 console.print("[dim]Initializing AI agent...[/dim]")
 agent = FunctionCallingAgent(
@@ -41,17 +40,25 @@ agent = FunctionCallingAgent(
 console.print("[dim]Initializing context manager...[/dim]")
 context_manager = ContextManager(
     resources=["mapping"],
-    schema=schema_md,
+    schema="",  # 将在查询时动态设置
     llm_client=agent.client,  # Share LLM client with agent
 )
 
 
 async def run(user_query: str):
-    """Run a single query"""
+    """Run a single query with dynamic schema"""
+    # 动态提取相关schema
+    console.print("[dim]Extracting dynamic schema...[/dim]")
+    dynamic_schema = await dynamic_extractor.extract_dynamic_schema(user_query)
+    dynamic_schema_md = dynamic_schema.to_md()
+    
+    # Log the dynamic schema usage
+    kg_logger.log_schema_usage(dynamic_schema_md)
+    
     response = ""
     async for chunk in agent.run_query_stream(
         user_query=user_query,
-        system_prompt=KG_AGENT_PROMPT.format(schema=schema_md),
+        system_prompt=KG_AGENT_PROMPT.format(schema=dynamic_schema_md),
     ):
         response += chunk
         print(chunk, end="")
@@ -80,9 +87,9 @@ async def chat_session():
 
     # Initialize components
     try:
-        # Set initial system prompt
+        # Set initial system prompt with empty schema (will be updated per query)
         agent.set_history(
-            [{"role": "system", "content": KG_AGENT_PROMPT.format(schema=schema_md)}]
+            [{"role": "system", "content": KG_AGENT_PROMPT.format(schema="")}]
         )
 
         console.print("[bold green]✓ Ready to chat![/bold green]")
@@ -119,12 +126,14 @@ async def chat_session():
                     [
                         {
                             "role": "system",
-                            "content": KG_AGENT_PROMPT.format(schema=schema_md),
+                            "content": KG_AGENT_PROMPT.format(schema=""),
                         }
                     ]
                 )
+                # 清空动态schema缓存
+                dynamic_extractor.clear_cache()
                 console.print()
-                console.print("[bold green]✓ Chat history cleared![/bold green]")
+                console.print("[bold green]✓ Chat history and schema cache cleared![/bold green]")
                 continue
 
             elif user_input.lower() == "help":
@@ -164,6 +173,24 @@ async def chat_session():
             console.print("[bold green]🤖 Assistant[/bold green]")
             console.print()
 
+            # Extract dynamic schema for this query
+            try:
+                console.print("[dim]Extracting dynamic schema...[/dim]")
+                dynamic_schema = await dynamic_extractor.extract_dynamic_schema(user_input)
+                dynamic_schema_md = dynamic_schema.to_md()
+                
+                # Log the dynamic schema usage
+                kg_logger.log_schema_usage(dynamic_schema_md)
+                
+                # Update context manager with dynamic schema
+                context_manager.schema = dynamic_schema_md
+                
+                console.print(f"[dim]✓ Dynamic schema extracted ({len(dynamic_schema.nodes)} node types, {len(dynamic_schema.relationships)} relationships)[/dim]")
+                
+            except Exception as e:
+                console.print(f"[dim]Warning: Dynamic schema extraction failed: {e}[/dim]")
+                dynamic_schema_md = ""
+
             # Load context before processing query
             try:
                 console.print("[dim]Loading context...[/dim]")
@@ -186,9 +213,12 @@ async def chat_session():
             except Exception as e:
                 console.print(f"[dim]Warning: Context loading failed: {e}[/dim]")
 
-            # Stream the response
+            # Stream the response with dynamic schema
             response_text = ""
-            async for chunk in agent.run_query_stream(user_query=user_input):
+            async for chunk in agent.run_query_stream(
+                user_query=user_input,
+                system_prompt=KG_AGENT_PROMPT.format(schema=dynamic_schema_md)
+            ):
                 response_text += chunk
                 console.print(chunk, end="")
 

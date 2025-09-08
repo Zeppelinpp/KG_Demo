@@ -1,5 +1,6 @@
 import inspect
 from typing import List, Dict, Any, Callable, Union
+from neo4j.time import DateTime, Date, Time, Duration
 
 
 def tools_to_openai_schema(tools: List[Callable]) -> List[Dict[str, Any]]:
@@ -113,3 +114,20 @@ def _get_json_type(python_type) -> str:
     }
 
     return type_mapping.get(python_type, "string")
+
+
+def serialize_neo4j_value(value):
+    """Convert Neo4j values to JSON-serializable format"""
+    if isinstance(value, (DateTime, Date, Time)):
+        return str(value)
+    elif isinstance(value, Duration):
+        return str(value)
+    elif isinstance(value, (int, float, str, bool)) or value is None:
+        return value
+    elif isinstance(value, list):
+        return [serialize_neo4j_value(item) for item in value]
+    elif isinstance(value, dict):
+        return {k: serialize_neo4j_value(v) for k, v in value.items()}
+    else:
+        # For any other type, convert to string
+        return str(value)

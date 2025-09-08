@@ -6,7 +6,7 @@
 
 **Relation Types**:
 
-['由...制单', '由...审核', '属于客户', '涉及银行', '涉及供应商', '涉及费用', '涉及仓库', '涉及人员', '凭证涉及供应商', '凭证涉及费用', '凭证涉及人员', '凭证涉及银行', '凭证涉及仓库', '余额对应科目', '余额对应客户', '余额对应供应商', '凭证由人员制单', '凭证由人员审核', '凭证使用科目', '凭证涉及客户', '余额对应银行', '余额对应人员', '余额对应仓库', '余额对应费用']
+['由...制单', '由...审核', '凭证涉及供应商', '凭证涉及费用', '凭证涉及人员', '凭证涉及银行', '凭证涉及仓库', '余额对应科目', '余额对应客户', '余额对应供应商', '凭证由...制单', '凭证由...审核', '凭证由人员制单', '凭证由人员审核', '凭证使用科目', '凭证属于客户', '凭证涉及客户', '余额对应银行', '余额对应人员', '余额对应仓库', '余额对应费用', '涉及', '被凭证涉及', '银行交易', '有凭证记录', '采购往来', '有业务凭证', '费用记账', '被凭证记录', '库存操作', '有库存凭证', '相关人员', '关联凭证', '制作了凭证', '审核了凭证']
 
 ## Node Details
 - `人员` (463 nodes) has properties: ['用户名', '类型', '人员id', '工号', '人员使用状态', '姓名', '序号', '性别', '用户禁用', '手机号码', '负责人', '部门', '职位', '兼职', '直接上级', 'demo']
@@ -27,7 +27,7 @@
   - Sample data: {'最后更新时间': '2020-11-06T15:53:46.000000000', '序号': '1', '编码': 'BC-9999', '名称': '虚拟银行', '最后更新人': 'TEST', '银行类别id': 'BC-9999', '使用状态': '可用'}
 - `凭证` (202 nodes) has properties: ['科目名称', '修改人', '科目全名', '原币借方', '科目编码', '币种', '原币金额', '摘要', '借方', '凭证id', '附件数', '序号', '期间', '创建时间', '审核日期', '过账人', '来源系统', '借方合计', '修改时间', '创建人', '来源类型', '过账', '凭证摘要', '凭证字', '审核人', '记账日期', '状态', '凭证号', '账簿', '贷方合计', '制单人', '贷方', '原币贷方', '附表项目', '来源表单类型', '审核驳回', '核算维度_客户_编码', '核算维度_销售组_名称', '复核人', '供应商编码', '费用编码', '仓库编码', '人员编码', '银行账号', '客户编码', '供应商名称', 'demo', '部门编码', '部门名称', '产品线编码', '客户名称', '产品线名称', '银行账户简称', '员工姓名', '员工工号', '项目编码', '项目名称', '费用类型', '现金流量项目']
   - Sample data: {'附件数': 0.0, '贷方合计': '28046138.15', '序号': '8.0', '制单人': 'yt0041', '凭证id': '95', '状态': '已审核', '科目编码': '6301.02', '审核人': 'yt0041', '凭证号': '95.0', '账簿': '江西银涛药业股份有限公司主账簿', '科目全名': '营业外收入_其他', '凭证摘要': '结转损益', '记账日期': '2024-03-31T00:00:00.000000000', '原币借方': '2020.0', '来源类型': '结转损益', '修改时间': '2024-05-10T16:49:30.000000000', '原币金额': 2020.0, '创建人': 'yt0034', '来源系统': '总账', '摘要': '结转损益', '币种': '人民币', '借方合计': '28046138.15', '凭证字': '记', '科目名称': '其他', '审核日期': '2024-04-25T09:00:18.000000000', '过账': '√', '借方': '2020.0', '过账人': 'yt0034', '修改人': 'yt0034', '期间': '2024年3期', '创建时间': '2024-04-18T09:40:00.000000000'}
-- `余额` (389 nodes) has properties: ['本年累计_贷方金额', '本期发生额_借方金额', '本年累计_借方金额', '期末余额_贷方金额', '期间', '本期发生额_贷方金额', '科目名称', '科目编码', 'fbalance_id', '时间', '序号', '基础资料属性', '期末余额_借方金额', '年初余额_贷方金额', '期初余额_贷方金额', '期初余额_借方金额', '账簿', 'demo', '客户编码', '客户名称', '供应商编码', '供应商名称', '银行账户简称', '银行账号', '固定资产_原值', '固定资产_累计折旧', '固定资产_净值']
+- `余额` (389 nodes) has properties: ['本年累计_贷方金额', '本期发生额_借方金额', '本年累计_借方金额', '期末余额_贷方金额', '期间', '本期发生额_贷方金额', '科目名称', '科目编码', 'fbalance_id', '时间', '序号', '基础资料属性', '期末余额_借方金额', '年初余额_贷方金额', '期初余额_贷方金额', '期初余额_借方金额', '本年累计.借方金额', '本期发生额.借方金额', '本年累计.贷方金额', '期末余额.借方金额', '账簿', '本期发生额.贷方金额', '期末余额.贷方金额', 'demo', '客户编码', '客户名称', '供应商编码', '供应商名称', '银行账户简称', '银行账号', '固定资产.累计折旧', '固定资产_原值', '固定资产.原值', '固定资产_累计折旧', '固定资产_净值', '固定资产.净值']
   - Sample data: {'基础资料属性': '借', '本期发生额_贷方金额': 136.0, '本期发生额_借方金额': 126.0, '时间': '2021-01-01T00:00:00.000000000', '序号': '1', '科目编码': '0', '期末余额_贷方金额': 10.0, '本年累计_借方金额': 126.0, '期间': '2021年1期', '科目名称': '测试科目版本化', 'fbalance_id': '1', '本年累计_贷方金额': 136.0}
 - `科目` (78 nodes) has properties: ['编码', '名称', 'demo']
   - Sample data: {'编码': '6301.02', '名称': '其他'}
@@ -47,49 +47,25 @@
   - Common patterns:
     - ['凭证'] -> ['人员'] (frequency: 100)
   - Sample data: ['人员']- [:由...审核] -> ['凭证']
-- `属于客户` (18 relationships) has properties: []
+- `凭证涉及供应商` (204 relationships) has properties: []
   - Common patterns:
-    - ['凭证'] -> ['客户'] (frequency: 9)
-  - Sample data: ['客户']- [:属于客户] -> ['凭证']
-- `涉及银行` (34 relationships) has properties: []
-  - Common patterns:
-    - ['凭证'] -> ['银行账户'] (frequency: 17)
-  - Sample data: ['银行账户']- [:涉及银行] -> ['凭证']
-- `涉及供应商` (14 relationships) has properties: []
-  - Common patterns:
-    - ['凭证'] -> ['供应商'] (frequency: 7)
-  - Sample data: ['供应商']- [:涉及供应商] -> ['凭证']
-- `涉及费用` (6 relationships) has properties: []
-  - Common patterns:
-    - ['凭证'] -> ['费用'] (frequency: 3)
-  - Sample data: ['费用']- [:涉及费用] -> ['凭证']
-- `涉及仓库` (6 relationships) has properties: []
-  - Common patterns:
-    - ['凭证'] -> ['仓库'] (frequency: 3)
-  - Sample data: ['仓库']- [:涉及仓库] -> ['凭证']
-- `涉及人员` (6 relationships) has properties: []
-  - Common patterns:
-    - ['凭证'] -> ['人员'] (frequency: 3)
-  - Sample data: ['人员']- [:涉及人员] -> ['凭证']
-- `凭证涉及供应商` (190 relationships) has properties: []
-  - Common patterns:
-    - ['凭证'] -> ['供应商'] (frequency: 95)
+    - ['凭证'] -> ['供应商'] (frequency: 102)
   - Sample data: ['供应商']- [:凭证涉及供应商] -> ['凭证']
-- `凭证涉及费用` (170 relationships) has properties: []
+- `凭证涉及费用` (176 relationships) has properties: []
   - Common patterns:
-    - ['凭证'] -> ['费用'] (frequency: 85)
+    - ['凭证'] -> ['费用'] (frequency: 88)
   - Sample data: ['费用']- [:凭证涉及费用] -> ['凭证']
-- `凭证涉及人员` (38 relationships) has properties: []
+- `凭证涉及人员` (44 relationships) has properties: []
   - Common patterns:
-    - ['凭证'] -> ['人员'] (frequency: 19)
+    - ['凭证'] -> ['人员'] (frequency: 22)
   - Sample data: ['人员']- [:凭证涉及人员] -> ['凭证']
-- `凭证涉及银行` (26 relationships) has properties: []
+- `凭证涉及银行` (60 relationships) has properties: []
   - Common patterns:
-    - ['凭证'] -> ['银行账户'] (frequency: 13)
+    - ['凭证'] -> ['银行账户'] (frequency: 30)
   - Sample data: ['银行账户']- [:凭证涉及银行] -> ['凭证']
-- `凭证涉及仓库` (64 relationships) has properties: []
+- `凭证涉及仓库` (70 relationships) has properties: []
   - Common patterns:
-    - ['凭证'] -> ['仓库'] (frequency: 32)
+    - ['凭证'] -> ['仓库'] (frequency: 35)
   - Sample data: ['仓库']- [:凭证涉及仓库] -> ['凭证']
 - `余额对应科目` (686 relationships) has properties: []
   - Common patterns:
@@ -103,6 +79,14 @@
   - Common patterns:
     - ['余额'] -> ['供应商'] (frequency: 300)
   - Sample data: ['供应商']- [:余额对应供应商] -> ['余额']
+- `凭证由...制单` (200 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['人员'] (frequency: 100)
+  - Sample data: ['人员']- [:凭证由...制单] -> ['凭证']
+- `凭证由...审核` (200 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['人员'] (frequency: 100)
+  - Sample data: ['人员']- [:凭证由...审核] -> ['凭证']
 - `凭证由人员制单` (200 relationships) has properties: []
   - Common patterns:
     - ['凭证'] -> ['人员'] (frequency: 100)
@@ -115,6 +99,10 @@
   - Common patterns:
     - ['凭证'] -> ['科目'] (frequency: 95)
   - Sample data: ['凭证']- [:凭证使用科目] -> ['科目']
+- `凭证属于客户` (18 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['客户'] (frequency: 9)
+  - Sample data: ['客户']- [:凭证属于客户] -> ['凭证']
 - `凭证涉及客户` (190 relationships) has properties: []
   - Common patterns:
     - ['凭证'] -> ['客户'] (frequency: 95)
@@ -135,3 +123,59 @@
   - Common patterns:
     - ['余额'] -> ['费用'] (frequency: 85)
   - Sample data: ['费用']- [:余额对应费用] -> ['余额']
+- `涉及` (18 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['客户'] (frequency: 9)
+  - Sample data: ['客户']- [:涉及] -> ['凭证']
+- `被凭证涉及` (18 relationships) has properties: []
+  - Common patterns:
+    - ['客户'] -> ['凭证'] (frequency: 9)
+  - Sample data: ['客户']- [:被凭证涉及] -> ['凭证']
+- `银行交易` (34 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['银行账户'] (frequency: 17)
+  - Sample data: ['银行账户']- [:银行交易] -> ['凭证']
+- `有凭证记录` (34 relationships) has properties: []
+  - Common patterns:
+    - ['银行账户'] -> ['凭证'] (frequency: 17)
+  - Sample data: ['银行账户']- [:有凭证记录] -> ['凭证']
+- `采购往来` (14 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['供应商'] (frequency: 7)
+  - Sample data: ['供应商']- [:采购往来] -> ['凭证']
+- `有业务凭证` (14 relationships) has properties: []
+  - Common patterns:
+    - ['供应商'] -> ['凭证'] (frequency: 7)
+  - Sample data: ['供应商']- [:有业务凭证] -> ['凭证']
+- `费用记账` (6 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['费用'] (frequency: 3)
+  - Sample data: ['费用']- [:费用记账] -> ['凭证']
+- `被凭证记录` (6 relationships) has properties: []
+  - Common patterns:
+    - ['费用'] -> ['凭证'] (frequency: 3)
+  - Sample data: ['费用']- [:被凭证记录] -> ['凭证']
+- `库存操作` (6 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['仓库'] (frequency: 3)
+  - Sample data: ['仓库']- [:库存操作] -> ['凭证']
+- `有库存凭证` (6 relationships) has properties: []
+  - Common patterns:
+    - ['仓库'] -> ['凭证'] (frequency: 3)
+  - Sample data: ['仓库']- [:有库存凭证] -> ['凭证']
+- `相关人员` (6 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['人员'] (frequency: 3)
+  - Sample data: ['人员']- [:相关人员] -> ['凭证']
+- `关联凭证` (6 relationships) has properties: []
+  - Common patterns:
+    - ['人员'] -> ['凭证'] (frequency: 3)
+  - Sample data: ['人员']- [:关联凭证] -> ['凭证']
+- `制作了凭证` (200 relationships) has properties: []
+  - Common patterns:
+    - ['人员'] -> ['凭证'] (frequency: 100)
+  - Sample data: ['人员']- [:制作了凭证] -> ['凭证']
+- `审核了凭证` (200 relationships) has properties: []
+  - Common patterns:
+    - ['人员'] -> ['凭证'] (frequency: 100)
+  - Sample data: ['人员']- [:审核了凭证] -> ['凭证']
