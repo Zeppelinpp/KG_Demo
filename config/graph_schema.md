@@ -1,9 +1,4 @@
 # Graph Schema
-## Database Information
-- **URI**: bolt://172.20.228.63:7687
-- **Database**: neo4j
-- **Extraction Time**: 2025-09-05 19:31:15.568342
-
 ## Overall Node Types and Relations Types
 **Node Types**:
 
@@ -11,7 +6,7 @@
 
 **Relation Types**:
 
-['使用科目', '对应科目', '由...制单', '由...审核', '属于客户', '涉及银行', '涉及费用', '涉及仓库', '涉及人员', '对应客户']
+['使用科目', '对应科目', '由...制单', '由...审核', '属于客户', '涉及银行', '涉及供应商', '涉及费用', '涉及仓库', '涉及人员', '对应客户']
 
 ## Node Details
 - `人员` (460 nodes) has properties: ['用户名', '类型', '人员id', '工号', '人员使用状态', '姓名', '序号', '性别', '用户禁用', '手机号码', '负责人', '部门', '职位', '兼职', '直接上级']
@@ -42,18 +37,21 @@
 - `属于客户` (190 relationships) has properties: []
   - Common patterns:
     - ['凭证'] -> ['客户'] (frequency: 95)
-- `涉及银行` (6 relationships) has properties: []
+- `涉及银行` (26 relationships) has properties: []
   - Common patterns:
-    - ['凭证'] -> ['银行账户'] (frequency: 3)
-- `涉及费用` (6 relationships) has properties: []
+    - ['凭证'] -> ['银行账户'] (frequency: 13)
+- `涉及供应商` (190 relationships) has properties: []
   - Common patterns:
-    - ['凭证'] -> ['费用'] (frequency: 3)
-- `涉及仓库` (6 relationships) has properties: []
+    - ['凭证'] -> ['供应商'] (frequency: 95)
+- `涉及费用` (170 relationships) has properties: []
   - Common patterns:
-    - ['凭证'] -> ['仓库'] (frequency: 3)
-- `涉及人员` (6 relationships) has properties: []
+    - ['凭证'] -> ['费用'] (frequency: 85)
+- `涉及仓库` (64 relationships) has properties: []
   - Common patterns:
-    - ['凭证'] -> ['人员'] (frequency: 3)
+    - ['凭证'] -> ['仓库'] (frequency: 32)
+- `涉及人员` (38 relationships) has properties: []
+  - Common patterns:
+    - ['凭证'] -> ['人员'] (frequency: 19)
 - `对应客户` (720 relationships) has properties: []
   - Common patterns:
     - ['余额'] -> ['客户'] (frequency: 360)
