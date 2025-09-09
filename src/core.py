@@ -94,18 +94,7 @@ def convert_schema_to_yaml_format(extracted_schema: Dict) -> Dict:
                 if pattern["target_labels"]:
                     relationship["target_labels"] = pattern["target_labels"]
 
-            # Extract relationship properties
-            if "properties" in rel_info and rel_info["properties"]:
-                rel_properties = {}
-                for prop in rel_info["properties"]:
-                    prop_name = prop["name"]
-                    # Try to infer type from samples
-                    prop_type = infer_property_type(
-                        rel_info.get("samples", []), prop_name, is_relationship=True
-                    )
-                    rel_properties[prop_name] = prop_type
-                if rel_properties:
-                    relationship["properties"] = rel_properties
+            # Extract relationship properties (Relation dont have properties)
 
             yaml_schema["schema"]["relationships"].append(relationship)
 
