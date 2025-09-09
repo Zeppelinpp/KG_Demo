@@ -2,180 +2,30 @@
 ## Overall Node Types and Relations Types
 **Node Types**:
 
-['银行账户', '凭证', '人员', '仓库', '供应商', '客户', '银行类别', '科目余额', '账簿', '期间', '科目', '部门', '余额', '费用', '产品线', '项目', 'Voucher', 'Entry', 'Account', 'SalesGroup', 'ExpenseItem', 'CashAccount', 'Supplier', 'BusinessMode', 'BankAccount', 'Department', 'Project', 'CostSubelement', 'AssetCategory', 'Employee', 'OtherParty', 'AssetCard', 'Customer', 'InventoryCategory', 'ManualInput', 'Bank', 'Warehouse', 'UseDepartment', 'Org']
+['凭证', '科目余额', '业务单元', '人员', '仓库', '供应商', '客户', '银行类别', '银行账户']
 
 **Relation Types**:
 
-['制作了凭证', '银行交易', '有凭证记录', '采购往来', '有业务凭证', '凭证涉及客户', '客户被凭证涉及', '费用记账', '被凭证记录', '库存操作', '有库存凭证', '相关人员', '关联凭证', '审核了凭证', '由人员制单', '由人员审核', 'HAS_ENTRY', 'FOR_SUPPLIER', 'IN_DEPARTMENT', 'FOR_EXPENSE_ITEM', 'FOR_PROJECT', 'IN_SALES_GROUP', 'IN_INVENTORY_CATEGORY', 'IN_COST_SUBELEM', 'IN_ASSET_CATEGORY', 'FOR_OTHER_PARTY', 'BY_EMPLOYEE']
+[]
 
 ## Node Details
-- `银行账户` (18 nodes) has properties: ['使用状态', '控制策略', '数据状态', '账户性质', '账户状态', '账户类型', '银行类别', '金融机构类别', '申请公司', '开户公司', '账户简称', '银行账号', 'uid', '最后更新人', '最后更新时间', '序号', '币别范围', '开户行', '银行账户id', 'demo']
-  - Sample data: {'银行账号': '235432424', '银行类别': '招商银行', '序号': '1', '账户类型': '一般存款账户', '账户简称': '招商银行宝安支行', '金融机构类别': '银行', '开户公司': '10', '最后更新人': 'TEST', '控制策略': '私有', '申请公司': '10', 'uid': '235432424', '最后更新时间': '2024-07-24 10:28:10', '账户性质': '收支户', '账户状态': '正常', '数据状态': '已审核', '使用状态': '可用'}
-- `凭证` (629 nodes) has properties: ['核算维度_客户_名称', '审核日期', '核算维度_客户_编码', '创建时间', '修改时间', '来源类型', '业务日期', '过账人', '来源系统', '创建人', '制单人', '审核人', '审核驳回', '科目全名', '借方', '科目名称', '原币金额', '摘要', '科目编码', '币种', '凭证号', '状态', '过账', '记账日期', '凭证字', '科目_发生额方向', '账簿', 'uid', '序号', '期间', '贷方', '核算维度_银行_名称', '复核人', '核算维度_现金账户_账户名称', '核算维度_员工_工号', '核算维度_员工_姓名', '核算维度_部门_长名称', '核算维度_部门_编码', '到期日', '核算维度_物料_名称', '核算维度_资产类别_长名称', '核算维度_供应商_名称', '核算维度_供应商_编码', '凭证id', '部门', '客户名称', '供应商名称', 'demo', '供应商编码', '部门名称', '部门编码', '客户编码', '产品线名称', '产品线编码', '银行账号', '银行账户简称', '员工姓名', '员工工号', '项目名称', '项目编码', '费用类型', '附表项目', '附件数', '现金流量项目', '仓库编码', '人员编码', '费用编码']
-  - Sample data: {'审核驳回': '否', '序号': '1.0', '制单人': 'IERP', '状态': '已审核', '科目编码': '0309', '审核人': 'IERP', '凭证号': '2.0', '账簿': '金蝶国际主账簿', '科目全名': '应收账款0823', '科目_发生额方向': '不控制', '记账日期': '2024-01-31', 'uid': '1.0', '来源类型': '手工凭证', '修改时间': '2025-04-01 09:58:42', '原币金额': '1.0', '创建人': 'IERP', '来源系统': '总账', '业务日期': '2024-01-31', '摘要': '1', '币种': '人民币', '凭证字': '记', '科目名称': '应收账款0823', '审核日期': '2024-03-08 14:56:26', '过账': '√', '借方': '1.0', '核算维度_客户_名称': '阳光集团', '核算维度_客户_编码': 'Cus-000039', '过账人': 'JZYZYZY', '期间': '2024年1期', '创建时间': '2024-03-08 14:36:14'}
-- `人员` (463 nodes) has properties: ['部门', '类型', '人员使用状态', '用户禁用', '职位', '兼职', 'uid', '手机号码', '性别', '序号', '用户名', '姓名', '工号', '负责人', '直接上级', '人员id', 'demo']
-  - Sample data: {'序号': '2', '手机号码': '17299999999.0', '职位': '测试', '人员使用状态': '可用', '性别': '男', 'uid': 'TEST::TEST::13466739', '姓名': 'TEST', '部门': '台北101大厦', '用户禁用': '否', '工号': '13466739', '兼职': '√', '用户名': 'TEST', '类型': '职员'}
-- `仓库` (35 nodes) has properties: ['控制策略', '数据状态', '名称', '使用状态', '可发量控制', '创建组织', '编码', 'uid', '序号', '仓库负责人', '仓库id']
-  - Sample data: {'uid': 'CK-403::虚仓', '序号': '1', '编码': 'CK-403', '创建组织': '100', '数据状态': '已审核', '名称': '虚仓', '可发量控制': '√', '使用状态': '可用', '控制策略': '私有'}
-- `供应商` (848 nodes) has properties: ['供应商状态', '原创建组织', '伙伴类型', '医药供应商属性', '使用状态', '数据状态', '编码', '名称', 'uid', '创建组织', '控制策略', '序号', '可VMI', '统一社会信用代码', '简称', '内部业务单元', '供应商id', 'demo']
-  - Sample data: {'uid': 'waitgroup0012::0217-01', '序号': '1', '编码': 'waitgroup0012', '创建组织': '10', '伙伴类型': '法人企业', '数据状态': '已审核', '原创建组织': '10.0', '医药供应商属性': '非医药类供应商', '名称': '0217-01', '供应商状态': '正常', '使用状态': '可用', '控制策略': '全局共享'}
-- `客户` (1008 nodes) has properties: ['伙伴类型', '数据状态', '控制策略', 'uid', '序号', '创建组织', '业务职能', '客户编码', '可用状态', '医药客户属性', '客户名称', '客户id', 'demo']
-  - Sample data: {'uid': '25150050::内蒙古煊蒙医药有限公司', '医药客户属性': '医药类客户', '序号': '1', '创建组织': '100', '伙伴类型': '法人企业', '数据状态': '已审核', '客户编码': '25150050', '可用状态': '可用', '客户名称': '内蒙古煊蒙医药有限公司', '控制策略': '分配/局部共享', '业务职能': '销售 结算 付款 收货'}
-- `银行类别` (4059 nodes) has properties: ['行别代码', 'uid', '序号', '名称', '编码', '使用状态', '简码', '最后更新时间', '最后更新人']
-  - Sample data: {'uid': 'BC-0351::辽宁灯塔农商行', '序号': '3727', '编码': 'BC-0351', '名称': '辽宁灯塔农商行', '使用状态': '可用', '行别代码': '402'}
-- `科目余额` (560 nodes) has properties: ['期末余额_贷方金额', '科目名称', '基础资料属性', '科目编码', '年初余额_贷方金额', '期初余额_贷方金额', 'uid', '序号', '期间', '期初余额_借方金额', '期末余额_借方金额', '年初余额_借方金额', '本年累计_借方金额', '本期发生额_借方金额', '本期发生额_贷方金额', '本年累计_贷方金额']
-  - Sample data: {'基础资料属性': '借', '期初余额_贷方金额': '10.0', 'uid': '1', '序号': '1', '科目编码': '0000', '期末余额_贷方金额': '10.0', '期间': '2025年1期', '科目名称': '测试科目版本化', '年初余额_贷方金额': '10.0'}
-- `账簿` (0 nodes) has properties: []
-- `期间` (0 nodes) has properties: []
-- `科目` (0 nodes) has properties: []
-- `部门` (0 nodes) has properties: []
-- `余额` (0 nodes) has properties: []
-- `费用` (3 nodes) has properties: ['费用id', '编码', '名称']
-  - Sample data: {'费用id': 'F001', '编码': 'F001', '名称': '工资费用'}
-- `产品线` (0 nodes) has properties: []
-- `项目` (0 nodes) has properties: []
-- `Voucher` (225 nodes) has properties: ['来源表单类型', '凭证摘要', '贷方合计', '借方合计', '修改时间', '审核日期', '来源类型', '来源系统', 'voucher_id', '过账人', '创建时间', '制单人', '审核人', '状态', '创建人', '记账日期', '凭证号', '过账', '账簿', '期间', '凭证字', '审核驳回', '复核人']
-  - Sample data: {'来源系统': '库存管理', '贷方合计': 809.73, '制单人': 'yt0041', '状态': '已审核', '借方合计': 809.73, '审核人': 'yt0041', '凭证号': '82.0', '凭证字': '记', '账簿': '江西银涛药业股份有限公司主账簿', '凭证摘要': '标准简单生产领料单', '审核日期': '2024-04-16T11:42:02.000000000', '记账日期': '2024-03-07T00:00:00.000000000', '过账': '√', '来源类型': '机制凭证', '过账人': 'yt0034', '修改时间': '2024-05-10T16:49:30.000000000', '期间': '2024年3期', 'voucher_id': '江西银涛药业股份有限公司主账簿::2024年3期::记::82.0', '创建时间': '2024-04-15T09:25:01.000000000', '来源表单类型': '简单生产领料单', '创建人': 'yt0041'}
-- `Entry` (9551 nodes) has properties: ['贷方', '币种', '原币金额', '摘要', 'entry_id', '原币贷方', '附件数', '序号', '借方', '原币借方', '附表项目', '参考消息', '主表项目金额', '主表项目']
-  - Sample data: {'附件数': '0.0', '原币贷方': 28046138.15, '贷方': 28046138.15, '序号': '1.0', '摘要': '结转损益', '币种': '人民币', '原币金额': 28046138.15, 'entry_id': '江西银涛药业股份有限公司主账簿::2024年3期::记::95.0::1.0'}
-- `Account` (0 nodes) has properties: []
-- `SalesGroup` (397 nodes) has properties: ['name']
-  - Sample data: {'name': '燕华鹰'}
-- `ExpenseItem` (17 nodes) has properties: ['name']
-  - Sample data: {'name': '住房公积金'}
-- `CashAccount` (0 nodes) has properties: []
-- `Supplier` (149 nodes) has properties: ['name']
-  - Sample data: {'name': '湖北垒宥企业管理有限公司'}
-- `BusinessMode` (0 nodes) has properties: []
-- `BankAccount` (0 nodes) has properties: []
-- `Department` (22 nodes) has properties: ['name']
-  - Sample data: {'name': 'yt1027'}
-- `Project` (24 nodes) has properties: ['name']
-  - Sample data: {'name': '农银时时付'}
-- `CostSubelement` (10 nodes) has properties: ['name']
-  - Sample data: {'name': '直接人工费'}
-- `AssetCategory` (6 nodes) has properties: ['name']
-  - Sample data: {'name': '电气设备'}
-- `Employee` (1 nodes) has properties: ['name']
-  - Sample data: {'name': 'yt0048'}
-- `OtherParty` (8 nodes) has properties: ['name']
-  - Sample data: {'name': '江西中医药高等专科学校'}
-- `AssetCard` (0 nodes) has properties: []
-- `Customer` (0 nodes) has properties: []
-- `InventoryCategory` (20 nodes) has properties: ['name']
-  - Sample data: {'name': '胶囊剂产成品'}
-- `ManualInput` (0 nodes) has properties: []
-- `Bank` (0 nodes) has properties: []
-- `Warehouse` (0 nodes) has properties: []
-- `UseDepartment` (0 nodes) has properties: []
-- `Org` (0 nodes) has properties: []
+- `凭证` (516 nodes) has properties: ['核算维度_客户_名称', '审核日期', '核算维度_客户_编码', '创建时间', '修改时间', '来源类型', '来源系统', '审核驳回', '业务日期', '制单人', '审核人', '过账人', '币种', '借方', '创建人', '科目全名', '原币金额', '科目编码', '科目名称', '状态', '过账', '摘要', '凭证字', '科目_发生额方向', '凭证号', '账簿', '序号', '期间', '记账日期', 'uid', '贷方', '核算维度_银行_名称', '复核人', '核算维度_现金账户_账户名称', '核算维度_员工_姓名', '核算维度_员工_工号', '核算维度_部门_长名称', '核算维度_部门_编码', '到期日', '核算维度_物料_名称', '核算维度_资产类别_长名称', '核算维度_供应商_名称', '核算维度_供应商_编码']
+  - Sample data: {'审核驳回': '否', '序号': '1.0', '制单人': 'IERP', '状态': '已审核', '科目编码': '0309', '审核人': 'IERP', '凭证号': '2.0', '账簿': '金蝶国际主账簿', '科目全名': '应收账款0823', '科目_发生额方向': '不控制', '记账日期': '2024-01-31', 'uid': 'dfe90d28-f2dc-4cd9-9314-470c328b3675', '来源类型': '手工凭证', '修改时间': '2025-04-01 09:58:42', '原币金额': '1.0', '创建人': 'IERP', '来源系统': '总账', '业务日期': '2024-01-31', '摘要': '1', '币种': '人民币', '凭证字': '记', '科目名称': '应收账款0823', '审核日期': '2024-03-08 14:56:26', '过账': '√', '借方': '1.0', '核算维度_客户_名称': '阳光集团', '核算维度_客户_编码': 'Cus-000039', '过账人': 'JZYZYZY', '期间': '2024年1期', '创建时间': '2024-03-08 14:36:14'}
+- `科目余额` (560 nodes) has properties: ['基础资料属性', '期末余额_贷方金额', '年初余额_贷方金额', '期初余额_贷方金额', '科目名称', '序号', '期间', '科目编码', 'uid', '期末余额_借方金额', '年初余额_借方金额', '期初余额_借方金额', '本期发生额_借方金额', '本年累计_借方金额', '本年累计_贷方金额', '本期发生额_贷方金额']
+  - Sample data: {'基础资料属性': '借', '期初余额_贷方金额': '10.0', 'uid': 'b727fe07-1ff6-4377-9ad3-8c22afaee6aa', '序号': '1', '科目编码': '0000', '期末余额_贷方金额': '10.0', '期间': '2025年1期', '科目名称': '测试科目版本化', '年初余额_贷方金额': '10.0'}
+- `业务单元` (25 nodes) has properties: ['资产职能', '税务职能', '研发职能', 'uid', '库存职能', '结算职能', '质检职能', '收付职能', '形态', '销售职能', '生产职能', '核算组织', '核算组织类型', '采购职能', '编码', '名称', '使用状态', '资金职能']
+  - Sample data: {'核算组织类型': '法人', '编码': '100', '税务职能': '√', '收付职能': '√', '名称': '100', '质检职能': '√', '生产职能': '√', '研发职能': '√', 'uid': '86997af7-6f0f-44b0-9007-8458313cf75c', '采购职能': '√', '库存职能': '√', '结算职能': '√', '形态': '公司', '销售职能': '√', '资产职能': '√', '核算组织': '√', '使用状态': '可用'}
+- `人员` (620 nodes) has properties: ['类型', '人员使用状态', '部门', '职位', '用户禁用', '工号', '手机号码', '序号', '用户名', '姓名', '性别', 'uid', '兼职', '负责人', '直接上级']
+  - Sample data: {'姓名': 'TEST', 'uid': 'da219bf7-1551-4432-ac12-117cfa36c064', '部门': '10', '序号': '1', '手机号码': '17299999999.0', '用户禁用': '否', '工号': '13466739', '用户名': 'TEST', '职位': '测试', '类型': '职员', '人员使用状态': '可用', '性别': '男'}
+- `仓库` (32 nodes) has properties: ['创建组织', 'uid', '数据状态', '序号', '可发量控制', '使用状态', '控制策略', '编码', '名称', '仓库负责人']
+  - Sample data: {'uid': 'd5482693-f544-45b2-897e-1b3aa1b8a4c8', '序号': '1', '编码': 'CK-403', '创建组织': '100', '数据状态': '已审核', '名称': '虚仓', '可发量控制': '√', '使用状态': '可用', '控制策略': '私有'}
+- `供应商` (842 nodes) has properties: ['uid', '供应商状态', '创建组织', '伙伴类型', '序号', '医药供应商属性', '控制策略', '原创建组织', '使用状态', '数据状态', '编码', '名称', '可VMI', '统一社会信用代码', '简称', '内部业务单元']
+  - Sample data: {'uid': 'c138ef0c-ff35-407f-b579-06ca327a9d5c', '序号': '1', '编码': 'waitgroup0012', '创建组织': '10', '伙伴类型': '法人企业', '数据状态': '已审核', '原创建组织': '10.0', '医药供应商属性': '非医药类供应商', '名称': '0217-01', '供应商状态': '正常', '使用状态': '可用', '控制策略': '全局共享'}
+- `客户` (1000 nodes) has properties: ['业务职能', '可用状态', '医药客户属性', '创建组织', 'uid', '伙伴类型', '客户名称', '数据状态', '客户编码', '控制策略', '序号']
+  - Sample data: {'uid': '49974551-351e-4656-b6d1-6034a5595b19', '医药客户属性': '医药类客户', '序号': '1', '创建组织': '100', '伙伴类型': '法人企业', '数据状态': '已审核', '客户编码': '25150050', '可用状态': '可用', '客户名称': '内蒙古煊蒙医药有限公司', '业务职能': '销售 结算 付款 收货', '控制策略': '分配/局部共享'}
+- `银行类别` (4059 nodes) has properties: ['uid', '最后更新时间', '序号', '名称', '最后更新人', '编码', '使用状态', '行别代码', '简码']
+  - Sample data: {'uid': '8e0079f7-ca30-45e7-aa9c-f9fb02e89164', '最后更新时间': '2020-11-06 15:53:46', '序号': '1', '编码': 'BC-9999', '名称': '虚拟银行', '最后更新人': 'TEST', '使用状态': '可用'}
+- `银行账户` (13 nodes) has properties: ['账户性质', '账户状态', '账户类型', '银行类别', '金融机构类别', '申请公司', '开户公司', '账户简称', '最后更新时间', '银行账号', 'uid', '使用状态', '序号', '最后更新人', '控制策略', '数据状态', '币别范围', '开户行']
+  - Sample data: {'银行账号': '235432424', '银行类别': '招商银行', '序号': '1', '账户类型': '一般存款账户', '账户简称': '招商银行宝安支行', '金融机构类别': '银行', '开户公司': '10', '最后更新人': 'TEST', '申请公司': '10', '控制策略': '私有', 'uid': '417f3c4c-c581-4754-8252-9bbe32212873', '最后更新时间': '2024-07-24 10:28:10', '账户性质': '收支户', '账户状态': '正常', '数据状态': '已审核', '使用状态': '可用'}
 
 ## Relationship Details
-- `制作了凭证` (46 relationships) has properties: ['source']
-  - Common patterns:
-    - ['人员'] -> ['凭证'] (frequency: 23)
-  - Sample data: ['人员']- [:制作了凭证] -> ['凭证']
-- `银行交易` (34 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['银行账户'] (frequency: 17)
-  - Sample data: ['凭证']- [:银行交易] -> ['银行账户']
-- `有凭证记录` (34 relationships) has properties: ['source']
-  - Common patterns:
-    - ['银行账户'] -> ['凭证'] (frequency: 17)
-  - Sample data: ['银行账户']- [:有凭证记录] -> ['凭证']
-- `采购往来` (14 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['供应商'] (frequency: 7)
-  - Sample data: ['凭证']- [:采购往来] -> ['供应商']
-- `有业务凭证` (14 relationships) has properties: ['source']
-  - Common patterns:
-    - ['供应商'] -> ['凭证'] (frequency: 7)
-  - Sample data: ['供应商']- [:有业务凭证] -> ['凭证']
-- `凭证涉及客户` (18 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['客户'] (frequency: 9)
-  - Sample data: ['凭证']- [:凭证涉及客户] -> ['客户']
-- `客户被凭证涉及` (18 relationships) has properties: ['source']
-  - Common patterns:
-    - ['客户'] -> ['凭证'] (frequency: 9)
-  - Sample data: ['客户']- [:客户被凭证涉及] -> ['凭证']
-- `费用记账` (6 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['费用'] (frequency: 3)
-  - Sample data: ['凭证']- [:费用记账] -> ['费用']
-- `被凭证记录` (6 relationships) has properties: ['source']
-  - Common patterns:
-    - ['费用'] -> ['凭证'] (frequency: 3)
-  - Sample data: ['费用']- [:被凭证记录] -> ['凭证']
-- `库存操作` (6 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['仓库'] (frequency: 3)
-  - Sample data: ['凭证']- [:库存操作] -> ['仓库']
-- `有库存凭证` (6 relationships) has properties: ['source']
-  - Common patterns:
-    - ['仓库'] -> ['凭证'] (frequency: 3)
-  - Sample data: ['仓库']- [:有库存凭证] -> ['凭证']
-- `相关人员` (6 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['人员'] (frequency: 3)
-  - Sample data: ['凭证']- [:相关人员] -> ['人员']
-- `关联凭证` (6 relationships) has properties: ['source']
-  - Common patterns:
-    - ['人员'] -> ['凭证'] (frequency: 3)
-  - Sample data: ['人员']- [:关联凭证] -> ['凭证']
-- `审核了凭证` (10 relationships) has properties: ['source']
-  - Common patterns:
-    - ['人员'] -> ['凭证'] (frequency: 5)
-  - Sample data: ['人员']- [:审核了凭证] -> ['凭证']
-- `由人员制单` (46 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['人员'] (frequency: 23)
-  - Sample data: ['凭证']- [:由人员制单] -> ['人员']
-- `由人员审核` (10 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['人员'] (frequency: 5)
-  - Sample data: ['凭证']- [:由人员审核] -> ['人员']
-- `HAS_ENTRY` (19102 relationships) has properties: []
-  - Common patterns:
-    - ['Voucher'] -> ['Entry'] (frequency: 9551)
-  - Sample data: ['Voucher']- [:HAS_ENTRY] -> ['Entry']
-- `FOR_SUPPLIER` (1466 relationships) has properties: []
-  - Common patterns:
-    - ['Entry'] -> ['Supplier'] (frequency: 733)
-  - Sample data: ['Entry']- [:FOR_SUPPLIER] -> ['Supplier']
-- `IN_DEPARTMENT` (612 relationships) has properties: []
-  - Common patterns:
-    - ['Entry'] -> ['Department'] (frequency: 306)
-  - Sample data: ['Entry']- [:IN_DEPARTMENT] -> ['Department']
-- `FOR_EXPENSE_ITEM` (786 relationships) has properties: []
-  - Common patterns:
-    - ['Entry'] -> ['ExpenseItem'] (frequency: 393)
-  - Sample data: ['Entry']- [:FOR_EXPENSE_ITEM] -> ['ExpenseItem']
-- `FOR_PROJECT` (282 relationships) has properties: []
-  - Common patterns:
-    - ['Entry'] -> ['Project'] (frequency: 141)
-  - Sample data: ['Entry']- [:FOR_PROJECT] -> ['Project']
-- `IN_SALES_GROUP` (9592 relationships) has properties: []
-  - Common patterns:
-    - ['Entry'] -> ['SalesGroup'] (frequency: 4796)
-  - Sample data: ['Entry']- [:IN_SALES_GROUP] -> ['SalesGroup']
-- `IN_INVENTORY_CATEGORY` (3174 relationships) has properties: []
-  - Common patterns:
-    - ['Entry'] -> ['InventoryCategory'] (frequency: 1587)
-  - Sample data: ['Entry']- [:IN_INVENTORY_CATEGORY] -> ['InventoryCategory']
-- `IN_COST_SUBELEM` (130 relationships) has properties: []
-  - Common patterns:
-    - ['Entry'] -> ['CostSubelement'] (frequency: 65)
-  - Sample data: ['Entry']- [:IN_COST_SUBELEM] -> ['CostSubelement']
-- `IN_ASSET_CATEGORY` (12 relationships) has properties: []
-  - Common patterns:
-    - ['Entry'] -> ['AssetCategory'] (frequency: 6)
-  - Sample data: ['Entry']- [:IN_ASSET_CATEGORY] -> ['AssetCategory']
-- `FOR_OTHER_PARTY` (20 relationships) has properties: []
-  - Common patterns:
-    - ['Entry'] -> ['OtherParty'] (frequency: 10)
-  - Sample data: ['Entry']- [:FOR_OTHER_PARTY] -> ['OtherParty']
-- `BY_EMPLOYEE` (4 relationships) has properties: []
-  - Common patterns:
-    - ['Entry'] -> ['Employee'] (frequency: 2)
-  - Sample data: ['Entry']- [:BY_EMPLOYEE] -> ['Employee']

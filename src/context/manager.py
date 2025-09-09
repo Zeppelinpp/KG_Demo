@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from config.constants import BUSSINESS_MAPPING, MAX_CONTEXT_WINDOW
 from src.core import Neo4jSchemaExtractor
-from src.storage.milvus_db import MilvusDB
+from src.context.retriever import MappingRetriever, SchemaRetriever
 from src.prompts import KG_AGENT_PROMPT, COMPRESS_PROMPT
 from src.logger import kg_logger
 
@@ -14,6 +14,7 @@ load_dotenv()
 
 PREFIX = {
     "mapping": "这次查询涉及的业务用词与知识图谱中可能相关的字段名称对应如下:\n",
+    "schema": "根据查询内容，相关的知识图谱Schema信息如下:\n",
 }
 
 
@@ -23,24 +24,31 @@ class ContextManager:
         resources: List[str],
         schema: Optional[str] = None,
         llm_client: Optional[OpenAI] = None,
+        schema_mode: str = "static",
     ):
         self.bussiness_mapping = BUSSINESS_MAPPING
         self.resources = resources
+        self.schema_mode = schema_mode
         self.prefix = {}
         for resource in resources:
             self.prefix[resource] = PREFIX[resource]
         
-        # Use provided schema or load from Neo4j
-        if schema:
-            self.graph_schema = schema
+        # Handle schema loading based on mode
+        if schema_mode == "static":
+            # Use provided schema or load from Neo4j for static mode
+            if schema:
+                self.graph_schema = schema
+            else:
+                extractor = Neo4jSchemaExtractor(
+                    uri=os.getenv("NEO4J_URI"),
+                    database=os.getenv("NEO4J_DATABASE"),
+                    username=os.getenv("NEO4J_USER"),
+                    password=os.getenv("NEO4J_PASSWORD"),
+                )
+                self.graph_schema = extractor.extract_full_schema(return_structured=True).to_md()
         else:
-            extractor = Neo4jSchemaExtractor(
-                uri=os.getenv("NEO4J_URI"),
-                database=os.getenv("NEO4J_DATABASE"),
-                username=os.getenv("NEO4J_USER"),
-                password=os.getenv("NEO4J_PASSWORD"),
-            )
-            self.graph_schema = extractor.extract_full_schema(return_structured=True).to_md()
+            # For dynamic mode, don't load schema at initialization
+            self.graph_schema = None
 
         # Use provided LLM client or create new one
         self.llm = llm_client or OpenAI(
@@ -52,19 +60,35 @@ class ContextManager:
         self.collections = {}
         for collection_name in self.resources:
             try:
-                self.collections[collection_name] = MilvusDB(
+                self.collections[collection_name] = MappingRetriever(
                     collection_name=collection_name
                 )
             except Exception as e:
                 print(f"Warning: Failed to initialize collection {collection_name}: {e}")
+        
+        # Initialize schema retriever for dynamic mode
+        self.schema_retriever = None
+        if self.schema_mode == "dynamic":
+            try:
+                self.schema_retriever = SchemaRetriever()
+            except Exception as e:
+                print(f"Warning: Failed to initialize schema retriever: {e}")
 
     def _parse(
-        self, result: Dict[str, Any], role: Literal["user", "assistant"], resource: str
+        self, result, role: Literal["user", "assistant"], resource: str
     ):
         """
         Parse result to Human message and Assistant message
+        Handles both dict (mapping) and string (schema) results
         """
-        message = {"role": role, "content": f"{self.prefix[resource]}{result}"}
+        if isinstance(result, str):
+            # For schema content, result is already a formatted string
+            content = f"{self.prefix[resource]}{result}"
+        else:
+            # For mapping content, result is a dict
+            content = f"{self.prefix[resource]}{result}"
+        
+        message = {"role": role, "content": content}
         return message
 
     def add_context_to_history(self, history: List[Dict[str, Any]], context_messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -114,9 +138,35 @@ class ContextManager:
             # Return original history if compression fails
             return history
 
-    def load_context(self, query: str, from_resources: List[str]) -> List[Dict[str, Any]]:
+    async def load_context(self, query: str, from_resources: List[str]) -> List[Dict[str, Any]]:
         """
         Load context from specified resources and return context messages
+        In dynamic mode, also retrieves relevant schema information
+        """
+        context_messages = []
+        
+        # Load mapping context if requested
+        if from_resources and any(res in self.collections for res in from_resources):
+            context_messages.extend(self._load_mapping_context(query, from_resources))
+        
+        # Load dynamic schema context if in dynamic mode
+        if self.schema_mode == "dynamic" and self.schema_retriever and context_messages:
+            try:
+                # Use the first mapping context for schema retrieval
+                mapping_context = next((msg for msg in context_messages if "mapping" in msg.get("content", "").lower()), None)
+                if mapping_context:
+                    schema_info = await self.schema_retriever.retrieve(query, mapping_context["content"])
+                    if schema_info:
+                        schema_message = self._parse(schema_info, "user", "schema")
+                        context_messages.append(schema_message)
+            except Exception as e:
+                print(f"Warning: Dynamic schema retrieval failed: {e}")
+        
+        return context_messages
+    
+    def _load_mapping_context(self, query: str, from_resources: List[str]) -> List[Dict[str, Any]]:
+        """
+        Load mapping context from specified resources
         """
         if not from_resources or not any(res in self.collections for res in from_resources):
             kg_logger.log_context_loading(query, from_resources, {})
@@ -171,6 +221,23 @@ class ContextManager:
             print(f"Warning: {error_msg}")
             return []
 
+    def get_schema(self) -> Optional[str]:
+        """
+        Get the schema information based on the mode
+        
+        Returns:
+            Schema string if in static mode, None if in dynamic mode
+        """
+        return self.graph_schema if self.schema_mode == "static" else None
+    
+    def is_dynamic_mode(self) -> bool:
+        """
+        Check if the context manager is in dynamic schema mode
+        
+        Returns:
+            True if in dynamic mode, False if in static mode
+        """
+        return self.schema_mode == "dynamic"
 
     def cleanup(self):
         """
@@ -180,12 +247,18 @@ class ContextManager:
 
 
 if __name__ == "__main__":
-    context_manager = ContextManager(
-        resources=["mapping"],
-    )
-    result = context_manager.load_context(
-        "江西银涛药业股份有限公司主账簿账簿在2024年3期期所有的应付账款发生额",
-        from_resources=["mapping"],
-    )
-    print(f"Context messages: {result}")
-    context_manager.cleanup()
+    import asyncio
+    
+    async def test():
+        context_manager = ContextManager(
+            resources=["mapping"],
+            schema_mode="static",
+        )
+        result = await context_manager.load_context(
+            "江西银涛药业股份有限公司主账簿账簿在2024年3期期所有的应付账款发生额",
+            from_resources=["mapping"],
+        )
+        print(f"Context messages: {result}")
+        context_manager.cleanup()
+    
+    asyncio.run(test())

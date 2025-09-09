@@ -1,17 +1,17 @@
 import ollama
-from src.storage.milvus_db import MilvusDB
+from src.context.retriever import MappingRetriever
 from src.model.mapping import Mapping
 from config.constants import BUSSINESS_MAPPING
 
-db = MilvusDB("mapping")
+db = MappingRetriever("mapping")
 
 datas = [
     Mapping(
         term=term,
         term_embedding=ollama.embed(model="bge-m3", input=term).embeddings[0],
-        attributes=[attributes] if isinstance(attributes, str) else attributes,
+        description=[description] if isinstance(description, str) else description,
     )
-    for term, attributes in BUSSINESS_MAPPING.items()
+    for term, description in BUSSINESS_MAPPING.items()
 ]
 
 def insert():

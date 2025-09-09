@@ -8,5 +8,5 @@ class Mapping(BaseModel):
 
     term: str
     term_embedding: List[float]
-    attributes: List[str]
+    description: List[str]
 

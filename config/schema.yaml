@@ -1,241 +1,79 @@
 schema:
-  indexes:
-  - INDEX ON :InventoryCategory(name)
-  - INDEX ON :Supplier(name)
-  - INDEX ON :CashAccount(name)
-  - INDEX ON :BankAccount(name)
-  - INDEX ON :SalesGroup(name)
-  - INDEX ON :Customer(name)
-  - INDEX ON :Voucher(voucher_id)
-  - INDEX ON :OtherParty(name)
-  - INDEX ON :Account(code)
-  - INDEX ON :CostSubelement(name)
-  - INDEX ON :Entry(entry_id)
-  - INDEX ON :Bank(name)
-  - INDEX ON :Project(name)
-  - INDEX ON :UseDepartment(name)
-  - INDEX ON :AssetCategory(name)
-  - INDEX ON :BusinessMode(name)
-  - INDEX ON :Org(name)
-  - INDEX ON :Employee(name)
-  - INDEX ON :Department(name)
-  - INDEX ON :ExpenseItem(name)
-  - INDEX ON :AssetCard(name)
-  - INDEX ON :Warehouse(name)
-  - INDEX ON :ManualInput(name)
-  - INDEX ON :凭证(人员编码)
-  - INDEX ON :项目(项目编码)
-  - INDEX ON :凭证(仓库编码)
-  - INDEX ON :费用(编码)
-  - INDEX ON :期间(名称)
-  - INDEX ON :凭证(账簿)
-  - INDEX ON :凭证(凭证id)
-  - INDEX ON :产品线(产品线编码)
-  - INDEX ON :客户(客户编码)
-  - INDEX ON :供应商(编码)
-  - INDEX ON :凭证(银行账号)
-  - INDEX ON :科目(科目名称)
-  - INDEX ON :人员(用户名)
-  - INDEX ON :人员(工号)
-  - INDEX ON :银行账户(银行账号)
-  - INDEX ON :人员(人员id)
-  - INDEX ON :仓库(编码)
-  - INDEX ON :部门(部门编码)
-  - INDEX ON :科目(编码)
-  - INDEX ON :余额(fbalance_id)
-  - INDEX ON :凭证(期间)
-  - INDEX ON :凭证(客户编码)
-  - INDEX ON :凭证(科目编码)
-  - INDEX ON :凭证(供应商编码)
-  - INDEX ON :凭证(费用编码)
-  - INDEX ON :凭证(科目名称)
-  - INDEX ON :账簿(名称)
-  - INDEX ON :客户(客户名称)
-  - CONSTRAINT 'UNIQUENESS' ON :InventoryCategory(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Supplier(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :CashAccount(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :BankAccount(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :SalesGroup(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Voucher(PROPERTY voucher_id)
-  - CONSTRAINT 'UNIQUENESS' ON :OtherParty(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Account(PROPERTY code)
-  - CONSTRAINT 'UNIQUENESS' ON :CostSubelement(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Entry(PROPERTY entry_id)
-  - CONSTRAINT 'UNIQUENESS' ON :Bank(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Project(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :UseDepartment(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :AssetCategory(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :BusinessMode(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Org(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Employee(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Department(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :ExpenseItem(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :AssetCard(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :Warehouse(PROPERTY name)
-  - CONSTRAINT 'UNIQUENESS' ON :ManualInput(PROPERTY name)
+  indexes: []
   nodeLabels:
-  - 银行账户
   - 凭证
+  - 科目余额
+  - 业务单元
   - 人员
   - 仓库
   - 供应商
   - 客户
   - 银行类别
-  - 科目余额
-  - 账簿
-  - 期间
-  - 科目
-  - 部门
-  - 余额
-  - 费用
-  - 产品线
-  - 项目
-  - Voucher
-  - Entry
-  - Account
-  - SalesGroup
-  - ExpenseItem
-  - CashAccount
-  - Supplier
-  - BusinessMode
-  - BankAccount
-  - Department
-  - Project
-  - CostSubelement
-  - AssetCategory
-  - Employee
-  - OtherParty
-  - AssetCard
-  - Customer
-  - InventoryCategory
-  - ManualInput
-  - Bank
-  - Warehouse
-  - UseDepartment
-  - Org
+  - 银行账户
   nodeProperties:
-    Account: []
-    AssetCard: []
-    AssetCategory:
-    - name: string
-    Bank: []
-    BankAccount: []
-    BusinessMode: []
-    CashAccount: []
-    CostSubelement:
-    - name: string
-    Customer: []
-    Department:
-    - name: string
-    Employee:
-    - name: string
-    Entry:
-    - 贷方: float
-    - 币种: string
-    - 原币金额: float
-    - 摘要: string
-    - entry_id: string
-    - 原币贷方: float
-    - 附件数: string
-    - 序号: string
-    - 借方: float
-    - 原币借方: float
-    - 附表项目: string
-    - 参考消息: string
-    - 主表项目金额: string
-    - 主表项目: string
-    ExpenseItem:
-    - name: string
-    InventoryCategory:
-    - name: string
-    ManualInput: []
-    Org: []
-    OtherParty:
-    - name: string
-    Project:
-    - name: string
-    SalesGroup:
-    - name: string
-    Supplier:
-    - name: string
-    UseDepartment: []
-    Voucher:
-    - 来源表单类型: string
-    - 凭证摘要: string
-    - 贷方合计: float
-    - 借方合计: float
-    - 修改时间: datetime
-    - 审核日期: datetime
-    - 来源类型: string
-    - 来源系统: string
-    - voucher_id: string
-    - 过账人: string
-    - 创建时间: datetime
-    - 制单人: string
-    - 审核人: string
-    - 状态: string
-    - 创建人: string
-    - 记账日期: datetime
-    - 凭证号: string
-    - 过账: string
-    - 账簿: string
-    - 期间: string
-    - 凭证字: string
-    - 审核驳回: string
-    - 复核人: string
-    Warehouse: []
-    产品线: []
+    业务单元:
+    - 资产职能: string
+    - 税务职能: string
+    - 研发职能: string
+    - uid: string
+    - 库存职能: string
+    - 结算职能: string
+    - 质检职能: string
+    - 收付职能: string
+    - 形态: string
+    - 销售职能: string
+    - 生产职能: string
+    - 核算组织: string
+    - 核算组织类型: string
+    - 采购职能: string
+    - 编码: string
+    - 名称: string
+    - 使用状态: string
+    - 资金职能: string
     人员:
-    - 部门: string
     - 类型: string
     - 人员使用状态: string
-    - 用户禁用: string
+    - 部门: string
     - 职位: string
-    - 兼职: string
-    - uid: datetime
+    - 用户禁用: string
+    - 工号: string
     - 手机号码: string
-    - 性别: string
     - 序号: string
     - 用户名: string
     - 姓名: string
-    - 工号: string
+    - 性别: string
+    - uid: string
+    - 兼职: string
     - 负责人: string
     - 直接上级: string
-    - 人员id: string
-    - demo: string
     仓库:
-    - 控制策略: string
-    - 数据状态: string
-    - 名称: string
-    - 使用状态: string
-    - 可发量控制: string
     - 创建组织: string
-    - 编码: string
     - uid: string
+    - 数据状态: string
     - 序号: string
+    - 可发量控制: string
+    - 使用状态: string
+    - 控制策略: string
+    - 编码: string
+    - 名称: string
     - 仓库负责人: string
-    - 仓库id: string
-    余额: []
     供应商:
+    - uid: string
     - 供应商状态: string
-    - 原创建组织: string
+    - 创建组织: string
     - 伙伴类型: string
+    - 序号: string
     - 医药供应商属性: string
+    - 控制策略: string
+    - 原创建组织: string
     - 使用状态: string
     - 数据状态: string
     - 编码: datetime
     - 名称: string
-    - uid: datetime
-    - 创建组织: string
-    - 控制策略: string
-    - 序号: string
     - 可VMI: string
     - 统一社会信用代码: string
     - 简称: string
     - 内部业务单元: string
-    - 供应商id: string
-    - demo: string
     凭证:
     - 核算维度_客户_名称: string
     - 审核日期: string
@@ -243,36 +81,36 @@ schema:
     - 创建时间: string
     - 修改时间: string
     - 来源类型: string
-    - 业务日期: string
-    - 过账人: string
     - 来源系统: string
-    - 创建人: string
+    - 审核驳回: string
+    - 业务日期: string
     - 制单人: string
     - 审核人: string
-    - 审核驳回: string
-    - 科目全名: string
-    - 借方: string
-    - 科目名称: string
-    - 原币金额: string
-    - 摘要: string
-    - 科目编码: string
+    - 过账人: string
     - 币种: string
-    - 凭证号: string
+    - 借方: string
+    - 创建人: string
+    - 科目全名: string
+    - 原币金额: string
+    - 科目编码: string
+    - 科目名称: string
     - 状态: string
     - 过账: string
-    - 记账日期: string
+    - 摘要: string
     - 凭证字: string
     - 科目_发生额方向: string
+    - 凭证号: string
     - 账簿: string
-    - uid: string
     - 序号: string
     - 期间: string
+    - 记账日期: string
+    - uid: string
     - 贷方: string
     - 核算维度_银行_名称: string
     - 复核人: string
     - 核算维度_现金账户_账户名称: string
-    - 核算维度_员工_工号: string
     - 核算维度_员工_姓名: string
+    - 核算维度_员工_工号: string
     - 核算维度_部门_长名称: string
     - 核算维度_部门_编码: string
     - 到期日: string
@@ -280,83 +118,46 @@ schema:
     - 核算维度_资产类别_长名称: string
     - 核算维度_供应商_名称: string
     - 核算维度_供应商_编码: string
-    - 凭证id: string
-    - 部门: string
-    - 客户名称: string
-    - 供应商名称: string
-    - demo: string
-    - 供应商编码: string
-    - 部门名称: string
-    - 部门编码: string
-    - 客户编码: string
-    - 产品线名称: string
-    - 产品线编码: string
-    - 银行账号: string
-    - 银行账户简称: string
-    - 员工姓名: string
-    - 员工工号: string
-    - 项目名称: string
-    - 项目编码: string
-    - 费用类型: string
-    - 附表项目: string
-    - 附件数: string
-    - 现金流量项目: string
-    - 仓库编码: string
-    - 人员编码: string
-    - 费用编码: string
     客户:
-    - 伙伴类型: string
-    - 数据状态: string
-    - 控制策略: string
-    - uid: string
-    - 序号: string
-    - 创建组织: string
     - 业务职能: string
-    - 客户编码: string
     - 可用状态: string
     - 医药客户属性: string
+    - 创建组织: string
+    - uid: string
+    - 伙伴类型: string
     - 客户名称: string
-    - 客户id: string
-    - demo: string
-    期间: []
-    科目: []
+    - 数据状态: string
+    - 客户编码: string
+    - 控制策略: string
+    - 序号: string
     科目余额:
-    - 期末余额_贷方金额: string
-    - 科目名称: string
     - 基础资料属性: string
-    - 科目编码: string
+    - 期末余额_贷方金额: string
     - 年初余额_贷方金额: string
     - 期初余额_贷方金额: string
-    - uid: string
+    - 科目名称: string
     - 序号: string
     - 期间: string
-    - 期初余额_借方金额: string
+    - 科目编码: string
+    - uid: string
     - 期末余额_借方金额: string
     - 年初余额_借方金额: string
-    - 本年累计_借方金额: string
+    - 期初余额_借方金额: string
     - 本期发生额_借方金额: string
-    - 本期发生额_贷方金额: string
+    - 本年累计_借方金额: string
     - 本年累计_贷方金额: string
-    账簿: []
-    费用:
-    - 费用id: string
-    - 编码: string
-    - 名称: string
-    部门: []
+    - 本期发生额_贷方金额: string
     银行类别:
-    - 行别代码: string
     - uid: string
+    - 最后更新时间: string
     - 序号: string
     - 名称: string
+    - 最后更新人: string
     - 编码: string
     - 使用状态: string
+    - 行别代码: string
     - 简码: string
-    - 最后更新时间: string
-    - 最后更新人: string
     银行账户:
-    - 使用状态: string
-    - 控制策略: string
-    - 数据状态: string
     - 账户性质: string
     - 账户状态: string
     - 账户类型: string
@@ -365,149 +166,14 @@ schema:
     - 申请公司: string
     - 开户公司: string
     - 账户简称: string
+    - 最后更新时间: string
     - 银行账号: string
     - uid: string
-    - 最后更新人: string
-    - 最后更新时间: string
+    - 使用状态: string
     - 序号: string
+    - 最后更新人: string
+    - 控制策略: string
+    - 数据状态: string
     - 币别范围: string
     - 开户行: string
-    - 银行账户id: string
-    - demo: string
-    项目: []
-  relationships:
-  - relation: 制作了凭证
-    source_labels:
-    - 人员
-    target_labels:
-    - 凭证
-  - relation: 银行交易
-    source_labels:
-    - 凭证
-    target_labels:
-    - 银行账户
-  - relation: 有凭证记录
-    source_labels:
-    - 银行账户
-    target_labels:
-    - 凭证
-  - relation: 采购往来
-    source_labels:
-    - 凭证
-    target_labels:
-    - 供应商
-  - relation: 有业务凭证
-    source_labels:
-    - 供应商
-    target_labels:
-    - 凭证
-  - relation: 凭证涉及客户
-    source_labels:
-    - 凭证
-    target_labels:
-    - 客户
-  - relation: 客户被凭证涉及
-    source_labels:
-    - 客户
-    target_labels:
-    - 凭证
-  - relation: 费用记账
-    source_labels:
-    - 凭证
-    target_labels:
-    - 费用
-  - relation: 被凭证记录
-    source_labels:
-    - 费用
-    target_labels:
-    - 凭证
-  - relation: 库存操作
-    source_labels:
-    - 凭证
-    target_labels:
-    - 仓库
-  - relation: 有库存凭证
-    source_labels:
-    - 仓库
-    target_labels:
-    - 凭证
-  - relation: 相关人员
-    source_labels:
-    - 凭证
-    target_labels:
-    - 人员
-  - relation: 关联凭证
-    source_labels:
-    - 人员
-    target_labels:
-    - 凭证
-  - relation: 审核了凭证
-    source_labels:
-    - 人员
-    target_labels:
-    - 凭证
-  - relation: 由人员制单
-    source_labels:
-    - 凭证
-    target_labels:
-    - 人员
-  - relation: 由人员审核
-    source_labels:
-    - 凭证
-    target_labels:
-    - 人员
-  - relation: HAS_ENTRY
-    source_labels:
-    - Voucher
-    target_labels:
-    - Entry
-  - relation: FOR_SUPPLIER
-    source_labels:
-    - Entry
-    target_labels:
-    - Supplier
-  - relation: IN_DEPARTMENT
-    source_labels:
-    - Entry
-    target_labels:
-    - Department
-  - relation: FOR_EXPENSE_ITEM
-    source_labels:
-    - Entry
-    target_labels:
-    - ExpenseItem
-  - relation: FOR_PROJECT
-    source_labels:
-    - Entry
-    target_labels:
-    - Project
-  - relation: IN_SALES_GROUP
-    source_labels:
-    - Entry
-    target_labels:
-    - SalesGroup
-  - relation: IN_INVENTORY_CATEGORY
-    source_labels:
-    - Entry
-    target_labels:
-    - InventoryCategory
-  - relation: IN_COST_SUBELEM
-    source_labels:
-    - Entry
-    target_labels:
-    - CostSubelement
-  - relation: IN_ASSET_CATEGORY
-    source_labels:
-    - Entry
-    target_labels:
-    - AssetCategory
-  - relation: FOR_OTHER_PARTY
-    source_labels:
-    - Entry
-    target_labels:
-    - OtherParty
-  - relation: BY_EMPLOYEE
-    source_labels:
-    - Entry
-    target_labels:
-    - Employee
+  relationships: []

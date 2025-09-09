@@ -1,5 +1,6 @@
 import os
 import asyncio
+import argparse
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
@@ -11,48 +12,96 @@ from src.tools import query_neo4j, get_schema_info
 from src.prompts import KG_AGENT_PROMPT, DYNAMIC_KG_AGENT_PROMPT
 from src.core import FunctionCallingAgent, Neo4jSchemaExtractor
 from src.context.manager import ContextManager
+from src.context.retriever import SchemaRetriever
 from src.logger import kg_logger
 
 load_dotenv()
 
 console = Console()
 
-console.print("[dim]Initializing connection to Neo4j...[/dim]")
-extractor = Neo4jSchemaExtractor(
-    uri=os.getenv("NEO4J_URI"),
-    database=os.getenv("NEO4J_DATABASE"),
-    username=os.getenv("NEO4J_USER"),
-    password=os.getenv("NEO4J_PASSWORD"),
-)
-schema = extractor.extract_full_schema("config/schema", format="yaml")
-schema = GraphSchema.from_extracted_schema(ExtractedGraphSchema.from_extraction_result(schema))
-schema_md = schema.to_md()
-
-# Log the schema information
-kg_logger.log_schema_usage(schema_md)
-
-console.print("[dim]Initializing AI agent...[/dim]")
-agent = FunctionCallingAgent(
-    model="qwen-max",
-    # tools=[query_neo4j, get_schema_info],
-    tools=[query_neo4j],
-    console=console,
-)
-
-console.print("[dim]Initializing context manager...[/dim]")
-context_manager = ContextManager(
-    resources=["mapping"],
-    schema=schema_md,
-    llm_client=agent.client,  # Share LLM client with agent
-)
+# Global variables to be initialized based on mode
+agent = None
+context_manager = None
+schema_retriever = None
+static_schema_md = None
 
 
-async def run(user_query: str):
+def init_static_schema():
+    """Initialize static schema mode"""
+    global agent, context_manager, static_schema_md
+    
+    console.print("[dim]Initializing static schema mode...[/dim]")
+    console.print("[dim]Extracting schema from Neo4j...[/dim]")
+    
+    extractor = Neo4jSchemaExtractor(
+        uri=os.getenv("NEO4J_URI"),
+        database=os.getenv("NEO4J_DATABASE"),
+        username=os.getenv("NEO4J_USER"),
+        password=os.getenv("NEO4J_PASSWORD"),
+    )
+    schema = extractor.extract_full_schema("config/schema", format="yaml")
+    schema = GraphSchema.from_extracted_schema(ExtractedGraphSchema.from_extraction_result(schema))
+    static_schema_md = schema.to_md()
+
+    # Log the schema information
+    kg_logger.log_schema_usage(static_schema_md)
+
+    console.print("[dim]Initializing AI agent...[/dim]")
+    agent = FunctionCallingAgent(
+        model="qwen-max",
+        tools=[query_neo4j],
+        console=console,
+    )
+
+    console.print("[dim]Initializing context manager...[/dim]")
+    context_manager = ContextManager(
+        resources=["mapping"],
+        schema=static_schema_md,
+        llm_client=agent.client,
+        schema_mode="static",
+    )
+    
+    console.print("[bold green]✓ Static schema mode initialized![/bold green]")
+
+
+def init_dynamic_schema():
+    """Initialize dynamic schema mode"""
+    global agent, context_manager, schema_retriever
+    
+    console.print("[dim]Initializing dynamic schema mode...[/dim]")
+    
+    console.print("[dim]Initializing AI agent...[/dim]")
+    agent = FunctionCallingAgent(
+        model="qwen-max",
+        tools=[query_neo4j],
+        console=console,
+    )
+
+    console.print("[dim]Initializing context manager...[/dim]")
+    context_manager = ContextManager(
+        resources=["mapping"],
+        schema=None,  # No static schema in dynamic mode
+        llm_client=agent.client,
+        schema_mode="dynamic",
+    )
+    
+    console.print("[dim]Initializing schema retriever...[/dim]")
+    schema_retriever = SchemaRetriever()
+    
+    console.print("[bold green]✓ Dynamic schema mode initialized![/bold green]")
+
+
+async def run(user_query: str, schema_mode: str = "static"):
     """Run a single query"""
+    if schema_mode == "static":
+        system_prompt = KG_AGENT_PROMPT.format(schema=static_schema_md)
+    else:
+        system_prompt = DYNAMIC_KG_AGENT_PROMPT
+    
     response = ""
     async for chunk in agent.run_query_stream(
         user_query=user_query,
-        system_prompt=KG_AGENT_PROMPT.format(schema=schema_md),
+        system_prompt=system_prompt,
     ):
         response += chunk
         print(chunk, end="")
@@ -60,15 +109,22 @@ async def run(user_query: str):
     return response
 
 
-async def chat_session():
-    """Interactive multi-turn chat session with Rich formatting"""
+async def chat_session(schema_mode: str = "static"):
+    """Interactive multi-turn chat session with Rich formatting
+    
+    Args:
+        schema_mode: "static" for pre-loaded schema, "dynamic" for on-demand schema retrieval
+    """
     # Welcome message
     console.print()
     console.rule("[bold green]🚀 Knowledge Graph Chat Assistant", style="green")
     console.print()
+    
+    schema_mode_text = "📊 Static Schema" if schema_mode == "static" else "🔄 Dynamic Schema"
     console.print(
         Panel(
-            "[bold cyan]Welcome to the Knowledge Graph Chat Assistant![/bold cyan]\n\n"
+            f"[bold cyan]Welcome to the Knowledge Graph Chat Assistant![/bold cyan]\n\n"
+            f"[yellow]Mode: {schema_mode_text}[/yellow]\n\n"
             "• Ask questions about your Neo4j knowledge graph\n"
             "• Type 'quit', 'exit', or 'bye' to end the session\n"
             "• Type 'clear' to clear chat history\n"
@@ -79,15 +135,20 @@ async def chat_session():
     )
     console.print()
 
-    # Initialize components
+    # Initialize components based on mode
     try:
-        # Set initial system prompt
-        agent.set_history(
-            [{"role": "system", "content": KG_AGENT_PROMPT.format(schema=schema_md)}]
-        )
-        # agent.set_history(
-        #     [{"role": "system", "content": DYNAMIC_KG_AGENT_PROMPT.format(schema=schema_md)}]
-        # )
+        if schema_mode == "static":
+            init_static_schema()
+            # Set initial system prompt with static schema
+            agent.set_history(
+                [{"role": "system", "content": KG_AGENT_PROMPT.format(schema=static_schema_md)}]
+            )
+        else:
+            init_dynamic_schema()
+            # Set initial system prompt for dynamic mode
+            agent.set_history(
+                [{"role": "system", "content": DYNAMIC_KG_AGENT_PROMPT}]
+            )
 
         console.print("[bold green]✓ Ready to chat![/bold green]")
         console.print()
@@ -119,22 +180,24 @@ async def chat_session():
 
             elif user_input.lower() == "clear":
                 agent.clear_history()
-                agent.set_history(
-                    [
-                        {
-                            "role": "system",
-                            "content": KG_AGENT_PROMPT.format(schema=schema_md),
-                        }
-                    ]
-                )
-                # agent.set_history(
-                #     [
-                #         {
-                #             "role": "system",
-                #             "content": DYNAMIC_KG_AGENT_PROMPT,
-                #         }
-                #     ]
-                # )
+                if schema_mode == "static":
+                    agent.set_history(
+                        [
+                            {
+                                "role": "system",
+                                "content": KG_AGENT_PROMPT.format(schema=static_schema_md),
+                            }
+                        ]
+                    )
+                else:
+                    agent.set_history(
+                        [
+                            {
+                                "role": "system",
+                                "content": DYNAMIC_KG_AGENT_PROMPT,
+                            }
+                        ]
+                    )
                 console.print()
                 console.print("[bold green]✓ Chat history cleared![/bold green]")
                 continue
@@ -179,7 +242,7 @@ async def chat_session():
             # Load context before processing query
             try:
                 console.print("[dim]Loading context...[/dim]")
-                context_messages = context_manager.load_context(
+                context_messages = await context_manager.load_context(
                     query=user_input,
                     from_resources=["mapping"]
                 )
@@ -224,8 +287,18 @@ async def chat_session():
 
 def main():
     """Main entry point for the chat session"""
+    parser = argparse.ArgumentParser(description="Knowledge Graph Chat Assistant")
+    parser.add_argument(
+        "--schema-mode",
+        choices=["static", "dynamic"],
+        default="static",
+        help="Schema loading mode: 'static' for pre-loaded schema, 'dynamic' for on-demand retrieval"
+    )
+    
+    args = parser.parse_args()
+    
     try:
-        asyncio.run(chat_session())
+        asyncio.run(chat_session(schema_mode=args.schema_mode))
     except KeyboardInterrupt:
         print("\nGoodbye!")
 

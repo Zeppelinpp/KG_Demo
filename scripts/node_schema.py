@@ -110,61 +110,22 @@ def get_node_schema():
 
 
 # Create collection and store in Milvus
-def create_collection_and_store_in_milvus():
+def sync_node_schema_to_milvus():
+    """Sync node schema data to Milvus database"""
     node_schemas = get_node_schema()
     milvus_client = MilvusClient("milvus.db")
-    if milvus_client.has_collection("node_schema"):
-        milvus_client.drop_collection("node_schema")
-    fields = [
-            FieldSchema(name="node_type", dtype=DataType.VARCHAR, max_length=200, is_primary=True),
-            FieldSchema(
-                name="properties",
-                dtype=DataType.ARRAY,
-                element_type=DataType.VARCHAR,
-                max_length=200,
-            ),
-            FieldSchema(
-                name="out_relations",
-                dtype=DataType.ARRAY,
-                element_type=DataType.VARCHAR,
-                max_length=200,
-            ),
-            FieldSchema(
-                name="in_relations",
-                dtype=DataType.ARRAY,
-                element_type=DataType.VARCHAR,
-                max_length=200,
-            ),
-            FieldSchema(
-                name="patterns",
-                dtype=DataType.ARRAY,
-                element_type=DataType.VARCHAR,
-                max_length=200,
-            ),
-            FieldSchema(name="embeddings", dtype=DataType.FLOAT_VECTOR, dim=1024),
-        ]
-    schema = CollectionSchema(fields, description="Node Schema")
-    index_params = IndexParams()
-    index_params.add_index(
-        field_name="embeddings",
-        index_type="FLAT",
-        index_name="embeddings",
-        metric_type="COSINE",
-    )
-    milvus_client.create_collection(
-        collection_name="node_schema",
-        schema=schema,
-        index_params=index_params,
-        using="default",
-        consistency_level="Strong",
-    )
+    
+    # Initialize collection if needed
+    from scripts.init_milvus import init_node_schema_collection
+    init_node_schema_collection()
 
     data = [node_schema.model_dump(mode="json") for node_schema in node_schemas]
     milvus_client.insert(
         collection_name="node_schema",
         data=data,
     )
+    print(f"Synced {len(data)} node schemas to Milvus")
 
 
 if __name__ == "__main__":
-    create_collection_and_store_in_milvus()
+    sync_node_schema_to_milvus()

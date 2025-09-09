@@ -12,7 +12,7 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from pathlib import Path
 from pydantic import ValidationError
-from src.tools import (
+from src.utils import (
     get_node_properties,
     get_relation_count,
     get_relation_patterns,

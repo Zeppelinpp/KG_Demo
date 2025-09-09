@@ -1,52 +1,16 @@
 import os
 import json
 import ollama
-from openai import OpenAI, AsyncOpenAI
-from pymilvus import MilvusClient, CollectionSchema, FieldSchema, DataType, Collection
-from pymilvus.milvus_client.index import IndexParams
+from openai import AsyncOpenAI
+from pymilvus import MilvusClient
 from typing import Dict, Any, List, Union
 from src.model.mapping import Mapping
 
 
-def init_collection(collection_name: str):
-    client = MilvusClient("milvus.db")
-
-    fields = [
-        FieldSchema(
-            name="term", dtype=DataType.VARCHAR, max_length=200, is_primary=True
-        ),
-        FieldSchema(name="term_embedding", dtype=DataType.FLOAT_VECTOR, dim=1024),
-        FieldSchema(
-            name="attributes",
-            dtype=DataType.ARRAY,
-            element_type=DataType.VARCHAR,
-            max_length=200,
-            max_capacity=10,
-        ),
-    ]
-
-    schema = CollectionSchema(fields, description="Contextual Knowledge Base")
-    if client.has_collection(collection_name):
-        client.drop_collection(collection_name)
-
-    index_params = IndexParams()
-    index_params.add_index(
-        field_name="term_embedding",
-        index_type="FLAT",
-        index_name="term_embedding",
-        metric_type="COSINE",
-    )
-    client.create_collection(
-        collection_name=collection_name,
-        schema=schema,
-        index_params=index_params,
-        using="default",
-        consistency_level="Strong",
-    )
-
-
-class MilvusDB:
-    def __init__(self, collection_name: str):
+class MappingRetriever:
+    """Retriever for business term mappings"""
+    
+    def __init__(self, collection_name: str = "mapping"):
         self.client = MilvusClient("milvus.db")
         self.collection_name = collection_name
         if self.client.has_collection(collection_name):
@@ -56,11 +20,13 @@ class MilvusDB:
         self.embed_model = ollama.Client(host=os.getenv("OLLAMA_HOST"))
 
     def insert(self, data: Mapping):
+        """Insert mapping data into collection"""
         self.client.insert(
             collection_name=self.collection_name, data=[data.model_dump()]
         )
 
     def search(self, query: str, top_k: int = 5):
+        """Search for similar mappings"""
         query_embedding = self.embed_model.embed(model="bge-m3", input=query).embeddings
         results = self.client.search(
             collection_name=self.collection_name,
@@ -73,15 +39,18 @@ class MilvusDB:
 
 
 class SchemaRetriever:
-    def __init__(self):
+    """Retriever for graph schema information"""
+    
+    def __init__(self, collection_name: str = "node_schema"):
         self.milvus_client = MilvusClient("milvus.db")
-        self.collection_name = "node_schema"
+        self.collection_name = collection_name
         self.llm = AsyncOpenAI(
             base_url=os.getenv("OPENAI_BASE_URL"),
             api_key=os.getenv("OPENAI_API_KEY"),
         )
 
     async def _extract_keywords(self, query: str, mapping: Union[Mapping, str]):
+        """Extract keywords from query for schema retrieval"""
         if isinstance(mapping, Mapping):
             mapping = mapping.model_dump_json()
         response = await self.llm.chat.completions.create(
@@ -100,6 +69,7 @@ class SchemaRetriever:
         return json.loads(response.choices[0].message.content)
 
     async def retrieve(self, query: str, mapping: Union[Mapping, str]):
+        """Retrieve relevant schema based on query and mapping"""
         keywords = await self._extract_keywords(query, mapping)
         results = self.milvus_client.search(
             collection_name=self.collection_name,
@@ -113,12 +83,3 @@ class SchemaRetriever:
             for result in keyword_result:
                 doc.append(f"## 节点标签:{result['entity']['node_type']}\n- 属性:{result['entity']['properties']}\n- Pattern:{result['entity']['patterns']}\n")
         return "\n".join(doc)
-
-if __name__ == "__main__":
-    # import asyncio
-
-    # schema_retriever = SchemaRetriever()
-    # mapping = MilvusDB("mapping").search("金蝶国际主账簿在2024年3期应付职工薪酬支出TOP10的部门", 5)
-    # result = asyncio.run(schema_retriever.retrieve("金蝶国际主账簿在2024年3期应付职工薪酬支出TOP10的部门", str(mapping)))
-    # print(result)
-    init_collection("mapping")
