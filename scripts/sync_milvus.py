@@ -5,7 +5,7 @@ from config.constants import BUSSINESS_MAPPING
 
 db = MilvusDB("mapping")
 
-data = [
+datas = [
     Mapping(
         term=term,
         term_embedding=ollama.embed(model="bge-m3", input=term).embeddings[0],
@@ -15,7 +15,7 @@ data = [
 ]
 
 def insert():
-    for data in data:
+    for data in datas:
         db.insert(data)
 
 def search():
@@ -26,8 +26,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--insert", required=False)
-    parser.add_argument("--search", required=False)
+    parser.add_argument("--insert", default=False, required=False)
+    parser.add_argument("--search", default=False, required=False)
     args = parser.parse_args()
 
     if args.insert:

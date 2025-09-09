@@ -1,5 +1,28 @@
 schema:
   indexes:
+  - INDEX ON :InventoryCategory(name)
+  - INDEX ON :Supplier(name)
+  - INDEX ON :CashAccount(name)
+  - INDEX ON :BankAccount(name)
+  - INDEX ON :SalesGroup(name)
+  - INDEX ON :Customer(name)
+  - INDEX ON :Voucher(voucher_id)
+  - INDEX ON :OtherParty(name)
+  - INDEX ON :Account(code)
+  - INDEX ON :CostSubelement(name)
+  - INDEX ON :Entry(entry_id)
+  - INDEX ON :Bank(name)
+  - INDEX ON :Project(name)
+  - INDEX ON :UseDepartment(name)
+  - INDEX ON :AssetCategory(name)
+  - INDEX ON :BusinessMode(name)
+  - INDEX ON :Org(name)
+  - INDEX ON :Employee(name)
+  - INDEX ON :Department(name)
+  - INDEX ON :ExpenseItem(name)
+  - INDEX ON :AssetCard(name)
+  - INDEX ON :Warehouse(name)
+  - INDEX ON :ManualInput(name)
   - INDEX ON :凭证(人员编码)
   - INDEX ON :项目(项目编码)
   - INDEX ON :凭证(仓库编码)
@@ -28,10 +51,32 @@ schema:
   - INDEX ON :凭证(科目名称)
   - INDEX ON :账簿(名称)
   - INDEX ON :客户(客户名称)
+  - CONSTRAINT 'UNIQUENESS' ON :InventoryCategory(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Supplier(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :CashAccount(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :BankAccount(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :SalesGroup(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Customer(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Voucher(PROPERTY voucher_id)
+  - CONSTRAINT 'UNIQUENESS' ON :OtherParty(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Account(PROPERTY code)
+  - CONSTRAINT 'UNIQUENESS' ON :CostSubelement(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Entry(PROPERTY entry_id)
+  - CONSTRAINT 'UNIQUENESS' ON :Bank(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Project(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :UseDepartment(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :AssetCategory(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :BusinessMode(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Org(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Employee(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Department(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :ExpenseItem(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :AssetCard(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :Warehouse(PROPERTY name)
+  - CONSTRAINT 'UNIQUENESS' ON :ManualInput(PROPERTY name)
   nodeLabels:
   - 银行账户
   - 凭证
-  - 业务单元
   - 人员
   - 仓库
   - 供应商
@@ -46,30 +91,101 @@ schema:
   - 费用
   - 产品线
   - 项目
+  - Voucher
+  - Entry
+  - Account
+  - SalesGroup
+  - ExpenseItem
+  - CashAccount
+  - Supplier
+  - BusinessMode
+  - BankAccount
+  - Department
+  - Project
+  - CostSubelement
+  - AssetCategory
+  - Employee
+  - OtherParty
+  - AssetCard
+  - Customer
+  - InventoryCategory
+  - ManualInput
+  - Bank
+  - Warehouse
+  - UseDepartment
+  - Org
   nodeProperties:
-    业务单元:
-    - 结算职能: string
-    - 采购职能: string
-    - 销售职能: string
-    - 生产职能: string
-    - 库存职能: string
-    - 核算组织类型: string
-    - 形态: string
-    - 名称: string
-    - 使用状态: string
-    - 核算组织: string
-    - 研发职能: string
-    - uid: string
-    - 编码: string
-    - 质检职能: string
-    - 收付职能: string
-    - 资产职能: string
-    - 税务职能: string
-    - 资金职能: string
-    产品线:
-    - 产品线编码: string
-    - demo: integer
-    - 产品线名称: string
+    Account: []
+    AssetCard: []
+    AssetCategory:
+    - name: string
+    Bank: []
+    BankAccount: []
+    BusinessMode: []
+    CashAccount: []
+    CostSubelement:
+    - name: string
+    Customer: []
+    Department:
+    - name: string
+    Employee:
+    - name: string
+    Entry:
+    - 贷方: float
+    - 币种: string
+    - 原币金额: float
+    - 摘要: string
+    - entry_id: string
+    - 原币贷方: float
+    - 附件数: string
+    - 序号: string
+    - 借方: float
+    - 原币借方: float
+    - 附表项目: string
+    - 参考消息: string
+    - 主表项目金额: string
+    - 主表项目: string
+    ExpenseItem:
+    - name: string
+    InventoryCategory:
+    - name: string
+    ManualInput: []
+    Org: []
+    OtherParty:
+    - name: string
+    Project:
+    - name: string
+    SalesGroup:
+    - name: string
+    Supplier:
+    - name: string
+    UseDepartment: []
+    Voucher:
+    - 来源表单类型: string
+    - 凭证摘要: string
+    - 贷方合计: float
+    - 借方合计: float
+    - 修改时间: datetime
+    - 审核日期: datetime
+    - 来源类型: string
+    - 来源系统: string
+    - voucher_id: string
+    - 过账人: string
+    - 创建时间: datetime
+    - 制单人: string
+    - 审核人: string
+    - 状态: string
+    - 创建人: string
+    - 记账日期: datetime
+    - 凭证号: string
+    - 过账: string
+    - 账簿: string
+    - 期间: string
+    - 凭证字: string
+    - 审核驳回: string
+    - 复核人: string
+    Warehouse: []
+    产品线: []
     人员:
     - 部门: string
     - 类型: string
@@ -100,34 +216,7 @@ schema:
     - 序号: string
     - 仓库负责人: string
     - 仓库id: string
-    余额:
-    - 本期发生额_贷方金额: integer
-    - 期间: string
-    - 科目名称: string
-    - 账簿: string
-    - 本期发生额_借方金额: integer
-    - 期末余额_贷方金额: string
-    - 第一维度编码: string
-    - 期末余额.贷方金额: string
-    - 本期发生额.贷方金额: string
-    - 期末余额.借方金额: string
-    - 本年累计.借方金额: string
-    - 本期发生额.借方金额: string
-    - 本年累计.贷方金额: string
-    - fbalance_id: string
-    - 时间: string
-    - 基础资料属性: string
-    - 科目编码: string
-    - demo: string
-    - 客户编码: string
-    - 客户名称: string
-    - 供应商名称: string
-    - 供应商编码: string
-    - 银行账户简称: string
-    - 银行账号: string
-    - 固定资产.累计折旧: string
-    - 固定资产.净值: string
-    - 固定资产.原值: string
+    余额: []
     供应商:
     - 供应商状态: string
     - 原创建组织: string
@@ -229,16 +318,8 @@ schema:
     - 客户名称: string
     - 客户id: string
     - demo: string
-    期间:
-    - 期数: integer
-    - 名称: string
-    - 年份: integer
-    科目:
-    - 科目编码: string
-    - 科目名称: string
-    - 名称: string
-    - demo: string
-    - 编码: string
+    期间: []
+    科目: []
     科目余额:
     - 期末余额_贷方金额: string
     - 科目名称: string
@@ -256,16 +337,12 @@ schema:
     - 本期发生额_借方金额: string
     - 本期发生额_贷方金额: string
     - 本年累计_贷方金额: string
-    账簿:
-    - 名称: string
+    账簿: []
     费用:
     - 费用id: string
     - 编码: string
     - 名称: string
-    部门:
-    - 名称: string
-    - demo: integer
-    - 部门编码: string
+    部门: []
     银行类别:
     - 行别代码: string
     - uid: string
@@ -297,10 +374,7 @@ schema:
     - 开户行: string
     - 银行账户id: string
     - demo: string
-    项目:
-    - 项目名称: string
-    - demo: integer
-    - 项目编码: string
+    项目: []
   relationships:
   - relation: 制作了凭证
     source_labels:
@@ -372,36 +446,6 @@ schema:
     - 人员
     target_labels:
     - 凭证
-  - relation: 凭证关联科目
-    source_labels:
-    - 凭证
-    target_labels:
-    - 科目
-  - relation: 凭证关联账簿
-    source_labels:
-    - 凭证
-    target_labels:
-    - 账簿
-  - relation: 凭证关联期间
-    source_labels:
-    - 凭证
-    target_labels:
-    - 期间
-  - relation: 余额关联科目
-    source_labels:
-    - 科目余额
-    target_labels:
-    - 科目
-  - relation: 余额关联账簿
-    source_labels:
-    - 余额
-    target_labels:
-    - 账簿
-  - relation: 余额关联期间
-    source_labels:
-    - 余额
-    target_labels:
-    - 期间
   - relation: 由人员制单
     source_labels:
     - 凭证
@@ -412,33 +456,58 @@ schema:
     - 凭证
     target_labels:
     - 人员
-  - relation: 期间关联余额
+  - relation: HAS_ENTRY
     source_labels:
-    - 期间
+    - Voucher
     target_labels:
-    - 余额
-  - relation: 科目关联余额
+    - Entry
+  - relation: FOR_SUPPLIER
     source_labels:
-    - 科目
+    - Entry
     target_labels:
-    - 科目余额
-  - relation: 账簿关联余额
+    - Supplier
+  - relation: IN_DEPARTMENT
     source_labels:
-    - 账簿
+    - Entry
     target_labels:
-    - 余额
-  - relation: 期间关联凭证
+    - Department
+  - relation: FOR_EXPENSE_ITEM
     source_labels:
-    - 期间
+    - Entry
     target_labels:
-    - 凭证
-  - relation: 科目关联凭证
+    - ExpenseItem
+  - relation: FOR_PROJECT
     source_labels:
-    - 科目
+    - Entry
     target_labels:
-    - 凭证
-  - relation: 账簿关联凭证
+    - Project
+  - relation: IN_SALES_GROUP
     source_labels:
-    - 账簿
+    - Entry
     target_labels:
-    - 凭证
+    - SalesGroup
+  - relation: IN_INVENTORY_CATEGORY
+    source_labels:
+    - Entry
+    target_labels:
+    - InventoryCategory
+  - relation: IN_COST_SUBELEM
+    source_labels:
+    - Entry
+    target_labels:
+    - CostSubelement
+  - relation: IN_ASSET_CATEGORY
+    source_labels:
+    - Entry
+    target_labels:
+    - AssetCategory
+  - relation: FOR_OTHER_PARTY
+    source_labels:
+    - Entry
+    target_labels:
+    - OtherParty
+  - relation: BY_EMPLOYEE
+    source_labels:
+    - Entry
+    target_labels:
+    - Employee

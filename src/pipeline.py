@@ -33,7 +33,7 @@ kg_logger.log_schema_usage(schema_md)
 
 console.print("[dim]Initializing AI agent...[/dim]")
 agent = FunctionCallingAgent(
-    model="qwen3-max-preview",
+    model="qwen-max",
     # tools=[query_neo4j, get_schema_info],
     tools=[query_neo4j],
     console=console,

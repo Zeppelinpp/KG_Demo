@@ -2,19 +2,17 @@
 ## Overall Node Types and Relations Types
 **Node Types**:
 
-['银行账户', '凭证', '业务单元', '人员', '仓库', '供应商', '客户', '银行类别', '科目余额', '账簿', '期间', '科目', '部门', '余额', '费用', '产品线', '项目']
+['银行账户', '凭证', '人员', '仓库', '供应商', '客户', '银行类别', '科目余额', '账簿', '期间', '科目', '部门', '余额', '费用', '产品线', '项目', 'Voucher', 'Entry', 'Account', 'SalesGroup', 'ExpenseItem', 'CashAccount', 'Supplier', 'BusinessMode', 'BankAccount', 'Department', 'Project', 'CostSubelement', 'AssetCategory', 'Employee', 'OtherParty', 'AssetCard', 'Customer', 'InventoryCategory', 'ManualInput', 'Bank', 'Warehouse', 'UseDepartment', 'Org']
 
 **Relation Types**:
 
-['制作了凭证', '银行交易', '有凭证记录', '采购往来', '有业务凭证', '凭证涉及客户', '客户被凭证涉及', '费用记账', '被凭证记录', '库存操作', '有库存凭证', '相关人员', '关联凭证', '审核了凭证', '凭证关联科目', '凭证关联账簿', '凭证关联期间', '余额关联科目', '余额关联账簿', '余额关联期间', '由人员制单', '由人员审核', '期间关联余额', '科目关联余额', '账簿关联余额', '期间关联凭证', '科目关联凭证', '账簿关联凭证']
+['制作了凭证', '银行交易', '有凭证记录', '采购往来', '有业务凭证', '凭证涉及客户', '客户被凭证涉及', '费用记账', '被凭证记录', '库存操作', '有库存凭证', '相关人员', '关联凭证', '审核了凭证', '由人员制单', '由人员审核', 'HAS_ENTRY', 'FOR_SUPPLIER', 'IN_DEPARTMENT', 'FOR_EXPENSE_ITEM', 'FOR_PROJECT', 'IN_SALES_GROUP', 'IN_INVENTORY_CATEGORY', 'IN_COST_SUBELEM', 'IN_ASSET_CATEGORY', 'FOR_OTHER_PARTY', 'BY_EMPLOYEE']
 
 ## Node Details
 - `银行账户` (18 nodes) has properties: ['使用状态', '控制策略', '数据状态', '账户性质', '账户状态', '账户类型', '银行类别', '金融机构类别', '申请公司', '开户公司', '账户简称', '银行账号', 'uid', '最后更新人', '最后更新时间', '序号', '币别范围', '开户行', '银行账户id', 'demo']
   - Sample data: {'银行账号': '235432424', '银行类别': '招商银行', '序号': '1', '账户类型': '一般存款账户', '账户简称': '招商银行宝安支行', '金融机构类别': '银行', '开户公司': '10', '最后更新人': 'TEST', '控制策略': '私有', '申请公司': '10', 'uid': '235432424', '最后更新时间': '2024-07-24 10:28:10', '账户性质': '收支户', '账户状态': '正常', '数据状态': '已审核', '使用状态': '可用'}
 - `凭证` (629 nodes) has properties: ['核算维度_客户_名称', '审核日期', '核算维度_客户_编码', '创建时间', '修改时间', '来源类型', '业务日期', '过账人', '来源系统', '创建人', '制单人', '审核人', '审核驳回', '科目全名', '借方', '科目名称', '原币金额', '摘要', '科目编码', '币种', '凭证号', '状态', '过账', '记账日期', '凭证字', '科目_发生额方向', '账簿', 'uid', '序号', '期间', '贷方', '核算维度_银行_名称', '复核人', '核算维度_现金账户_账户名称', '核算维度_员工_工号', '核算维度_员工_姓名', '核算维度_部门_长名称', '核算维度_部门_编码', '到期日', '核算维度_物料_名称', '核算维度_资产类别_长名称', '核算维度_供应商_名称', '核算维度_供应商_编码', '凭证id', '部门', '客户名称', '供应商名称', 'demo', '供应商编码', '部门名称', '部门编码', '客户编码', '产品线名称', '产品线编码', '银行账号', '银行账户简称', '员工姓名', '员工工号', '项目名称', '项目编码', '费用类型', '附表项目', '附件数', '现金流量项目', '仓库编码', '人员编码', '费用编码']
   - Sample data: {'审核驳回': '否', '序号': '1.0', '制单人': 'IERP', '状态': '已审核', '科目编码': '0309', '审核人': 'IERP', '凭证号': '2.0', '账簿': '金蝶国际主账簿', '科目全名': '应收账款0823', '科目_发生额方向': '不控制', '记账日期': '2024-01-31', 'uid': '1.0', '来源类型': '手工凭证', '修改时间': '2025-04-01 09:58:42', '原币金额': '1.0', '创建人': 'IERP', '来源系统': '总账', '业务日期': '2024-01-31', '摘要': '1', '币种': '人民币', '凭证字': '记', '科目名称': '应收账款0823', '审核日期': '2024-03-08 14:56:26', '过账': '√', '借方': '1.0', '核算维度_客户_名称': '阳光集团', '核算维度_客户_编码': 'Cus-000039', '过账人': 'JZYZYZY', '期间': '2024年1期', '创建时间': '2024-03-08 14:36:14'}
-- `业务单元` (25 nodes) has properties: ['结算职能', '采购职能', '销售职能', '生产职能', '库存职能', '核算组织类型', '形态', '名称', '使用状态', '核算组织', '研发职能', 'uid', '编码', '质检职能', '收付职能', '资产职能', '税务职能', '资金职能']
-  - Sample data: {'核算组织类型': '法人', '编码': '100', '税务职能': '√', '名称': '100', '收付职能': '√', '质检职能': '√', '生产职能': '√', '研发职能': '√', '采购职能': '√', 'uid': '100::100', '库存职能': '√', '结算职能': '√', '销售职能': '√', '形态': '公司', '资产职能': '√', '使用状态': '可用', '核算组织': '√'}
 - `人员` (463 nodes) has properties: ['部门', '类型', '人员使用状态', '用户禁用', '职位', '兼职', 'uid', '手机号码', '性别', '序号', '用户名', '姓名', '工号', '负责人', '直接上级', '人员id', 'demo']
   - Sample data: {'序号': '2', '手机号码': '17299999999.0', '职位': '测试', '人员使用状态': '可用', '性别': '男', 'uid': 'TEST::TEST::13466739', '姓名': 'TEST', '部门': '台北101大厦', '用户禁用': '否', '工号': '13466739', '兼职': '√', '用户名': 'TEST', '类型': '职员'}
 - `仓库` (35 nodes) has properties: ['控制策略', '数据状态', '名称', '使用状态', '可发量控制', '创建组织', '编码', 'uid', '序号', '仓库负责人', '仓库id']
@@ -27,22 +25,50 @@
   - Sample data: {'uid': 'BC-0351::辽宁灯塔农商行', '序号': '3727', '编码': 'BC-0351', '名称': '辽宁灯塔农商行', '使用状态': '可用', '行别代码': '402'}
 - `科目余额` (560 nodes) has properties: ['期末余额_贷方金额', '科目名称', '基础资料属性', '科目编码', '年初余额_贷方金额', '期初余额_贷方金额', 'uid', '序号', '期间', '期初余额_借方金额', '期末余额_借方金额', '年初余额_借方金额', '本年累计_借方金额', '本期发生额_借方金额', '本期发生额_贷方金额', '本年累计_贷方金额']
   - Sample data: {'基础资料属性': '借', '期初余额_贷方金额': '10.0', 'uid': '1', '序号': '1', '科目编码': '0000', '期末余额_贷方金额': '10.0', '期间': '2025年1期', '科目名称': '测试科目版本化', '年初余额_贷方金额': '10.0'}
-- `账簿` (2 nodes) has properties: ['名称']
-  - Sample data: {'名称': '江西银涛药业股份有限公司主账簿'}
-- `期间` (1 nodes) has properties: ['期数', '名称', '年份']
-  - Sample data: {'年份': 2024, '名称': '2024年3期', '期数': 3}
-- `科目` (19 nodes) has properties: ['科目编码', '科目名称', '名称', 'demo', '编码']
-  - Sample data: {'科目编码': '2202', '科目名称': '应付账款'}
-- `部门` (14 nodes) has properties: ['名称', 'demo', '部门编码']
-  - Sample data: {'名称': '财务部'}
-- `余额` (46 nodes) has properties: ['本期发生额_贷方金额', '期间', '科目名称', '账簿', '本期发生额_借方金额', '期末余额_贷方金额', '第一维度编码', '期末余额.贷方金额', '本期发生额.贷方金额', '期末余额.借方金额', '本年累计.借方金额', '本期发生额.借方金额', '本年累计.贷方金额', 'fbalance_id', '时间', '基础资料属性', '科目编码', 'demo', '客户编码', '客户名称', '供应商名称', '供应商编码', '银行账户简称', '银行账号', '固定资产.累计折旧', '固定资产.净值', '固定资产.原值']
-  - Sample data: {'本期发生额_贷方金额': 50000, '期间': '2024年2期', '账簿': '江西银涛药业股份有限公司主账簿', '科目名称': '银行存款'}
+- `账簿` (0 nodes) has properties: []
+- `期间` (0 nodes) has properties: []
+- `科目` (0 nodes) has properties: []
+- `部门` (0 nodes) has properties: []
+- `余额` (0 nodes) has properties: []
 - `费用` (3 nodes) has properties: ['费用id', '编码', '名称']
   - Sample data: {'费用id': 'F001', '编码': 'F001', '名称': '工资费用'}
-- `产品线` (2 nodes) has properties: ['产品线编码', 'demo', '产品线名称']
-  - Sample data: {'产品线编码': 'PL-01', 'demo': True, '产品线名称': '感冒用药'}
-- `项目` (2 nodes) has properties: ['项目名称', 'demo', '项目编码']
-  - Sample data: {'项目名称': '新产品临床试验', 'demo': True, '项目编码': 'PRJ-001'}
+- `产品线` (0 nodes) has properties: []
+- `项目` (0 nodes) has properties: []
+- `Voucher` (225 nodes) has properties: ['来源表单类型', '凭证摘要', '贷方合计', '借方合计', '修改时间', '审核日期', '来源类型', '来源系统', 'voucher_id', '过账人', '创建时间', '制单人', '审核人', '状态', '创建人', '记账日期', '凭证号', '过账', '账簿', '期间', '凭证字', '审核驳回', '复核人']
+  - Sample data: {'来源系统': '库存管理', '贷方合计': 809.73, '制单人': 'yt0041', '状态': '已审核', '借方合计': 809.73, '审核人': 'yt0041', '凭证号': '82.0', '凭证字': '记', '账簿': '江西银涛药业股份有限公司主账簿', '凭证摘要': '标准简单生产领料单', '审核日期': '2024-04-16T11:42:02.000000000', '记账日期': '2024-03-07T00:00:00.000000000', '过账': '√', '来源类型': '机制凭证', '过账人': 'yt0034', '修改时间': '2024-05-10T16:49:30.000000000', '期间': '2024年3期', 'voucher_id': '江西银涛药业股份有限公司主账簿::2024年3期::记::82.0', '创建时间': '2024-04-15T09:25:01.000000000', '来源表单类型': '简单生产领料单', '创建人': 'yt0041'}
+- `Entry` (9551 nodes) has properties: ['贷方', '币种', '原币金额', '摘要', 'entry_id', '原币贷方', '附件数', '序号', '借方', '原币借方', '附表项目', '参考消息', '主表项目金额', '主表项目']
+  - Sample data: {'附件数': '0.0', '原币贷方': 28046138.15, '贷方': 28046138.15, '序号': '1.0', '摘要': '结转损益', '币种': '人民币', '原币金额': 28046138.15, 'entry_id': '江西银涛药业股份有限公司主账簿::2024年3期::记::95.0::1.0'}
+- `Account` (0 nodes) has properties: []
+- `SalesGroup` (397 nodes) has properties: ['name']
+  - Sample data: {'name': '燕华鹰'}
+- `ExpenseItem` (17 nodes) has properties: ['name']
+  - Sample data: {'name': '住房公积金'}
+- `CashAccount` (0 nodes) has properties: []
+- `Supplier` (149 nodes) has properties: ['name']
+  - Sample data: {'name': '湖北垒宥企业管理有限公司'}
+- `BusinessMode` (0 nodes) has properties: []
+- `BankAccount` (0 nodes) has properties: []
+- `Department` (22 nodes) has properties: ['name']
+  - Sample data: {'name': 'yt1027'}
+- `Project` (24 nodes) has properties: ['name']
+  - Sample data: {'name': '农银时时付'}
+- `CostSubelement` (10 nodes) has properties: ['name']
+  - Sample data: {'name': '直接人工费'}
+- `AssetCategory` (6 nodes) has properties: ['name']
+  - Sample data: {'name': '电气设备'}
+- `Employee` (1 nodes) has properties: ['name']
+  - Sample data: {'name': 'yt0048'}
+- `OtherParty` (8 nodes) has properties: ['name']
+  - Sample data: {'name': '江西中医药高等专科学校'}
+- `AssetCard` (0 nodes) has properties: []
+- `Customer` (0 nodes) has properties: []
+- `InventoryCategory` (20 nodes) has properties: ['name']
+  - Sample data: {'name': '胶囊剂产成品'}
+- `ManualInput` (0 nodes) has properties: []
+- `Bank` (0 nodes) has properties: []
+- `Warehouse` (0 nodes) has properties: []
+- `UseDepartment` (0 nodes) has properties: []
+- `Org` (0 nodes) has properties: []
 
 ## Relationship Details
 - `制作了凭证` (46 relationships) has properties: ['source']
@@ -101,31 +127,6 @@
   - Common patterns:
     - ['人员'] -> ['凭证'] (frequency: 5)
   - Sample data: ['人员']- [:审核了凭证] -> ['凭证']
-- `凭证关联科目` (470 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['科目'] (frequency: 235)
-  - Sample data: ['凭证']- [:凭证关联科目] -> ['科目']
-- `凭证关联账簿` (30 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['账簿'] (frequency: 15)
-  - Sample data: ['凭证']- [:凭证关联账簿] -> ['账簿']
-- `凭证关联期间` (82 relationships) has properties: ['source']
-  - Common patterns:
-    - ['凭证'] -> ['期间'] (frequency: 41)
-  - Sample data: ['凭证']- [:凭证关联期间] -> ['期间']
-- `余额关联科目` (152 relationships) has properties: ['source']
-  - Common patterns:
-    - ['科目余额'] -> ['科目'] (frequency: 40)
-    - ['余额'] -> ['科目'] (frequency: 36)
-  - Sample data: ['余额']- [:余额关联科目] -> ['科目']
-- `余额关联账簿` (36 relationships) has properties: ['source']
-  - Common patterns:
-    - ['余额'] -> ['账簿'] (frequency: 18)
-  - Sample data: ['余额']- [:余额关联账簿] -> ['账簿']
-- `余额关联期间` (20 relationships) has properties: ['source']
-  - Common patterns:
-    - ['余额'] -> ['期间'] (frequency: 10)
-  - Sample data: ['余额']- [:余额关联期间] -> ['期间']
 - `由人员制单` (46 relationships) has properties: ['source']
   - Common patterns:
     - ['凭证'] -> ['人员'] (frequency: 23)
@@ -134,28 +135,47 @@
   - Common patterns:
     - ['凭证'] -> ['人员'] (frequency: 5)
   - Sample data: ['凭证']- [:由人员审核] -> ['人员']
-- `期间关联余额` (20 relationships) has properties: ['source']
+- `HAS_ENTRY` (19102 relationships) has properties: []
   - Common patterns:
-    - ['期间'] -> ['余额'] (frequency: 10)
-  - Sample data: ['期间']- [:期间关联余额] -> ['余额']
-- `科目关联余额` (152 relationships) has properties: ['source']
+    - ['Voucher'] -> ['Entry'] (frequency: 9551)
+  - Sample data: ['Voucher']- [:HAS_ENTRY] -> ['Entry']
+- `FOR_SUPPLIER` (1466 relationships) has properties: []
   - Common patterns:
-    - ['科目'] -> ['科目余额'] (frequency: 40)
-    - ['科目'] -> ['余额'] (frequency: 36)
-  - Sample data: ['科目']- [:科目关联余额] -> ['余额']
-- `账簿关联余额` (36 relationships) has properties: ['source']
+    - ['Entry'] -> ['Supplier'] (frequency: 733)
+  - Sample data: ['Entry']- [:FOR_SUPPLIER] -> ['Supplier']
+- `IN_DEPARTMENT` (612 relationships) has properties: []
   - Common patterns:
-    - ['账簿'] -> ['余额'] (frequency: 18)
-  - Sample data: ['账簿']- [:账簿关联余额] -> ['余额']
-- `期间关联凭证` (82 relationships) has properties: ['source']
+    - ['Entry'] -> ['Department'] (frequency: 306)
+  - Sample data: ['Entry']- [:IN_DEPARTMENT] -> ['Department']
+- `FOR_EXPENSE_ITEM` (786 relationships) has properties: []
   - Common patterns:
-    - ['期间'] -> ['凭证'] (frequency: 41)
-  - Sample data: ['期间']- [:期间关联凭证] -> ['凭证']
-- `科目关联凭证` (470 relationships) has properties: ['source']
+    - ['Entry'] -> ['ExpenseItem'] (frequency: 393)
+  - Sample data: ['Entry']- [:FOR_EXPENSE_ITEM] -> ['ExpenseItem']
+- `FOR_PROJECT` (282 relationships) has properties: []
   - Common patterns:
-    - ['科目'] -> ['凭证'] (frequency: 235)
-  - Sample data: ['科目']- [:科目关联凭证] -> ['凭证']
-- `账簿关联凭证` (30 relationships) has properties: ['source']
+    - ['Entry'] -> ['Project'] (frequency: 141)
+  - Sample data: ['Entry']- [:FOR_PROJECT] -> ['Project']
+- `IN_SALES_GROUP` (9592 relationships) has properties: []
   - Common patterns:
-    - ['账簿'] -> ['凭证'] (frequency: 15)
-  - Sample data: ['账簿']- [:账簿关联凭证] -> ['凭证']
+    - ['Entry'] -> ['SalesGroup'] (frequency: 4796)
+  - Sample data: ['Entry']- [:IN_SALES_GROUP] -> ['SalesGroup']
+- `IN_INVENTORY_CATEGORY` (3174 relationships) has properties: []
+  - Common patterns:
+    - ['Entry'] -> ['InventoryCategory'] (frequency: 1587)
+  - Sample data: ['Entry']- [:IN_INVENTORY_CATEGORY] -> ['InventoryCategory']
+- `IN_COST_SUBELEM` (130 relationships) has properties: []
+  - Common patterns:
+    - ['Entry'] -> ['CostSubelement'] (frequency: 65)
+  - Sample data: ['Entry']- [:IN_COST_SUBELEM] -> ['CostSubelement']
+- `IN_ASSET_CATEGORY` (12 relationships) has properties: []
+  - Common patterns:
+    - ['Entry'] -> ['AssetCategory'] (frequency: 6)
+  - Sample data: ['Entry']- [:IN_ASSET_CATEGORY] -> ['AssetCategory']
+- `FOR_OTHER_PARTY` (20 relationships) has properties: []
+  - Common patterns:
+    - ['Entry'] -> ['OtherParty'] (frequency: 10)
+  - Sample data: ['Entry']- [:FOR_OTHER_PARTY] -> ['OtherParty']
+- `BY_EMPLOYEE` (4 relationships) has properties: []
+  - Common patterns:
+    - ['Entry'] -> ['Employee'] (frequency: 2)
+  - Sample data: ['Entry']- [:BY_EMPLOYEE] -> ['Employee']

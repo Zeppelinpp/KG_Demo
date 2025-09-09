@@ -18,7 +18,7 @@ uv run src/storage/milvus_db.py --collection_name mapping
 
 # Step 5: Insert data and test search
 echo "Step 5: Inserting data and testing search..."
-uv run scripts/sync_milvus.py --insert
-uv run scripts/sync_milvus.py --search
+uv run scripts/sync_milvus.py --insert true
+uv run scripts/sync_milvus.py --search true
 
 echo "=== Sync process completed successfully ==="

@@ -188,7 +188,7 @@ class FunctionCallingAgent:
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY"), base_url=os.getenv("OPENAI_BASE_URL")
         )
-        self.max_iterations = 10  # Prevent infinite loops
+        self.max_iterations = 100  # Prevent infinite loops
         self.chat_history = []  # Store conversation history
         self.console = console or Console()
 

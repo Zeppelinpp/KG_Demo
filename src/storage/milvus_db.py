@@ -115,9 +115,10 @@ class SchemaRetriever:
         return "\n".join(doc)
 
 if __name__ == "__main__":
-    import asyncio
+    # import asyncio
 
-    schema_retriever = SchemaRetriever()
-    mapping = MilvusDB("mapping").search("金蝶国际主账簿在2024年3期应付职工薪酬支出TOP10的部门", 5)
-    result = asyncio.run(schema_retriever.retrieve("金蝶国际主账簿在2024年3期应付职工薪酬支出TOP10的部门", str(mapping)))
-    print(result)
+    # schema_retriever = SchemaRetriever()
+    # mapping = MilvusDB("mapping").search("金蝶国际主账簿在2024年3期应付职工薪酬支出TOP10的部门", 5)
+    # result = asyncio.run(schema_retriever.retrieve("金蝶国际主账簿在2024年3期应付职工薪酬支出TOP10的部门", str(mapping)))
+    # print(result)
+    init_collection("mapping")
