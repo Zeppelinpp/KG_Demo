@@ -1,6 +1,7 @@
 # KG_Demo - Neo4j Knowledge Graph Assistant
 
 ## Project Structure
+
 ```
 KG_Demo/
 ├── config/
@@ -26,12 +27,14 @@ KG_Demo/
 ## Core Functionality (core.py)
 
 ### FunctionCallingAgent
+
 - **OpenAI Integration**: Async chat completions with tool calling
 - **Tool Execution**: Handles Neo4j query execution with rich console output
 - **Chat Management**: Maintains conversation history with streaming support
 - **Error Handling**: Robust error handling with iteration limits
 
 ### Neo4jSchemaExtractor
+
 - **Schema Discovery**: Extracts nodes, relationships, constraints, and indexes
 - **Validation**: Uses Pydantic models for schema validation
 - **Export Formats**: Supports JSON and YAML output
@@ -50,10 +53,10 @@ graph TD
     G --> H[Generate Cypher]
     H --> I[Execute Query]
     I --> J[Return Results]
-    
+  
     K[core.py Components] --> L[FunctionCallingAgent<br/>- OpenAI Integration<br/>- Tool Calling<br/>- Chat History]
     K --> M[Neo4jSchemaExtractor<br/>- Schema Discovery<br/>- Validation<br/>- YAML/JSON Export]
-    
+  
     N[Supporting Modules] --> O[tools.py<br/>Neo4j Query Execution]
     N --> P[model/graph.py<br/>Pydantic Schema Models]
     N --> Q[prompts.py<br/>System Prompts]
@@ -62,17 +65,20 @@ graph TD
 ## TODO List
 
 ### Context Manager Enhancement
-- [ ] **Schema Context Management**: Implement ContextManager for caching and managing graph schema information across sessions
-- [ ] **Chat History Persistence**: Add persistent storage for conversation history with session management
+
+- [X] **Schema Context Management**: Implement ContextManager for caching and managing graph schema information across sessions
+- [X] **Chat History Persistence**: Add persistent storage for conversation history with session management
 - [ ] **Dynamic Schema Updates**: Real-time schema refresh when database structure changes
 
 ### Intelligent Mapping System
-- [ ] **Embedding-Based Mapping**: Use vector embeddings to match user queries with relevant graph attributes
-- [ ] **Semantic Search**: Implement semantic similarity search for finding the most relevant nodes/relationships
-- [ ] **Query Optimization**: Intelligent query planning based on schema analysis and user intent
+
+- [X] **Embedding-Based Mapping**: Use vector embeddings to match user queries with relevant graph attributes
+- [X] **Semantic Search**: Implement semantic similarity search for finding the most relevant nodes/relationships
+- [X] **Query Optimization**: Intelligent query planning based on schema analysis and user intent
 
 ### Advanced Features
-- [ ] **Multi-hop Reasoning**: Support complex multi-step queries across graph relationships
+
+- [X] **Multi-hop Reasoning**: Support complex multi-step queries across graph relationships
 - [ ] **Result Ranking**: Implement relevance scoring for query results
 - [ ] **Auto-completion**: Provide intelligent suggestions for graph traversal paths
 
