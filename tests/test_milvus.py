@@ -23,5 +23,5 @@ def test_search():
     print(results)
 
 if __name__ == "__main__":
-    # test_insert()
+    test_insert()
     test_search()
