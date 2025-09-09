@@ -7,8 +7,8 @@ from rich.prompt import Prompt
 from rich.markdown import Markdown
 from rich.rule import Rule
 from src.model.graph import ExtractedGraphSchema, GraphSchema
-from src.tools import query_neo4j
-from src.prompts import KG_AGENT_PROMPT
+from src.tools import query_neo4j, get_schema_info
+from src.prompts import KG_AGENT_PROMPT, DYNAMIC_KG_AGENT_PROMPT
 from src.core import FunctionCallingAgent, Neo4jSchemaExtractor
 from src.context.manager import ContextManager
 from src.logger import kg_logger
@@ -33,7 +33,8 @@ kg_logger.log_schema_usage(schema_md)
 
 console.print("[dim]Initializing AI agent...[/dim]")
 agent = FunctionCallingAgent(
-    model="qwen-max",
+    model="qwen3-max-preview",
+    # tools=[query_neo4j, get_schema_info],
     tools=[query_neo4j],
     console=console,
 )
@@ -84,6 +85,9 @@ async def chat_session():
         agent.set_history(
             [{"role": "system", "content": KG_AGENT_PROMPT.format(schema=schema_md)}]
         )
+        # agent.set_history(
+        #     [{"role": "system", "content": DYNAMIC_KG_AGENT_PROMPT.format(schema=schema_md)}]
+        # )
 
         console.print("[bold green]✓ Ready to chat![/bold green]")
         console.print()
@@ -123,6 +127,14 @@ async def chat_session():
                         }
                     ]
                 )
+                # agent.set_history(
+                #     [
+                #         {
+                #             "role": "system",
+                #             "content": DYNAMIC_KG_AGENT_PROMPT,
+                #         }
+                #     ]
+                # )
                 console.print()
                 console.print("[bold green]✓ Chat history cleared![/bold green]")
                 continue

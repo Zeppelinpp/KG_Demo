@@ -34,41 +34,41 @@ def query_neo4j(
         wrap_csv_with_backticks,
         cypher_query,
     )
-    
+
     # Wrap property names with backticks using split approach
     # First, temporarily replace already wrapped properties to protect them
     protected_patterns = []
     placeholder_pattern = "___PROTECTED_PROP_{}___"
-    
+
     # Find and protect already wrapped properties
     def protect_wrapped(match):
         index = len(protected_patterns)
         protected_patterns.append(match.group(0))
         return placeholder_pattern.format(index)
-    
-    cypher_query = re.sub(r'\b[a-zA-Z_]\w*\.`[^`]+`', protect_wrapped, cypher_query)
-    
+
+    cypher_query = re.sub(r"\b[a-zA-Z_]\w*\.`[^`]+`", protect_wrapped, cypher_query)
+
     # Now process unprotected properties using split approach
     def wrap_property_with_split(match):
         full_match = match.group(0)
         # Split by dot
-        parts = full_match.split('.')
+        parts = full_match.split(".")
         if len(parts) >= 2:
             # First part is variable name, rest are property parts
             variable = parts[0]
             property_parts = parts[1:]
             # Join property parts with dots and wrap with backticks
-            property_name = '.'.join(property_parts)
+            property_name = ".".join(property_parts)
             return f"{variable}.`{property_name}`"
         return full_match
-    
+
     # Match variable.property patterns (including multi-level properties)
     cypher_query = re.sub(
         r"\b[a-zA-Z_]\w*(?:\.[^`\s\(\)\[\],;=<>!]+)+",  # matches var.prop1.prop2...
         wrap_property_with_split,
         cypher_query,
     )
-    
+
     # Restore protected patterns
     for i, pattern in enumerate(protected_patterns):
         cypher_query = cypher_query.replace(placeholder_pattern.format(i), pattern)
@@ -153,6 +153,17 @@ def get_relation_count(relation_type: str):
         return []
 
 
+def get_relation(node_type: str):
+    cypher = f"""
+    MATCH (n:`{node_type}`)-[r]-(m)
+    WITH type(r) AS relType
+    RETURN DISTINCT relType
+    ORDER BY relType
+    """
+    result = execute_cypher(cypher.format(node_type=node_type))
+    return [relType["relType"] for relType in result]
+
+
 def get_node_properties(node_type: str):
     cypher = """
     MATCH (n:`{node_type}`)
@@ -160,7 +171,7 @@ def get_node_properties(node_type: str):
     RETURN DISTINCT prop
     """
     result = execute_cypher(cypher.format(node_type=node_type))
-    
+
     if result:
         return [prop["prop"] for prop in result]
     else:
@@ -194,6 +205,32 @@ def get_sample_relationships(relation_type: str):
     else:
         return []
 
+
+def get_schema_info(node_types: List[str]):
+    """
+    获取节点的属性字段信息已经与其连接的边的信息作为图谱的schema信息
+    Args:
+        node_types: 节点类型列表
+    Returns:
+        schema_info: 图谱的schema信息
+    """
+    schema = {}
+    for node_type in node_types:
+        schema[node_type] = {
+            "properties": get_node_properties(node_type),
+            "relationships": get_relation(node_type),
+        }
+    # Convert to markdown
+    schema_markdown = ""
+    for node_type, info in schema.items():
+        schema_markdown += f"## {node_type}\n"
+        schema_markdown += f"### 属性\n"
+        schema_markdown += f"{info['properties']}\n"
+        schema_markdown += f"### 关系边\n"
+        schema_markdown += f"{info['relationships']}\n"
+    return schema_markdown
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -203,7 +240,7 @@ if __name__ == "__main__":
     parser.add_argument("--relation_type", type=str, required=False)
     args = parser.parse_args()
     if args.node_type:
-        result = get_node_properties(args.node_type)
+        result = get_relation(args.node_type)
     elif args.query:
         result = execute_cypher(args.query)
     elif args.relation_type:
