@@ -1,6 +1,7 @@
 import os
 from src.core import Neo4jSchemaExtractor
 from dotenv import load_dotenv
+
 load_dotenv()
 
 extractor = Neo4jSchemaExtractor(

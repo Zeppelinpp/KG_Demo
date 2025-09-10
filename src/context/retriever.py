@@ -9,7 +9,7 @@ from src.model.mapping import Mapping
 
 class MappingRetriever:
     """Retriever for business term mappings"""
-    
+
     def __init__(self, collection_name: str = "mapping"):
         self.client = MilvusClient("milvus.db")
         self.collection_name = collection_name
@@ -40,7 +40,7 @@ class MappingRetriever:
 
 class SchemaRetriever:
     """Retriever for graph schema information"""
-    
+
     def __init__(self, collection_name: str = "node_schema"):
         self.milvus_client = MilvusClient("milvus.db")
         self.collection_name = collection_name
@@ -56,11 +56,17 @@ class SchemaRetriever:
         response = await self.llm.chat.completions.create(
             model="qwen-max",
             messages=[
-                {"role": "system", "content": f"""
+                {
+                    "role": "system",
+                    "content": f"""
                 你是一个ERP和财务系统专家, 根据提供的业务可能相关的业务词汇和知识图谱中可能相关的字段名称的对应关系, 
                 从用户的问题中提取可以用于召回相关schema的关键词, 以JSON格式返回,结果是一个关键词列表, 不要输出任何其他内容
-                """},
-                {"role": "user", "content": f"业务词汇和知识图谱中可能相关的字段名称的对应关系:\n{mapping}\n用户的问题:\n{query}"},
+                """,
+                },
+                {
+                    "role": "user",
+                    "content": f"业务词汇和知识图谱中可能相关的字段名称的对应关系:\n{mapping}\n用户的问题:\n{query}",
+                },
             ],
             response_format={"type": "json_object"},
         )
@@ -81,5 +87,7 @@ class SchemaRetriever:
         doc = []
         for keyword_result in results:
             for result in keyword_result:
-                doc.append(f"## 节点标签:{result['entity']['node_type']}\n- 属性:{result['entity']['properties']}\n- Pattern:{result['entity']['patterns']}\n")
+                doc.append(
+                    f"## 节点标签:{result['entity']['node_type']}\n- 属性:{result['entity']['properties']}\n- Pattern:{result['entity']['patterns']}\n"
+                )
         return "\n".join(doc)

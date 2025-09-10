@@ -14,13 +14,18 @@ datas = [
     for term, description in BUSSINESS_MAPPING.items()
 ]
 
+
 def insert():
     for data in datas:
         db.insert(data)
 
+
 def search():
-    results = db.search("江西银涛药业股份有限公司主账簿在2024年3期应付职工薪酬支出TOP10的部门")
+    results = db.search(
+        "江西银涛药业股份有限公司主账簿在2024年3期应付职工薪酬支出TOP10的部门"
+    )
     print(results)
+
 
 if __name__ == "__main__":
     import argparse

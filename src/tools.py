@@ -96,8 +96,6 @@ def query_neo4j(
             driver.close()
 
 
-
-
 def get_schema_info(node_types: List[str]):
     """
     获取节点的属性字段信息已经与其连接的边的信息作为图谱的schema信息

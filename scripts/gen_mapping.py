@@ -67,7 +67,7 @@ result = response.choices[0].message.content
 mapping_str = result
 try:
     # Extract JSON from the output (in case there's other text)
-    json_match = re.search(r'\{.*\}', mapping_str, re.DOTALL)
+    json_match = re.search(r"\{.*\}", mapping_str, re.DOTALL)
     if json_match:
         mapping_dict = json.loads(json_match.group())
     else:
@@ -78,18 +78,20 @@ except json.JSONDecodeError as e:
     exit(1)
 
 # Read current constants.py
-with open('config/constants.py', 'r') as f:
+with open("config/constants.py", "r") as f:
     content = f.read()
 
 # Find and replace BUSSINESS_MAPPING
-pattern = r'BUSSINESS_MAPPING\s*=\s*\{[^}]*\}'
-replacement = f'BUSSINESS_MAPPING = {json.dumps(mapping_dict, ensure_ascii=False, indent=4)}'
+pattern = r"BUSSINESS_MAPPING\s*=\s*\{[^}]*\}"
+replacement = (
+    f"BUSSINESS_MAPPING = {json.dumps(mapping_dict, ensure_ascii=False, indent=4)}"
+)
 
 # Replace the mapping
 new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
 
 # Write back to file
-with open('config/constants.py', 'w') as f:
+with open("config/constants.py", "w") as f:
     f.write(new_content)
 
 print("Updated BUSSINESS_MAPPING in config/constants.py")

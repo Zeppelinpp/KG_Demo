@@ -28,25 +28,29 @@ static_schema_md = None
 
 class SchemaLoader:
     """Utility class for loading schema information"""
-    
+
     @staticmethod
     def load_graph_schema_from_md(file_path: str = "config/graph_schema.md") -> str:
         """Load graph schema content directly from markdown file
-        
+
         Args:
             file_path: Path to the graph_schema.md file
-            
+
         Returns:
             str: Content of the graph schema markdown file
         """
         try:
             full_path = os.path.join(os.getcwd(), file_path)
-            with open(full_path, 'r', encoding='utf-8') as f:
+            with open(full_path, "r", encoding="utf-8") as f:
                 content = f.read()
             return content
         except FileNotFoundError:
-            console.print(f"[bold red]❌ Graph schema file not found: {file_path}[/bold red]")
-            console.print("[yellow]Please run the node schema extraction script first to generate the file.[/yellow]")
+            console.print(
+                f"[bold red]❌ Graph schema file not found: {file_path}[/bold red]"
+            )
+            console.print(
+                "[yellow]Please run the node schema extraction script first to generate the file.[/yellow]"
+            )
             raise
         except Exception as e:
             console.print(f"[bold red]❌ Error loading graph schema: {e}[/bold red]")
@@ -56,10 +60,10 @@ class SchemaLoader:
 def init_static_schema():
     """Initialize static schema mode"""
     global agent, context_manager, static_schema_md
-    
+
     console.print("[dim]Initializing static schema mode...[/dim]")
     console.print("[dim]Loading schema from graph_schema.md...[/dim]")
-    
+
     try:
         # Load schema directly from markdown file
         static_schema_md = SchemaLoader.load_graph_schema_from_md()
@@ -68,7 +72,7 @@ def init_static_schema():
         # Fallback to extracting from Neo4j if file doesn't exist
         console.print("[yellow]Falling back to Neo4j extraction...[/yellow]")
         console.print("[dim]Extracting schema from Neo4j...[/dim]")
-        
+
         extractor = Neo4jSchemaExtractor(
             uri=os.getenv("NEO4J_URI"),
             database=os.getenv("NEO4J_DATABASE"),
@@ -76,7 +80,9 @@ def init_static_schema():
             password=os.getenv("NEO4J_PASSWORD"),
         )
         schema = extractor.extract_full_schema("config/schema", format="yaml")
-        schema = GraphSchema.from_extracted_schema(ExtractedGraphSchema.from_extraction_result(schema))
+        schema = GraphSchema.from_extracted_schema(
+            ExtractedGraphSchema.from_extraction_result(schema)
+        )
         static_schema_md = schema.to_md()
 
     # Log the schema information
@@ -96,16 +102,16 @@ def init_static_schema():
         llm_client=agent.client,
         schema_mode="static",
     )
-    
+
     console.print("[bold green]✓ Static schema mode initialized![/bold green]")
 
 
 def init_dynamic_schema():
     """Initialize dynamic schema mode"""
     global agent, context_manager, schema_retriever
-    
+
     console.print("[dim]Initializing dynamic schema mode...[/dim]")
-    
+
     console.print("[dim]Initializing AI agent...[/dim]")
     agent = FunctionCallingAgent(
         model="qwen-max",
@@ -120,10 +126,10 @@ def init_dynamic_schema():
         llm_client=agent.client,
         schema_mode="dynamic",
     )
-    
+
     console.print("[dim]Initializing schema retriever...[/dim]")
     schema_retriever = SchemaRetriever()
-    
+
     console.print("[bold green]✓ Dynamic schema mode initialized![/bold green]")
 
 
@@ -133,7 +139,7 @@ async def run(user_query: str, schema_mode: str = "static"):
         system_prompt = KG_AGENT_PROMPT.format(schema=static_schema_md)
     else:
         system_prompt = DYNAMIC_KG_AGENT_PROMPT
-    
+
     response = ""
     async for chunk in agent.run_query_stream(
         user_query=user_query,
@@ -147,7 +153,7 @@ async def run(user_query: str, schema_mode: str = "static"):
 
 async def chat_session(schema_mode: str = "static"):
     """Interactive multi-turn chat session with Rich formatting
-    
+
     Args:
         schema_mode: "static" for pre-loaded schema, "dynamic" for on-demand schema retrieval
     """
@@ -155,8 +161,10 @@ async def chat_session(schema_mode: str = "static"):
     console.print()
     console.rule("[bold green]🚀 Knowledge Graph Chat Assistant", style="green")
     console.print()
-    
-    schema_mode_text = "📊 Static Schema" if schema_mode == "static" else "🔄 Dynamic Schema"
+
+    schema_mode_text = (
+        "📊 Static Schema" if schema_mode == "static" else "🔄 Dynamic Schema"
+    )
     console.print(
         Panel(
             f"[bold cyan]Welcome to the Knowledge Graph Chat Assistant![/bold cyan]\n\n"
@@ -177,14 +185,17 @@ async def chat_session(schema_mode: str = "static"):
             init_static_schema()
             # Set initial system prompt with static schema
             agent.set_history(
-                [{"role": "system", "content": KG_AGENT_PROMPT.format(schema=static_schema_md)}]
+                [
+                    {
+                        "role": "system",
+                        "content": KG_AGENT_PROMPT.format(schema=static_schema_md),
+                    }
+                ]
             )
         else:
             init_dynamic_schema()
             # Set initial system prompt for dynamic mode
-            agent.set_history(
-                [{"role": "system", "content": DYNAMIC_KG_AGENT_PROMPT}]
-            )
+            agent.set_history([{"role": "system", "content": DYNAMIC_KG_AGENT_PROMPT}])
 
         console.print("[bold green]✓ Ready to chat![/bold green]")
         console.print()
@@ -221,7 +232,9 @@ async def chat_session(schema_mode: str = "static"):
                         [
                             {
                                 "role": "system",
-                                "content": KG_AGENT_PROMPT.format(schema=static_schema_md),
+                                "content": KG_AGENT_PROMPT.format(
+                                    schema=static_schema_md
+                                ),
                             }
                         ]
                     )
@@ -279,10 +292,9 @@ async def chat_session(schema_mode: str = "static"):
             try:
                 console.print("[dim]Loading context...[/dim]")
                 context_messages = await context_manager.load_context(
-                    query=user_input,
-                    from_resources=["mapping"]
+                    query=user_input, from_resources=["mapping"]
                 )
-                
+
                 # Add context to agent's history if available
                 if context_messages:
                     current_history = agent.get_history()
@@ -293,7 +305,7 @@ async def chat_session(schema_mode: str = "static"):
                     console.print("[dim]✓ Context loaded[/dim]")
                 else:
                     console.print("[dim]No relevant context found[/dim]")
-                    
+
             except Exception as e:
                 console.print(f"[dim]Warning: Context loading failed: {e}[/dim]")
 
@@ -313,7 +325,7 @@ async def chat_session(schema_mode: str = "static"):
             console.print()
             console.print(f"[bold red]❌ Error: {e}[/bold red]")
             continue
-    
+
     # Cleanup resources
     try:
         context_manager.cleanup()
@@ -328,11 +340,11 @@ def main():
         "--schema-mode",
         choices=["static", "dynamic"],
         default="static",
-        help="Schema loading mode: 'static' for pre-loaded schema, 'dynamic' for on-demand retrieval"
+        help="Schema loading mode: 'static' for pre-loaded schema, 'dynamic' for on-demand retrieval",
     )
-    
+
     args = parser.parse_args()
-    
+
     try:
         asyncio.run(chat_session(schema_mode=args.schema_mode))
     except KeyboardInterrupt:

@@ -51,12 +51,14 @@ def init_node_schema_collection():
     """Initialize node schema collection for graph schema storage"""
     client = MilvusClient("milvus.db")
     collection_name = "node_schema"
-    
+
     if client.has_collection(collection_name):
         client.drop_collection(collection_name)
-        
+
     fields = [
-        FieldSchema(name="node_type", dtype=DataType.VARCHAR, max_length=200, is_primary=True),
+        FieldSchema(
+            name="node_type", dtype=DataType.VARCHAR, max_length=200, is_primary=True
+        ),
         FieldSchema(
             name="properties",
             dtype=DataType.ARRAY,
@@ -89,7 +91,7 @@ def init_node_schema_collection():
         ),
         FieldSchema(name="embeddings", dtype=DataType.FLOAT_VECTOR, dim=1024),
     ]
-    
+
     schema = CollectionSchema(fields, description="Node Schema")
     index_params = IndexParams()
     index_params.add_index(
@@ -123,6 +125,7 @@ def init_all_collections(collection: str = None):
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--collection", type=str, required=False)
     args = parser.parse_args()

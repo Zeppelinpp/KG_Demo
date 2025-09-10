@@ -58,16 +58,16 @@ def get_node_schema():
         # First get all connected node labels
         connected_nodes = session.run(GET_CONNECTED_NODES).data()
         connected_node_labels = {node["nodeLabel"] for node in connected_nodes}
-        
+
         # Then get all nodes with properties
         nodes = session.run(GET_NODES).data()
         for node in nodes:
             node_type = node["nodeType"].split(":")[-1].strip("`")
-            
+
             # Skip nodes that don't have any relationships
             if node_type not in connected_node_labels:
                 continue
-                
+
             properties = node["properties"]
 
             # Extract out and in relations
@@ -143,11 +143,11 @@ def get_connected_node_labels():
         os.getenv("NEO4J_URI"),
         auth=(os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD")),
     )
-    
+
     with driver.session(database=os.getenv("NEO4J_DATABASE")) as session:
         connected_nodes = session.run(GET_CONNECTED_NODES).data()
         connected_node_labels = [node["nodeLabel"] for node in connected_nodes]
-        
+
     driver.close()
     return connected_node_labels
 
@@ -155,38 +155,42 @@ def get_connected_node_labels():
 def write_node_schema_to_md():
     """Write node schema information to graph_schema.md"""
     node_schemas = get_node_schema()
-    
+
     # Generate markdown content
     md_content = ["# Graph Schema", "## Node Details"]
-    
+
     for node_schema in node_schemas:
         # Node header with type and sample count
         sample_count = len(node_schema.samples) if node_schema.samples else 0
-        md_content.append(f"- `{node_schema.node_type}` has properties: {node_schema.properties}")
-        
+        md_content.append(
+            f"- `{node_schema.node_type}` has properties: {node_schema.properties}"
+        )
+
         # Add sample data if available
         if node_schema.samples:
             md_content.append(f"  - Sample data: {node_schema.samples[0]}")
-        
+
         # Add relationship information
         if node_schema.out_relations:
             md_content.append(f"  - Outgoing relations: {node_schema.out_relations}")
         if node_schema.in_relations:
             md_content.append(f"  - Incoming relations: {node_schema.in_relations}")
-        
+
         # Add patterns if available
         if node_schema.patterns:
             md_content.append(f"  - Relationship patterns:")
             for pattern in node_schema.patterns[:5]:  # Limit to first 5 patterns
-                md_content.append(f"    - ({pattern.source})-[{pattern.relation}]->({pattern.target})")
-        
+                md_content.append(
+                    f"    - ({pattern.source})-[{pattern.relation}]->({pattern.target})"
+                )
+
         md_content.append("")  # Empty line for separation
-    
+
     # Write to file
     md_file_path = "/Users/ruipu/projects/KG_Demo/config/graph_schema.md"
-    with open(md_file_path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(md_content))
-    
+    with open(md_file_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(md_content))
+
     print(f"Node schema information written to {md_file_path}")
     print(f"Total nodes processed: {len(node_schemas)}")
 
@@ -196,9 +200,10 @@ def sync_node_schema_to_milvus():
     """Sync node schema data to Milvus database"""
     node_schemas = get_node_schema()
     milvus_client = MilvusClient("milvus.db")
-    
+
     # Initialize collection if needed
     from scripts.init_milvus import init_node_schema_collection
+
     init_node_schema_collection()
 
     data = []
@@ -223,6 +228,6 @@ if __name__ == "__main__":
     # Write node schema to markdown file
     print("\n正在写入节点模式信息到 graph_schema.md...")
     write_node_schema_to_md()
-    
+
     # Sync to Milvus (optional)
     sync_node_schema_to_milvus()

@@ -254,7 +254,9 @@ class FunctionCallingAgent:
 
         except Exception as e:
             error_msg = f"Tool execution failed: {e}"
-            kg_logger.log_error(error_msg, {"tool_name": function_name, "tool_args": function_args})
+            kg_logger.log_error(
+                error_msg, {"tool_name": function_name, "tool_args": function_args}
+            )
             self.console.print(f"[bold red]❌ Tool execution failed: {e}[/bold red]")
             return f"Error executing tool call: {str(e)}"
 
@@ -273,15 +275,18 @@ class FunctionCallingAgent:
                         user_query = msg.get("content", "")
                     elif msg.get("role") == "system":
                         system_prompt = msg.get("content", "")
-                
-                kg_logger.log_llm_call(system_prompt, user_query, self.model, current_messages)
-                
+
+                kg_logger.log_llm_call(
+                    system_prompt, user_query, self.model, current_messages
+                )
+
                 # Make API call to OpenAI
                 response = await self.client.chat.completions.create(
                     model=self.model,
                     messages=current_messages,
                     tools=self.tools,
                     tool_choice="auto",
+                    temperature=0.3,
                 )
 
                 assistant_message = response.choices[0].message
@@ -318,7 +323,9 @@ class FunctionCallingAgent:
 
                 else:
                     # No tool calls, log and return the final response
-                    response_content = assistant_message.content or "No response generated"
+                    response_content = (
+                        assistant_message.content or "No response generated"
+                    )
                     kg_logger.log_llm_response(response_content)
                     return response_content
 
@@ -344,9 +351,11 @@ class FunctionCallingAgent:
                         user_query = msg.get("content", "")
                     elif msg.get("role") == "system":
                         system_prompt = msg.get("content", "")
-                
-                kg_logger.log_llm_call(system_prompt, user_query, self.model, current_messages)
-                
+
+                kg_logger.log_llm_call(
+                    system_prompt, user_query, self.model, current_messages
+                )
+
                 # Make API call to OpenAI with streaming
                 stream = await self.client.chat.completions.create(
                     model=self.model,
@@ -354,6 +363,7 @@ class FunctionCallingAgent:
                     tools=self.tools,
                     tool_choice="auto",
                     stream=True,
+                    temperature=0.3,
                 )
 
                 assistant_content = ""
