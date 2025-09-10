@@ -18,7 +18,7 @@ def init_mapping_collection():
         ),
         FieldSchema(name="term_embedding", dtype=DataType.FLOAT_VECTOR, dim=1024),
         FieldSchema(
-            name="attributes",
+            name="description",
             dtype=DataType.ARRAY,
             element_type=DataType.VARCHAR,
             max_length=200,
@@ -81,6 +81,12 @@ def init_node_schema_collection():
             element_type=DataType.VARCHAR,
             max_length=200,
         ),
+        FieldSchema(
+            name="samples",
+            dtype=DataType.ARRAY,
+            element_type=DataType.VARCHAR,
+            max_length=200,
+        ),
         FieldSchema(name="embeddings", dtype=DataType.FLOAT_VECTOR, dim=1024),
     ]
     
@@ -102,13 +108,25 @@ def init_node_schema_collection():
     print(f"Collection '{collection_name}' initialized successfully")
 
 
-def init_all_collections():
+def init_all_collections(collection: str = None):
     """Initialize all Milvus collections"""
     print("Initializing Milvus collections...")
-    init_mapping_collection()
-    init_node_schema_collection()
+    if collection == "mapping":
+        init_mapping_collection()
+    elif collection == "node_schema":
+        init_node_schema_collection()
+    else:
+        init_mapping_collection()
+        init_node_schema_collection()
     print("All collections initialized successfully")
 
 
 if __name__ == "__main__":
-    init_all_collections()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--collection", type=str, required=False)
+    args = parser.parse_args()
+    if args.collection:
+        init_all_collections(args.collection)
+    else:
+        init_all_collections()
