@@ -17,6 +17,7 @@ class NodeSchema(BaseModel):
     out_relations: List[str]
     in_relations: List[str]
     patterns: List[Pattern]
+    samples: List[str]
     embeddings: List[float]
 
     model_config = {
