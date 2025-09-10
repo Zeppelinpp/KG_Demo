@@ -33,7 +33,7 @@ class MappingRetriever:
             data=query_embedding,
             anns_field="term_embedding",
             limit=top_k,
-            output_fields=["term", "attributes"],
+            output_fields=["term", "description"],
         )
         return results
 

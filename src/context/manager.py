@@ -13,7 +13,7 @@ from src.logger import kg_logger
 load_dotenv()
 
 PREFIX = {
-    "mapping": "这次查询涉及的业务用词与知识图谱中可能相关的字段名称对应如下:\n",
+    "mapping": "这次查询与图谱中字段的关系和解释如下，请仔细参考:\n",
     "schema": "根据查询内容，相关的知识图谱Schema信息如下:\n",
 }
 
