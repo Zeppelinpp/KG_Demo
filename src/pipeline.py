@@ -26,22 +26,58 @@ schema_retriever = None
 static_schema_md = None
 
 
+class SchemaLoader:
+    """Utility class for loading schema information"""
+    
+    @staticmethod
+    def load_graph_schema_from_md(file_path: str = "config/graph_schema.md") -> str:
+        """Load graph schema content directly from markdown file
+        
+        Args:
+            file_path: Path to the graph_schema.md file
+            
+        Returns:
+            str: Content of the graph schema markdown file
+        """
+        try:
+            full_path = os.path.join(os.getcwd(), file_path)
+            with open(full_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            return content
+        except FileNotFoundError:
+            console.print(f"[bold red]❌ Graph schema file not found: {file_path}[/bold red]")
+            console.print("[yellow]Please run the node schema extraction script first to generate the file.[/yellow]")
+            raise
+        except Exception as e:
+            console.print(f"[bold red]❌ Error loading graph schema: {e}[/bold red]")
+            raise
+
+
 def init_static_schema():
     """Initialize static schema mode"""
     global agent, context_manager, static_schema_md
     
     console.print("[dim]Initializing static schema mode...[/dim]")
-    console.print("[dim]Extracting schema from Neo4j...[/dim]")
+    console.print("[dim]Loading schema from graph_schema.md...[/dim]")
     
-    extractor = Neo4jSchemaExtractor(
-        uri=os.getenv("NEO4J_URI"),
-        database=os.getenv("NEO4J_DATABASE"),
-        username=os.getenv("NEO4J_USER"),
-        password=os.getenv("NEO4J_PASSWORD"),
-    )
-    schema = extractor.extract_full_schema("config/schema", format="yaml")
-    schema = GraphSchema.from_extracted_schema(ExtractedGraphSchema.from_extraction_result(schema))
-    static_schema_md = schema.to_md()
+    try:
+        # Load schema directly from markdown file
+        static_schema_md = SchemaLoader.load_graph_schema_from_md()
+        console.print("[dim]✓ Schema loaded from graph_schema.md[/dim]")
+    except Exception as e:
+        # Fallback to extracting from Neo4j if file doesn't exist
+        console.print("[yellow]Falling back to Neo4j extraction...[/yellow]")
+        console.print("[dim]Extracting schema from Neo4j...[/dim]")
+        
+        extractor = Neo4jSchemaExtractor(
+            uri=os.getenv("NEO4J_URI"),
+            database=os.getenv("NEO4J_DATABASE"),
+            username=os.getenv("NEO4J_USER"),
+            password=os.getenv("NEO4J_PASSWORD"),
+        )
+        schema = extractor.extract_full_schema("config/schema", format="yaml")
+        schema = GraphSchema.from_extracted_schema(ExtractedGraphSchema.from_extraction_result(schema))
+        static_schema_md = schema.to_md()
 
     # Log the schema information
     kg_logger.log_schema_usage(static_schema_md)
