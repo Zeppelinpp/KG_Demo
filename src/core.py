@@ -177,7 +177,13 @@ def format_constraint(constraint: Dict) -> str:
 
 
 class FunctionCallingAgent:
-    def __init__(self, model: str, tools: List[Callable], console: Console = None):
+    def __init__(
+        self,
+        model: str,
+        tools: List[Callable],
+        console: Console = None,
+        tool_usage: bool = False,
+    ):
         self.model = model
         self.tool_functions = {
             tool.__name__: tool for tool in tools
@@ -185,6 +191,7 @@ class FunctionCallingAgent:
 
         # Use updated tools_to_openai_schema function that accepts callable list directly
         self.tools = tools_to_openai_schema(tools)
+        self.tool_usage = tool_usage
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY"), base_url=os.getenv("OPENAI_BASE_URL")
         )
@@ -198,28 +205,33 @@ class FunctionCallingAgent:
             function_name = tool_call["function"]["name"]
             function_args = json.loads(tool_call["function"]["arguments"])
 
-            # Display tool call information
-            self.console.print()
-            self.console.print(
-                Panel(
-                    f"[bold cyan]🔧 Tool Call: {function_name}[/bold cyan]",
-                    border_style="cyan",
-                )
-            )
-
-            # Special handling for Neo4j query tool to display Cypher
-            if function_name == "query_neo4j" and "cypher_query" in function_args:
-                cypher_query = function_args["cypher_query"]
+            # Log tool call information (don't print to console to avoid interference with Gradio)
+            # Display tool call information only if not in web mode
+            if self.tool_usage:
                 self.console.print()
                 self.console.print(
                     Panel(
-                        Syntax(
-                            cypher_query, "cypher", theme="monokai", line_numbers=True
-                        ),
-                        title="[bold yellow]🔍 Executing Cypher Query",
-                        border_style="yellow",
+                        f"[bold cyan]🔧 Tool Call: {function_name}[/bold cyan]",
+                        border_style="cyan",
                     )
                 )
+
+                # Special handling for Neo4j query tool to display Cypher
+                if function_name == "query_neo4j" and "cypher_query" in function_args:
+                    cypher_query = function_args["cypher_query"]
+                    self.console.print()
+                    self.console.print(
+                        Panel(
+                            Syntax(
+                                cypher_query,
+                                "cypher",
+                                theme="monokai",
+                                line_numbers=True,
+                            ),
+                            title="[bold yellow]🔍 Executing Cypher Query",
+                            border_style="yellow",
+                        )
+                    )
 
             # Get the actual function
             if function_name not in self.tool_functions:
@@ -237,7 +249,8 @@ class FunctionCallingAgent:
                 # Log tool call information
                 kg_logger.log_tool_call(function_name, function_args, str(result))
 
-                # Display result summary
+                # Display result summary only if not in web mode
+
                 self.console.print()
                 if isinstance(result, list):
                     self.console.print(
@@ -257,7 +270,9 @@ class FunctionCallingAgent:
             kg_logger.log_error(
                 error_msg, {"tool_name": function_name, "tool_args": function_args}
             )
-            self.console.print(f"[bold red]❌ Tool execution failed: {e}[/bold red]")
+            self.console.print(
+                f"[bold red]❌ Tool execution failed: {e}[/bold red]"
+            )
             return f"Error executing tool call: {str(e)}"
 
     async def run(self, messages: List[Dict[str, Any]]) -> str:
@@ -286,7 +301,7 @@ class FunctionCallingAgent:
                     messages=current_messages,
                     tools=self.tools,
                     tool_choice="auto",
-                    temperature=0.3,
+                    temperature=0.4,
                 )
 
                 assistant_message = response.choices[0].message
@@ -363,7 +378,7 @@ class FunctionCallingAgent:
                     tools=self.tools,
                     tool_choice="auto",
                     stream=True,
-                    temperature=0.3,
+                    temperature=0.4,
                 )
 
                 assistant_content = ""

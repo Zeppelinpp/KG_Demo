@@ -90,10 +90,12 @@ def init_static_schema():
 
     console.print("[dim]Initializing AI agent...[/dim]")
     agent = FunctionCallingAgent(
-        model="qwen-max",
+        model="qwen-max-latest",
         tools=[query_neo4j],
         console=console,
     )
+    # Enable tool call display for CLI mode
+    agent.show_tool_calls = True
 
     console.print("[dim]Initializing context manager...[/dim]")
     context_manager = ContextManager(
@@ -114,10 +116,12 @@ def init_dynamic_schema():
 
     console.print("[dim]Initializing AI agent...[/dim]")
     agent = FunctionCallingAgent(
-        model="qwen-max",
+        model="qwen-max-latest",
         tools=[query_neo4j],
         console=console,
     )
+    # Enable tool call display for CLI mode
+    agent.show_tool_calls = True
 
     console.print("[dim]Initializing context manager...[/dim]")
     context_manager = ContextManager(
@@ -151,7 +155,7 @@ async def run(user_query: str, schema_mode: str = "static"):
     return response
 
 
-async def chat_session(schema_mode: str = "static"):
+async def chat_session(schema_mode: str = "static", tool_usage: bool = False):
     """Interactive multi-turn chat session with Rich formatting
 
     Args:
@@ -342,11 +346,12 @@ def main():
         default="static",
         help="Schema loading mode: 'static' for pre-loaded schema, 'dynamic' for on-demand retrieval",
     )
+    parser.add_argument("--tool_usage", default=False, required=False)
 
     args = parser.parse_args()
 
     try:
-        asyncio.run(chat_session(schema_mode=args.schema_mode))
+        asyncio.run(chat_session(schema_mode=args.schema_mode, tool_usage=args.tool_usage))
     except KeyboardInterrupt:
         print("\nGoodbye!")
 

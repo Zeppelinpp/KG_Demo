@@ -4,6 +4,7 @@ from neo4j import GraphDatabase
 from dotenv import load_dotenv
 from typing import List, Dict, Any, Optional
 from src.utils import get_node_properties, get_relation
+from src.logger import kg_logger
 
 load_dotenv()
 
@@ -73,7 +74,7 @@ def query_neo4j(
     # Restore protected patterns
     for i, pattern in enumerate(protected_patterns):
         cypher_query = cypher_query.replace(placeholder_pattern.format(i), pattern)
-    print(cypher_query)
+    # print(cypher_query)
     try:
         # Connect to Neo4j database
         driver = GraphDatabase.driver(
@@ -89,6 +90,7 @@ def query_neo4j(
 
             return records
     except Exception as e:
+        kg_logger.log_error(f"Query failed: {str(e)}")
         return [{"error": f"Query failed: {str(e)}"}]
 
     finally:
