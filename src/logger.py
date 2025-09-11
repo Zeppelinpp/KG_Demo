@@ -61,7 +61,7 @@ class KGLogger:
     def log_context_loading(
         self, query: str, resources: List[str], context_data: Dict[str, Any]
     ):
-        """Log context manager loading information"""
+        """Log context manager loading information (excluding schema)"""
         self.logger.info(f"[CONTEXT MANAGER] Query: {query}")
         self.logger.info(f"[CONTEXT MANAGER] Resources: {resources}")
         self.logger.info(
@@ -69,14 +69,30 @@ class KGLogger:
         )
         if context_data:
             try:
-                # Try to serialize context data, with fallback for problematic objects
-                serializable_data = self._make_serializable(context_data)
+                # Filter out schema content from context data
+                filtered_data = []
+                if isinstance(context_data, list):
+                    for item in context_data:
+                        if isinstance(item, dict):
+                            content = item.get("content", "")
+                            # Skip schema-related content
+                            if not (isinstance(content, str) and 
+                                   ("Graph Schema" in content or "KG Schema" in content or 
+                                    "Node Details" in content or "Relationship Details" in content)):
+                                filtered_data.append(item)
+                        else:
+                            filtered_data.append(item)
+                else:
+                    filtered_data = context_data
+                
+                # Try to serialize filtered context data
+                serializable_data = self._make_serializable(filtered_data)
                 self.logger.info(
-                    f"[CONTEXT MANAGER] Context data: {json.dumps(serializable_data, ensure_ascii=False, indent=2)}"
+                    f"[CONTEXT MANAGER] Context data (excluding schema): {json.dumps(serializable_data, ensure_ascii=False, indent=2)}"
                 )
             except Exception as e:
                 self.logger.info(
-                    f"[CONTEXT MANAGER] Context data (raw): {str(context_data)}"
+                    f"[CONTEXT MANAGER] Context data (raw, excluding schema): {str(context_data)}"
                 )
                 self.logger.warning(
                     f"[CONTEXT MANAGER] Failed to serialize context data: {e}"
@@ -91,14 +107,14 @@ class KGLogger:
         model: str,
         messages: List[Dict[str, Any]],
     ):
-        """Log LLM call information including prompts"""
+        """Log LLM call information - user message only"""
         self.logger.info(f"[LLM CALL] Model: {model}")
         self.logger.info(f"[LLM CALL] User Query: {user_query}")
-        self.logger.info(
-            f"[LLM CALL] System Prompt: {system_prompt[:500]}{'...' if len(system_prompt) > 500 else ''}"
-        )
-        self.logger.info(f"[LLM CALL] Message History Count: {len(messages)}")
-        for i, msg in enumerate(messages):
+        
+        # Log only user and assistant messages, skip system messages
+        user_messages = [msg for msg in messages if msg.get("role") in ["user", "assistant"]]
+        self.logger.info(f"[LLM CALL] User Message History Count: {len(user_messages)}")
+        for i, msg in enumerate(user_messages):
             role = msg.get("role", "unknown")
             content = msg.get("content", "")
             self.logger.info(
