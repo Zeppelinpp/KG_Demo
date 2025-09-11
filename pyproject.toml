@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastexcel>=0.14.0",
+    "gradio>=5.0.0",
     "milvus>=2.3.9",
     "neo4j>=5.28.2",
     "numpy>=2.3.2",
