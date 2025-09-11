@@ -22,7 +22,7 @@ def insert():
 
 def search():
     results = db.search(
-        "江西银涛药业股份有限公司主账簿在2024年3期应付职工薪酬支出TOP10的部门"
+        "从2025年8期往回近一年存款期末余额环比变化"
     )
     print(results)
 

@@ -186,6 +186,7 @@ class ContextManager:
             except Exception as e:
                 print(f"Warning: Dynamic schema retrieval failed: {e}")
 
+        kg_logger.log_context_loading(query, from_resources, context_messages)
         return context_messages
 
     def _load_mapping_context(
@@ -197,7 +198,6 @@ class ContextManager:
         if not from_resources or not any(
             res in self.collections for res in from_resources
         ):
-            kg_logger.log_context_loading(query, from_resources, {})
             return []
 
         # Load extra information from available collections
@@ -208,7 +208,6 @@ class ContextManager:
         ]
 
         if not available_collections:
-            kg_logger.log_context_loading(query, from_resources, {})
             return []
 
         try:
@@ -227,16 +226,15 @@ class ContextManager:
                     for hit in result[0]:
                         if "entity" in hit and "term" in hit["entity"]:
                             # Convert attributes from RepeatedScalarContainer to list
-                            attributes = hit["entity"].get("attributes", [])
-                            if hasattr(attributes, "__iter__") and not isinstance(
-                                attributes, (str, dict)
+                            description = hit["entity"].get("description", [])
+                            if hasattr(description, "__iter__") and not isinstance(
+                                description, (str, dict)
                             ):
                                 # Convert to list if it's a RepeatedScalarContainer or similar
-                                attributes = list(attributes)
-                            combined_results[hit["entity"]["term"]] = attributes
+                                description = list(description)
+                            combined_results[hit["entity"]["term"]] = description
 
-            # Log context loading information
-            kg_logger.log_context_loading(query, from_resources, combined_results)
+            # Context loading will be logged by the main load_context method
 
             # Generate context messages
             context_messages = []
