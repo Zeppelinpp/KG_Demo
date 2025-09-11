@@ -1,14 +1,18 @@
 import ollama
+import os
+from dotenv import load_dotenv
 from src.context.retriever import MappingRetriever
 from src.model.mapping import Mapping
 from config.constants import BUSSINESS_MAPPING
+
+load_dotenv()
 
 db = MappingRetriever("mapping")
 
 datas = [
     Mapping(
         term=term,
-        term_embedding=ollama.embed(model="bge-m3", input=term).embeddings[0],
+        term_embedding=ollama.embed(model=os.getenv("EMBED_MODEL"), input=term).embeddings[0],
         description=[description] if isinstance(description, str) else description,
     )
     for term, description in BUSSINESS_MAPPING.items()
@@ -22,7 +26,7 @@ def insert():
 
 def search():
     results = db.search(
-        "从2025年8期往回近一年存款期末余额环比变化"
+        "按客户分析2025年3月末应收账款分布（金额及占比），结果按金额降序。"
     )
     print(results)
 

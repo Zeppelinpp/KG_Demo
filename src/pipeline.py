@@ -8,7 +8,7 @@ from rich.prompt import Prompt
 from rich.markdown import Markdown
 from rich.rule import Rule
 from src.model.graph import ExtractedGraphSchema, GraphSchema
-from src.tools import query_neo4j, get_schema_info
+from src.tools import query_neo4j
 from src.prompts import KG_AGENT_PROMPT, DYNAMIC_KG_AGENT_PROMPT
 from src.core import FunctionCallingAgent, Neo4jSchemaExtractor
 from src.context.manager import ContextManager

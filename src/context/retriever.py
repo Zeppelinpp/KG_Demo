@@ -27,7 +27,7 @@ class MappingRetriever:
 
     def search(self, query: str, top_k: int = 5):
         """Search for similar mappings"""
-        query_embedding = self.embed_model.embed(model="bge-m3", input=query).embeddings
+        query_embedding = self.embed_model.embed(model=os.getenv("EMBED_MODEL"), input=query).embeddings
         results = self.client.search(
             collection_name=self.collection_name,
             data=query_embedding,

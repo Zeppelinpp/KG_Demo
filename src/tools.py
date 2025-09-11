@@ -97,6 +97,31 @@ def query_neo4j(
         if driver:
             driver.close()
 
+def add(number1: int, number2: int) -> int:
+    """
+    Add two numbers
+    """
+    return number1 + number2
+
+def subtract(number1: int, number2: int) -> int:
+    """
+    Subtract two numbers number1 by number2
+    """
+    return number1 - number2
+
+def multiply(number1: int, number2: int) -> int:
+    """
+    Multiply two numbers number1 by number2
+    """
+    return number1 * number2
+
+def divide(number1: int, number2: int) -> int:
+    """
+    Divide two numbers number1 by number2
+    """
+    if number2 == 0:
+        return 0
+    return number1 / number2
 
 def get_schema_info(node_types: List[str]):
     """
