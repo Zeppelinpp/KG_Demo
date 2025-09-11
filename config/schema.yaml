@@ -2,178 +2,53 @@ schema:
   indexes: []
   nodeLabels:
   - 凭证
-  - 科目余额
-  - 业务单元
-  - 人员
-  - 仓库
-  - 供应商
-  - 客户
-  - 银行类别
-  - 银行账户
   nodeProperties:
-    业务单元:
-    - 资产职能: string
-    - 税务职能: string
-    - 研发职能: string
-    - uid: string
-    - 库存职能: string
-    - 结算职能: string
-    - 质检职能: string
-    - 收付职能: string
-    - 形态: string
-    - 销售职能: string
-    - 生产职能: string
-    - 核算组织: string
-    - 核算组织类型: string
-    - 采购职能: string
-    - 编码: string
-    - 名称: string
-    - 使用状态: string
-    - 资金职能: string
-    人员:
-    - 类型: string
-    - 人员使用状态: string
-    - 部门: string
-    - 职位: string
-    - 用户禁用: string
-    - 工号: string
-    - 手机号码: string
-    - 序号: string
-    - 用户名: string
-    - 姓名: string
-    - 性别: string
-    - uid: string
-    - 兼职: string
-    - 负责人: string
-    - 直接上级: string
-    仓库:
-    - 创建组织: string
-    - uid: string
-    - 数据状态: string
-    - 序号: string
-    - 可发量控制: string
-    - 使用状态: string
-    - 控制策略: string
-    - 编码: string
-    - 名称: string
-    - 仓库负责人: string
-    供应商:
-    - uid: string
-    - 供应商状态: string
-    - 创建组织: string
-    - 伙伴类型: string
-    - 序号: string
-    - 医药供应商属性: string
-    - 控制策略: string
-    - 原创建组织: string
-    - 使用状态: string
-    - 数据状态: string
-    - 编码: datetime
-    - 名称: string
-    - 可VMI: string
-    - 统一社会信用代码: string
-    - 简称: string
-    - 内部业务单元: string
     凭证:
-    - 核算维度_客户_名称: string
-    - 审核日期: string
+    - 核算维度_仓库_名称: string
+    - 单价: string
     - 核算维度_客户_编码: string
-    - 创建时间: string
-    - 修改时间: string
-    - 来源类型: string
-    - 来源系统: string
+    - 核算维度_客户_名称: string
+    - 核算维度_仓库_编码: string
     - 审核驳回: string
-    - 业务日期: string
-    - 制单人: string
-    - 审核人: string
-    - 过账人: string
+    - 计量单位_编码: string
+    - 计量单位_名称: string
+    - 数量: string
+    - 原币金额: float
+    - 过账人: integer
+    - AI记账: string
+    - 核算维度_资产卡片_资产名称: string
     - 币种: string
-    - 借方: string
-    - 创建人: string
-    - 科目全名: string
-    - 原币金额: string
+    - 原币借方: string
+    - 核算维度_存货类别_名称: string
+    - 核算维度_成本子要素_名称: string
+    - 核算维度_手工输入: string
+    - 核算维度_经营方式_名称: string
+    - 核算维度_项目_项目名称: string
+    - 核算维度_资产使用部门_名称: string
+    - 核算维度_销售组_名称: string
+    - 核算维度_其他往来单位_名称: string
+    - 核算维度_组织机构_名称: string
+    - 核算维度_资产类别_名称: string
+    - 核算维度_部门_名称: string
+    - 核算维度_费用项目_长名称: string
+    - 核算维度_银行账户_账户简称: string
+    - 核算维度_现金账户_账户名称: string
+    - 核算维度_供应商_名称: string
+    - 核算维度_员工_姓名: string
     - 科目编码: string
-    - 科目名称: string
-    - 状态: string
-    - 过账: string
+    - 科目全名: string
+    - 贷方合计: float
     - 摘要: string
-    - 凭证字: string
-    - 科目_发生额方向: string
+    - 核算维度_银行_名称: string
+    - 过账: string
+    - 凭证摘要: string
+    - 借方合计: float
+    - 凭证字: integer
     - 凭证号: string
-    - 账簿: string
+    - 状态: string
     - 序号: string
-    - 期间: string
+    - 账簿: integer
+    - 期间: integer
     - 记账日期: string
     - uid: string
-    - 贷方: string
-    - 核算维度_银行_名称: string
-    - 复核人: string
-    - 核算维度_现金账户_账户名称: string
-    - 核算维度_员工_姓名: string
-    - 核算维度_员工_工号: string
-    - 核算维度_部门_长名称: string
-    - 核算维度_部门_编码: string
-    - 到期日: string
-    - 核算维度_物料_名称: string
-    - 核算维度_资产类别_长名称: string
-    - 核算维度_供应商_名称: string
-    - 核算维度_供应商_编码: string
-    客户:
-    - 业务职能: string
-    - 可用状态: string
-    - 医药客户属性: string
-    - 创建组织: string
-    - uid: string
-    - 伙伴类型: string
-    - 客户名称: string
-    - 数据状态: string
-    - 客户编码: string
-    - 控制策略: string
-    - 序号: string
-    科目余额:
-    - 基础资料属性: string
-    - 期末余额_贷方金额: string
-    - 年初余额_贷方金额: string
-    - 期初余额_贷方金额: string
-    - 科目名称: string
-    - 序号: string
-    - 期间: string
-    - 科目编码: string
-    - uid: string
-    - 期末余额_借方金额: string
-    - 年初余额_借方金额: string
-    - 期初余额_借方金额: string
-    - 本期发生额_借方金额: string
-    - 本年累计_借方金额: string
-    - 本年累计_贷方金额: string
-    - 本期发生额_贷方金额: string
-    银行类别:
-    - uid: string
-    - 最后更新时间: string
-    - 序号: string
-    - 名称: string
-    - 最后更新人: string
-    - 编码: string
-    - 使用状态: string
-    - 行别代码: string
-    - 简码: string
-    银行账户:
-    - 账户性质: string
-    - 账户状态: string
-    - 账户类型: string
-    - 银行类别: string
-    - 金融机构类别: string
-    - 申请公司: string
-    - 开户公司: string
-    - 账户简称: string
-    - 最后更新时间: string
-    - 银行账号: string
-    - uid: string
-    - 使用状态: string
-    - 序号: string
-    - 最后更新人: string
-    - 控制策略: string
-    - 数据状态: string
-    - 币别范围: string
-    - 开户行: string
   relationships: []
