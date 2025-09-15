@@ -1,5 +1,8 @@
 import os
 import json
+from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.core import VectorStoreIndex
+from llama_index.vector_stores.milvus import MilvusVectorStore
 import ollama
 from openai import AsyncOpenAI
 from pymilvus import MilvusClient
@@ -91,3 +94,4 @@ class SchemaRetriever:
                     f"## 节点标签:{result['entity']['node_type']}\n- 属性:{result['entity']['properties']}\n- Pattern:{result['entity']['patterns']}\n"
                 )
         return "\n".join(doc)
+
