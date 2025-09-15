@@ -1,54 +1,323 @@
 schema:
   indexes: []
   nodeLabels:
-  - 凭证
+  - 科目余额
+  - 供应商
+  - 存货类别
+  - 客户分组
+  - 客户
+  - 物料分组
+  - 组织机构
+  - 费用项目
+  - 资产类别
+  - 银行
+  - 银行账号
+  - 资产负债表
+  - 资产负债表数据
   nodeProperties:
-    凭证:
-    - 核算维度_仓库_名称: string
-    - 单价: string
-    - 核算维度_客户_编码: string
-    - 核算维度_客户_名称: string
-    - 核算维度_仓库_编码: string
-    - 审核驳回: string
-    - 计量单位_编码: string
-    - 计量单位_名称: string
-    - 数量: string
-    - 原币金额: float
-    - 过账人: integer
-    - AI记账: string
-    - 核算维度_资产卡片_资产名称: string
-    - 币种: string
-    - 原币借方: string
-    - 核算维度_存货类别_名称: string
-    - 核算维度_成本子要素_名称: string
-    - 核算维度_手工输入: string
-    - 核算维度_经营方式_名称: string
-    - 核算维度_项目_项目名称: string
-    - 核算维度_资产使用部门_名称: string
-    - 核算维度_销售组_名称: string
-    - 核算维度_其他往来单位_名称: string
-    - 核算维度_组织机构_名称: string
-    - 核算维度_资产类别_名称: string
-    - 核算维度_部门_名称: string
-    - 核算维度_费用项目_长名称: string
-    - 核算维度_银行账户_账户简称: string
-    - 核算维度_现金账户_账户名称: string
-    - 核算维度_供应商_名称: string
-    - 核算维度_员工_姓名: string
-    - 科目编码: string
-    - 科目全名: string
-    - 贷方合计: float
-    - 摘要: string
-    - 核算维度_银行_名称: string
-    - 过账: string
-    - 凭证摘要: string
-    - 借方合计: float
-    - 凭证字: integer
-    - 凭证号: string
-    - 状态: string
-    - 序号: string
-    - 账簿: integer
-    - 期间: integer
-    - 记账日期: string
+    供应商:
+    - 银行网点: string
+    - 商品类别: string
+    - 对应集团供应商: string
+    - 集团供应商: string
+    - SwiftCode: string
+    - 注册编码: string
+    - 网点名称: string
+    - 币别: string
+    - 开户行地址: string
+    - 联行号: string
+    - 默认: string
+    - 描述: string
+    - 开户银行: string
+    - 账户名称: string
+    - 收款银行: string
+    - 国家: string
+    - 银行账号: string
+    - 审核日期: string
+    - 数据状态: string
+    - 审核人: datetime
+    - 创建日期: string
+    - 供应商分组: string
+    - 禁用状态: string
+    - 简称: string
+    - 禁用日期: string
     - uid: string
-  relationships: []
+    - 编码: string
+    - 名称: string
+    - 创建人: string
+    存货类别:
+    - 数据状态: string
+    - 禁用日期: string
+    - 禁用状态: string
+    - 审核人: string
+    - 审核日期: string
+    - 创建人: string
+    - 创建日期: string
+    - uid: string
+    - 禁用人: string
+    - 编码: string
+    - 名称: string
+    - 修改人: string
+    - 修改日期: string
+    客户:
+    - 集团客户标识_仅用于审核操作功能的一个判断标识: string
+    - 客户类别: string
+    - 对应集团客户: string
+    - 默认付款方: string
+    - 不校验可发量: string
+    - 集团客户: string
+    - 公司类别: string
+    - 公司性质: string
+    - 公司规模: string
+    - 对应供应商: string
+    - 创立日期: string
+    - 行业: string
+    - 传真: string
+    - 纳税登记号: string
+    - 注册地址: string
+    - 联系电话: string
+    - 法人代表: string
+    - 注册资本: string
+    - 地区: string
+    - 通讯地址: string
+    - 邮政编码: string
+    - 公司网址: string
+    - 客户编码: string
+    - 单据状态: string
+    - 修改日期: string
+    - 禁用人: string
+    - 客户名称: datetime
+    - 银行账号: string
+    - 开户银行: string
+    - 修改人: string
+    - 禁用日期: string
+    - 禁用状态: string
+    - 国家: string
+    - 审核人: string
+    - 审核日期: string
+    - 创建人: string
+    - 创建日期: string
+    - 统一社会信用代码: string
+    - 开票联系电话: string
+    - 开票通讯地址: string
+    - 简称: string
+    - 客户优先级: string
+    - 客户分组: string
+    - 订货平台管理员: string
+    - 发票抬头: datetime
+    - 默认税率: string
+    - 启用信用管理: string
+    - 发票类型: string
+    - uid: string
+    - 运输提前期: string
+    - 税分类: string
+    - 结算方式: string
+    - 收款条件: string
+    - 价目表: string
+    - 折扣表: string
+    - 销售部门: string
+    - 销售员: string
+    - 备注: string
+    - 结算币别: string
+    - 销售组: string
+    客户分组:
+    - uid: string
+    - 编码: string
+    - 名称: string
+    物料分组:
+    - uid: string
+    - 全部: string
+    - 名称: string
+    科目余额:
+    - 期间: string
+    - 本年累计实际损益发生额: float
+    - 账簿: string
+    - 期末余额_贷方: float
+    - 本期实际损益发生额: float
+    - 本年累计_贷方: float
+    - 期末余额_借方: float
+    - 本期发生_贷方: float
+    - 本年累计_借方: float
+    - 期初余额_贷方: float
+    - 本期发生_借方: float
+    - 年初余额_贷方: float
+    - 期初余额_借方: float
+    - 币别: string
+    - 年初余额_借方: float
+    - 银行_名称: string
+    - 银行账号_编码: string
+    - 银行账号_名称: string
+    - 方向: string
+    - 费用项目_名称: string
+    - 存货类别_编码: string
+    - 存货类别_名称: string
+    - 银行_编码: string
+    - 员工_名称: string
+    - 物料_编码: string
+    - 物料_名称: string
+    - 费用项目_编码: string
+    - 客户_名称: string
+    - 部门_编码: string
+    - 部门_名称: string
+    - 员工_编码: string
+    - 会计要素: string
+    - 供应商_名称: string
+    - 客户_编码: string
+    - 科目类别: string
+    - 供应商_编码: string
+    - 科目编码: string
+    - 科目名称: string
+    - uid: string
+    - 期末余额_本位币_贷: string
+    - 期末余额_本位币_借: string
+    - 期末余额_原币_贷: string
+    - 本年累计_本位币_贷: string
+    - 期末余额_原币_借: string
+    - 本年累计_本位币_借: string
+    - 本年累计_原币_贷: string
+    - 本期发生_本位币_贷: string
+    - 本年累计_原币_借: string
+    - 本期发生_本位币_借: string
+    - 本期发生_原币_贷: string
+    - 期初余额_本位币_贷: string
+    - 本期发生_原币_借: string
+    - 期初余额_本位币_借: string
+    - 期初余额_原币_贷: string
+    - 期初余额_原币_借: string
+    - 本年累计实际损益发生额_本位币: string
+    - 本期实际损益发生额_本位币: string
+    - 本年累计实际损益发生额_原币: string
+    - 年初余额_本位币_贷: string
+    - 本期实际损益发生额_原币: string
+    - 年初余额_本位币_借: string
+    - 年初余额_原币_贷: string
+    - 年初余额_原币_借: string
+    组织机构:
+    - uid: string
+    - 编码: string
+    - 名称: string
+    费用项目:
+    - 修改日期: string
+    - 禁用人: string
+    - 享受税收优惠政策: string
+    - 税收优惠政策类型: string
+    - 可用于报销: string
+    - 修改人: string
+    - 分组: string
+    - 系统预置: string
+    - 税收分类编码: string
+    - 描述: string
+    - 存货成本类别: string
+    - 是否默认: string
+    - 数据状态: string
+    - 禁用状态: string
+    - 税率: string
+    - 创建日期: string
+    - 审核日期: string
+    - 名称: string
+    - 禁用日期: string
+    - uid: string
+    - 编码: string
+    - 创建人: string
+    - 审核人: string
+    资产类别:
+    - 名称: string
+    - uid: string
+    - 编码: string
+    - 原值包含进项税: string
+    - 默认计量单位: string
+    - 数据状态: string
+    - 描述: string
+    资产负债表:
+    - 月: integer
+    - 期间: string
+    - 年: integer
+    - 货币单位: string
+    资产负债表数据:
+    - 名称: string
+    - 是否总计: integer
+    - 分类: string
+    - 是否小计: integer
+    - 期末数: float
+    - 年初数: float
+    银行:
+    - 银行地址: string
+    - 省: string
+    - 城市: string
+    - 地区: string
+    - 修改人: string
+    - 修改日期: string
+    - 银行: string
+    - 地区码: string
+    - 地区名: string
+    - 禁用人: string
+    - 禁用状态: string
+    - 联行号: string
+    - 描述: string
+    - 银行网点: string
+    - 审核日期: string
+    - 数据状态: string
+    - 创建日期: string
+    - 审核人: string
+    - 名称: string
+    - 禁用日期: string
+    - uid: string
+    - 国别: string
+    - 编码: string
+    - 创建人: string
+    银行账号:
+    - 修改日期: string
+    - 地区: string
+    - 开户银行: string
+    - 禁用人: string
+    - 银行账号: string
+    - 修改人: string
+    - 数据状态: string
+    - 禁用状态: string
+    - 账户名称: string
+    - 审核人: string
+    - 审核日期: string
+    - 创建人: string
+    - 创建日期: string
+    - 透支额度: string
+    - 倒序下载对账单: string
+    - 网上银行类型: string
+    - 禁用日期: string
+    - 透支策略: string
+    - 支持电子回单: string
+    - 支持导入负余额对账单: float
+    - 支持自动下载电子回单: string
+    - 支持自动下载当天电子回单: string
+    - 部门: string
+    - 聚合收款商户号: string
+    - 登录配置编号: string
+    - 银行版本: string
+    - 支持BBC分销门户显示: string
+    - 启用智能对账: string
+    - 默认账号: string
+    - 授权密码: string
+    - 对公账号: string
+    - 账户收支属性: string
+    - 内部账户: string
+    - 支持网银: string
+    - 留底余额: float
+    - 最小上划金额: float
+    - 上划方式: string
+    - 上划定额: string
+    - 开户银行地址: string
+    - 账户地区码: string
+    - 账户地区名: string
+    - 资金上划: string
+    - 账号类型: string
+    - 开户银行联行号: string
+    - 银行: string
+    - 省: string
+    - 城市: string
+    - 国别: string
+    - uid: string
+  relationships:
+  - relation: 属于资产负债表数据
+    source_labels:
+    - 资产负债表数据
+    target_labels:
+    - 资产负债表

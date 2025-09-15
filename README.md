@@ -132,13 +132,13 @@ python main.py --schema-mode dynamic
 
 ### Schema Modes Comparison
 
-| Feature | Static Mode | Dynamic Mode |
-|---------|-------------|-------------|
-| **Startup Time** | Slower (schema extraction) | Faster (no pre-loading) |
-| **Memory Usage** | Higher (full schema cached) | Lower (minimal schema) |
-| **Query Speed** | Faster (schema ready) | Moderate (retrieval needed) |
-| **Schema Coverage** | Complete | Context-relevant |
-| **Best For** | Comprehensive queries | Targeted queries |
+| Feature             | Static Mode                 | Dynamic Mode                |
+| ------------------- | --------------------------- | --------------------------- |
+| **Startup Time**    | Slower (schema extraction)  | Faster (no pre-loading)     |
+| **Memory Usage**    | Higher (full schema cached) | Lower (minimal schema)      |
+| **Query Speed**     | Faster (schema ready)       | Moderate (retrieval needed) |
+| **Schema Coverage** | Complete                    | Context-relevant            |
+| **Best For**        | Comprehensive queries       | Targeted queries            |
 
 ### Data Synchronization
 
