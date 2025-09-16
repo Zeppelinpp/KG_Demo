@@ -5,7 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "eventlet>=0.40.3",
     "fastexcel>=0.14.0",
+    "flask>=3.1.2",
+    "flask-cors>=6.0.1",
+    "flask-socketio>=5.5.1",
     "gradio>=5.0.0",
     "llama-index-core>=0.14.1",
     "llama-index-embeddings-ollama>=0.8.3",
@@ -21,6 +25,7 @@ dependencies = [
     "polars>=1.32.3",
     "pymilvus>=2.6.1",
     "python-dotenv>=1.1.1",
+    "python-socketio>=5.13.0",
     "pyyaml>=6.0.1",
     "rich>=14.1.0",
 ]
