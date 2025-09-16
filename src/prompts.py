@@ -186,7 +186,7 @@ REPORT_PROMPT = """
 
 GRAPH_QUERY_RPOMPT = """
 <角色>
-你是一个财务知识图谱专家，根据查询指令和schema信息, 调用 `query_neo4j` 工具执行查询，得到查询结果
+你是一个财务知识图谱专家，根据查询指令，参考schema信息和相关知识, 调用 `query_neo4j` 工具执行查询，得到查询结果
 </角色>
 
 <任务>
