@@ -63,49 +63,49 @@ def get_node_schema():
         nodes = session.run(GET_NODES).data()
         for node in nodes:
             node_type = node["nodeType"].split(":")[-1].strip("`")
-
-            # Skip nodes that don't have any relationships
-            if node_type not in connected_node_labels:
-                continue
-
             properties = node["properties"]
 
-            # Extract out and in relations
-            out_relations = session.run(
-                GET_OUT_RELATED_RELATIONS.format(node_type=node_type)
-            ).data()
-            out_relations = [relation["relationType"] for relation in out_relations]
-            in_relations = session.run(
-                GET_IN_RELATED_RELATIONS.format(node_type=node_type)
-            ).data()
-            in_relations = [relation["relationType"] for relation in in_relations]
+            if node_type in connected_node_labels:
+                # Extract out and in relations
+                out_relations = session.run(
+                    GET_OUT_RELATED_RELATIONS.format(node_type=node_type)
+                ).data()
+                out_relations = [relation["relationType"] for relation in out_relations]
+                in_relations = session.run(
+                    GET_IN_RELATED_RELATIONS.format(node_type=node_type)
+                ).data()
+                in_relations = [relation["relationType"] for relation in in_relations]
 
-            # Extract patterns
-            patterns = []
-            for relation in out_relations:
-                out_patterns = session.run(
-                    GET_OUT_PATTERNS.format(node_type=node_type, relation_type=relation)
-                ).data()
-                for pattern in out_patterns:
-                    patterns.append(
-                        Pattern(
-                            source=node_type,
-                            target=pattern["targetType"][0],
-                            relation=relation,
+                # Extract patterns
+                patterns = []
+                for relation in out_relations:
+                    out_patterns = session.run(
+                        GET_OUT_PATTERNS.format(node_type=node_type, relation_type=relation)
+                    ).data()
+                    for pattern in out_patterns:
+                        patterns.append(
+                            Pattern(
+                                source=node_type,
+                                target=pattern["targetType"][0],
+                                relation=relation,
+                            )
                         )
-                    )
-            for relation in in_relations:
-                in_patterns = session.run(
-                    GET_IN_PATTERNS.format(node_type=node_type, relation_type=relation)
-                ).data()
-                for pattern in in_patterns:
-                    patterns.append(
-                        Pattern(
-                            source=pattern["sourceType"][0],
-                            target=node_type,
-                            relation=relation,
+                for relation in in_relations:
+                    in_patterns = session.run(
+                        GET_IN_PATTERNS.format(node_type=node_type, relation_type=relation)
+                    ).data()
+                    for pattern in in_patterns:
+                        patterns.append(
+                            Pattern(
+                                source=pattern["sourceType"][0],
+                                target=node_type,
+                                relation=relation,
+                            )
                         )
-                    )
+            else:
+                out_relations = []
+                in_relations = []
+                patterns = []
 
             # Get sample data
             sample_data = session.run(
@@ -113,12 +113,10 @@ def get_node_schema():
             ).data()
             sample_data = [str(record["sample"]) for record in sample_data]
 
-            # Gen embedding with node + rel + pattern
+            # Gen embedding with node + rel
             doc = [
                 f"节点标签：{node_type}",
                 f"节点属性：{properties}",
-                f"出边关系：{out_relations}",
-                f"入边关系：{in_relations}",
             ]
             doc_str = "\n".join(doc)
             doc_embedding = ollama.embed(model="bge-m3", input=doc_str).embeddings[0]
