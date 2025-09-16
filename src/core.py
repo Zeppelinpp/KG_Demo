@@ -183,6 +183,7 @@ class FunctionCallingAgent:
         tools: List[Callable],
         console: Console = None,
         tool_usage: bool = False,
+        event_callback: Callable = None,
     ):
         self.model = model
         self.tool_functions = {
@@ -195,15 +196,23 @@ class FunctionCallingAgent:
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY"), base_url=os.getenv("OPENAI_BASE_URL")
         )
-        self.max_iterations = 100  # Prevent infinite loops
+        self.max_iterations = 5  # Prevent infinite loops
         self.chat_history = []  # Store conversation history
         self.console = console or Console()
+        self.event_callback = event_callback  # Callback for emitting events
 
     async def _handle_tool_call(self, tool_call: Dict[str, Any]) -> str:
         """Execute a tool call and return the result"""
         try:
             function_name = tool_call["function"]["name"]
             function_args = json.loads(tool_call["function"]["arguments"])
+
+            # Emit tool call event if callback is provided
+            if self.event_callback:
+                await self.event_callback("tool_call_start", {
+                    "tool_name": function_name,
+                    "tool_args": function_args
+                })
 
             # Log tool call information (don't print to console to avoid interference with Gradio)
             # Display tool call information only if not in web mode
@@ -248,6 +257,14 @@ class FunctionCallingAgent:
 
                 # Log tool call information
                 kg_logger.log_tool_call(function_name, function_args, str(result))
+
+                # Emit tool call result event if callback is provided
+                if self.event_callback:
+                    await self.event_callback("tool_call_complete", {
+                        "tool_name": function_name,
+                        "tool_args": function_args,
+                        "tool_result": result
+                    })
 
                 # Display result summary only if not in web mode
 
