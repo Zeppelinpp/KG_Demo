@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Graph Assistant</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Chat Section - Left 2/3 */
+        .chat-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.assistant {
+            text-align: left;
+        }
+
+        .message-content {
+            display: inline-block;
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background-color: #f1f3f5;
+            color: #333;
+        }
+        
+        /* Markdown content styling */
+        .message-content h1, .message-content h2, .message-content h3 {
+            margin-top: 16px;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .message-content h1 { font-size: 1.5em; }
+        .message-content h2 { font-size: 1.3em; }
+        .message-content h3 { font-size: 1.1em; }
+        
+        .message-content p {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .message-content ul, .message-content ol {
+            margin-left: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .message-content li {
+            margin-bottom: 4px;
+            line-height: 1.5;
+        }
+        
+        .message-content code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #d14;
+        }
+        
+        .message-content pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+        
+        .message-content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .message-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 8px 0;
+        }
+        
+        .message-content th, .message-content td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .message-content th {
+            background-color: #f4f4f4;
+            font-weight: 600;
+        }
+        
+        .message-content blockquote {
+            border-left: 3px solid #007bff;
+            padding-left: 12px;
+            margin: 8px 0;
+            color: #555;
+            font-style: italic;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background-color: #ffffff;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #007bff;
+        }
+
+        .send-button {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .send-button:hover {
+            background-color: #0056b3;
+        }
+
+        .send-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Workflow Section - Right 1/3 */
+        .workflow-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+            overflow: hidden;
+        }
+
+        .workflow-header {
+            padding: 20px;
+            background-color: #34495e;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .workflow-header h2 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .workflow-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .workflow-step {
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .workflow-step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .workflow-step-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .workflow-step-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #ffeaa7;
+            color: #d63031;
+        }
+
+        .status-running {
+            background-color: #74b9ff;
+            color: #0984e3;
+        }
+
+        .status-completed {
+            background-color: #55efc4;
+            color: #00b894;
+        }
+
+        .status-error {
+            background-color: #ff7675;
+            color: #d63031;
+        }
+
+        .workflow-step-content {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .analysis-queries {
+            margin-top: 10px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .analysis-queries h4 {
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .analysis-queries ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .analysis-queries li {
+            padding: 4px 0;
+            color: #555;
+        }
+
+        .analysis-queries li:before {
+            content: "• ";
+            color: #007bff;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .agent-work {
+            margin-top: 12px;
+            padding: 12px;
+            background-color: #f1f3f5;
+            border-radius: 6px;
+            border-left: 3px solid #007bff;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .tool-call {
+            margin-top: 8px;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .tool-call-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            color: #555;
+        }
+
+        .tool-icon {
+            margin-right: 8px;
+        }
+
+        .tool-call-args {
+            margin-top: 6px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            color: #333;
+        }
+
+        .tool-call-result {
+            margin-top: 6px;
+            padding: 8px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #2e7d32;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .report-info {
+            margin-top: 12px;
+            padding: 12px;
+            background-color: #e3f2fd;
+            border-radius: 6px;
+            border-left: 3px solid #2196f3;
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Code block styling */
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+
+        .cypher-container {
+            margin: 8px 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .cypher-toggle {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f5f5f5;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        
+        .cypher-toggle:hover {
+            background-color: #e8e8e8;
+        }
+        
+        .cypher-toggle-icon {
+            margin-right: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .cypher-toggle.expanded .cypher-toggle-icon {
+            transform: rotate(90deg);
+        }
+        
+        .cypher-query {
+            display: none;
+            background-color: #1e1e1e;
+            color: #4fc3f7;
+            padding: 12px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            border-top: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .cypher-query.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Chat Section -->
+        <div class="chat-section">
+            <div class="chat-header">
+                <h1>🧠 Knowledge Graph Assistant</h1>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will be dynamically added here -->
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        class="chat-input" 
+                        placeholder="输入您的问题..."
+                        autocomplete="off"
+                    >
+                    <button id="sendButton" class="send-button">发送</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Workflow Section -->
+        <div class="workflow-section">
+            <div class="workflow-header">
+                <h2>工作流状态</h2>
+            </div>
+            
+            <div class="workflow-content" id="workflowContent">
+                <!-- Workflow steps will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        // DOM elements
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const workflowContent = document.getElementById('workflowContent');
+        
+        // State
+        let isProcessing = false;
+        let currentReport = '';
+        let workflowSteps = {};
+        let agentTasks = {};
+        
+        // Connect to server
+        socket.on('connected', (data) => {
+            console.log('Connected with session ID:', data.session_id);
+        });
+        
+        // Handle query submission
+        function submitQuery() {
+            const query = chatInput.value.trim();
+            if (!query || isProcessing) return;
+            
+            // Add user message
+            addMessage('user', query);
+            
+            // Clear input
+            chatInput.value = '';
+            
+            // Set processing state
+            isProcessing = true;
+            sendButton.disabled = true;
+            sendButton.textContent = '处理中...';
+            
+            // Clear workflow content
+            workflowContent.innerHTML = '';
+            workflowSteps = {};
+            agentTasks = {};
+            currentReport = '';
+            
+            // Send query to server
+            socket.emit('submit_query', { query });
+        }
+        
+        // Add message to chat
+        function addMessage(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            // Use marked.js to render markdown
+            if (role === 'assistant') {
+                contentDiv.innerHTML = marked.parse(content);
+            } else {
+                // For user messages, just escape HTML
+                contentDiv.textContent = content;
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Create or update workflow step
+        function createOrUpdateWorkflowStep(id, title, status = 'pending') {
+            let stepDiv = workflowSteps[id];
+            
+            if (!stepDiv) {
+                stepDiv = document.createElement('div');
+                stepDiv.className = 'workflow-step';
+                stepDiv.innerHTML = `
+                    <div class="workflow-step-header">
+                        <div class="workflow-step-title">${title}</div>
+                        <div class="workflow-step-status status-${status}">${getStatusText(status)}</div>
+                    </div>
+                    <div class="workflow-step-content" id="${id}-content"></div>
+                `;
+                workflowContent.appendChild(stepDiv);
+                workflowSteps[id] = stepDiv;
+            } else {
+                // Update status
+                const statusDiv = stepDiv.querySelector('.workflow-step-status');
+                statusDiv.className = `workflow-step-status status-${status}`;
+                statusDiv.textContent = getStatusText(status);
+            }
+            
+            return stepDiv;
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': '等待中',
+                'running': '执行中',
+                'completed': '已完成',
+                'done': '已完成',
+                'error': '错误'
+            };
+            return statusMap[status] || status;
+        }
+        
+        // Handle workflow events
+        socket.on('workflow_event', (event) => {
+            console.log('Workflow event:', event);
+            
+            switch (event.type) {
+                case 'analysis_status':
+                    handleAnalysisStatus(event.data);
+                    break;
+                    
+                case 'analysis_complete':
+                    handleAnalysisComplete(event.data);
+                    break;
+                    
+                case 'execution_status':
+                    handleExecutionStatus(event.data);
+                    break;
+                    
+                case 'query_executed':
+                    handleQueryExecuted(event.data);
+                    break;
+                    
+                case 'tool_call':
+                    handleToolCall(event.data);
+                    break;
+                    
+                case 'report_status':
+                    handleReportStatus(event.data);
+                    break;
+                    
+                case 'report_chunk':
+                    handleReportChunk(event.data);
+                    break;
+                    
+                case 'workflow_complete':
+                    handleWorkflowComplete(event.data);
+                    break;
+                    
+                case 'workflow_error':
+                    handleWorkflowError(event.data);
+                    break;
+            }
+        });
+        
+        function handleAnalysisStatus(data) {
+            const status = data.status === 'done' ? 'completed' : 'running';
+            createOrUpdateWorkflowStep('analysis', '🔍 查询分析', status);
+        }
+        
+        function handleAnalysisComplete(data) {
+            const stepDiv = createOrUpdateWorkflowStep('analysis', '🔍 查询分析', 'completed');
+            const contentDiv = document.getElementById('analysis-content');
+            
+            // Make sure contentDiv exists
+            if (!contentDiv) {
+                console.error('Analysis content div not found');
+                return;
+            }
+            
+            let queriesHtml = '<div class="analysis-queries">';
+            queriesHtml += `<h4>主查询:</h4><p>${data.main_query || '无'}</p>`;
+            
+            if (data.insights_queries && data.insights_queries.length > 0) {
+                queriesHtml += '<h4>洞察查询:</h4><ul>';
+                data.insights_queries.forEach(query => {
+                    queriesHtml += `<li>${query}</li>`;
+                });
+                queriesHtml += '</ul>';
+            }
+            queriesHtml += '</div>';
+            
+            contentDiv.innerHTML = queriesHtml;
+        }
+        
+        function handleExecutionStatus(data) {
+            const status = data.status === 'done' ? 'completed' : 'running';
+            createOrUpdateWorkflowStep('execution', '📊 查询执行', status);
+            
+            if (data.status === 'pending') {
+                const contentDiv = document.getElementById('execution-content');
+                contentDiv.innerHTML = `<p>准备执行 ${data.total_queries || ''} 个查询...</p>`;
+            }
+        }
+        
+        function handleQueryExecuted(data) {
+            const stepDiv = workflowSteps['execution'];
+            if (!stepDiv) return;
+            
+            const contentDiv = document.getElementById('execution-content');
+            const agentId = data.query_type;
+            
+            if (!agentTasks[agentId]) {
+                const agentDiv = document.createElement('div');
+                agentDiv.className = 'agent-work';
+                agentDiv.innerHTML = `
+                    <div class="agent-name">${getAgentName(data.query_type)}</div>
+                    <div id="agent-${agentId}-tasks"></div>
+                `;
+                contentDiv.appendChild(agentDiv);
+                agentTasks[agentId] = agentDiv;
+            }
+            
+            const tasksDiv = document.getElementById(`agent-${agentId}-tasks`);
+            const queryInfo = document.createElement('div');
+            queryInfo.style.marginBottom = '8px';
+            queryInfo.innerHTML = `<small>✓ 查询: ${data.query.substring(0, 50)}...</small>`;
+            tasksDiv.appendChild(queryInfo);
+        }
+        
+        function getAgentName(queryType) {
+            if (queryType === 'main') {
+                return '主查询代理';
+            } else if (queryType.startsWith('insight_')) {
+                const num = parseInt(queryType.split('_')[1]) + 1;
+                return `洞察代理 ${num}`;
+            }
+            return queryType;
+        }
+        
+        function handleToolCall(data) {
+            // Use query_type if available, otherwise try to get from agent name
+            const agentId = data.query_type || getAgentIdFromName(data.agent);
+            
+            // Ensure the execution step exists
+            if (!workflowSteps['execution']) {
+                createOrUpdateWorkflowStep('execution', '📊 查询执行', 'running');
+            }
+            
+            // Create agent section if it doesn't exist
+            if (!agentTasks[agentId]) {
+                const contentDiv = document.getElementById('execution-content');
+                const agentDiv = document.createElement('div');
+                agentDiv.className = 'agent-work';
+                agentDiv.innerHTML = `
+                    <div class="agent-name">${getAgentName(agentId)}</div>
+                    <div id="agent-${agentId}-tasks"></div>
+                `;
+                contentDiv.appendChild(agentDiv);
+                agentTasks[agentId] = agentDiv;
+            }
+            
+            const tasksDiv = document.getElementById(`agent-${agentId}-tasks`);
+            const toolDiv = document.createElement('div');
+            toolDiv.className = 'tool-call';
+            
+            let toolHtml = `
+                <div class="tool-call-header">
+                    <span class="tool-icon">🔧</span>
+                    <strong>${data.tool_name}</strong>
+                </div>
+            `;
+            
+            if (data.tool_args) {
+                // Special handling for Cypher queries with collapsible container
+                if (data.tool_name === 'query_neo4j' && data.tool_args.cypher_query) {
+                    const uniqueId = `cypher-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                    toolHtml += `
+                        <div class="cypher-container">
+                            <div class="cypher-toggle" onclick="toggleCypher('${uniqueId}')">
+                                <span class="cypher-toggle-icon">▶</span>
+                                <span>Cypher查询 (点击展开)</span>
+                            </div>
+                            <div id="${uniqueId}" class="cypher-query">${escapeHtml(data.tool_args.cypher_query)}</div>
+                        </div>
+                    `;
+                } else {
+                    toolHtml += `<div class="tool-call-args">${escapeHtml(JSON.stringify(data.tool_args, null, 2))}</div>`;
+                }
+            }
+            
+            if (data.tool_result) {
+                const resultPreview = typeof data.tool_result === 'string' 
+                    ? data.tool_result.substring(0, 200) + (data.tool_result.length > 200 ? '...' : '')
+                    : JSON.stringify(data.tool_result, null, 2).substring(0, 200) + '...';
+                toolHtml += `<div class="tool-call-result">结果: ${escapeHtml(resultPreview)}</div>`;
+            }
+            
+            toolDiv.innerHTML = toolHtml;
+            tasksDiv.appendChild(toolDiv);
+        }
+        
+        function getAgentIdFromName(agentName) {
+            if (agentName === 'Main Query Agent') return 'main';
+            if (agentName.startsWith('Insight Agent')) {
+                const num = parseInt(agentName.split(' ')[2]) - 1;
+                return `insight_${num}`;
+            }
+            return agentName;
+        }
+        
+        function handleReportStatus(data) {
+            const status = data.status === 'done' ? 'completed' : 'running';
+            const stepDiv = createOrUpdateWorkflowStep('report', '📝 报告生成', status);
+            
+            // Add info about report being generated in chat
+            if (status === 'running') {
+                const contentDiv = document.getElementById('report-content');
+                if (contentDiv) {
+                    contentDiv.innerHTML = '<div class="report-info">正在生成综合分析报告，内容将在左侧聊天框中实时显示...</div>';
+                }
+            }
+        }
+        
+        function handleReportChunk(data) {
+            currentReport += data.chunk;
+            
+            // Check if we already have a report message in chat
+            let reportMessageDiv = document.getElementById('report-message');
+            
+            if (!reportMessageDiv) {
+                // Create new assistant message for report
+                reportMessageDiv = document.createElement('div');
+                reportMessageDiv.className = 'message assistant';
+                reportMessageDiv.id = 'report-message';
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.id = 'report-content-chat';
+                
+                reportMessageDiv.appendChild(contentDiv);
+                chatMessages.appendChild(reportMessageDiv);
+            }
+            
+            // Update report content with streaming markdown
+            const contentDiv = document.getElementById('report-content-chat');
+            // Use marked.js to render markdown
+            contentDiv.innerHTML = marked.parse(currentReport);
+            
+            // Auto scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function handleWorkflowComplete(data) {
+            // Report is already displayed via streaming, no need to add again
+            
+            // Update all workflow steps to completed
+            Object.keys(workflowSteps).forEach(stepId => {
+                const stepDiv = workflowSteps[stepId];
+                const statusDiv = stepDiv.querySelector('.workflow-step-status');
+                if (statusDiv && !statusDiv.classList.contains('status-error')) {
+                    statusDiv.className = 'workflow-step-status status-completed';
+                    statusDiv.textContent = getStatusText('completed');
+                }
+            });
+            
+            // Reset state
+            isProcessing = false;
+            sendButton.disabled = false;
+            sendButton.textContent = '发送';
+        }
+        
+        function handleWorkflowError(data) {
+            // Add error message to chat
+            addMessage('assistant', `❌ 处理过程中出现错误: ${data.error}`);
+            
+            // Update workflow status
+            Object.keys(workflowSteps).forEach(stepId => {
+                const stepDiv = workflowSteps[stepId];
+                const statusDiv = stepDiv.querySelector('.workflow-step-status');
+                if (statusDiv && !statusDiv.classList.contains('status-completed')) {
+                    statusDiv.className = 'workflow-step-status status-error';
+                    statusDiv.textContent = '错误';
+                }
+            });
+            
+            // Reset state
+            isProcessing = false;
+            sendButton.disabled = false;
+            sendButton.textContent = '发送';
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Toggle Cypher query visibility
+        function toggleCypher(id) {
+            const cypherDiv = document.getElementById(id);
+            const toggleDiv = cypherDiv.previousElementSibling;
+            
+            cypherDiv.classList.toggle('show');
+            toggleDiv.classList.toggle('expanded');
+            
+            // Update toggle text
+            const textSpan = toggleDiv.querySelector('span:last-child');
+            if (cypherDiv.classList.contains('show')) {
+                textSpan.textContent = 'Cypher查询 (点击收起)';
+            } else {
+                textSpan.textContent = 'Cypher查询 (点击展开)';
+            }
+        }
+        
+        // Event listeners
+        sendButton.addEventListener('click', submitQuery);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitQuery();
+            }
+        });
+        
+        // Focus on input
+        chatInput.focus();
+    </script>
+</body>
+</html>
