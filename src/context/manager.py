@@ -212,7 +212,7 @@ class ContextManager:
 
         try:
             with ThreadPoolExecutor(max_workers=len(available_collections)) as pool:
-                search_args = {"query": query, "top_k": 5}
+                search_args = {"query": query, "top_k": 2}
                 futures = [
                     (name, pool.submit(db.search, **search_args))
                     for name, db in available_collections
