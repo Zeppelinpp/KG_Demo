@@ -190,7 +190,11 @@ GRAPH_QUERY_RPOMPT = """
 </角色>
 
 <任务>
-- 根据查询指令和schema信息, 调用 `query_neo4j` 工具执行查询，得到查询结果
+1. 根据查询指令和schema信息, 调用 `query_neo4j` 工具执行查询，得到查询结果
+2. 根据查询结果生成合法的Cypher查询语句:
+- 注意GROUP BY在Cypher中是错误语法
+- 数值类型需要使用toFloat()并筛除null值
+- 数字计算使用聚合函数或者Cypher的算术运算符
 </任务>
 
 <图谱Schema>
