@@ -14,11 +14,11 @@ class Pattern(BaseModel):
 class NodeSchema(BaseModel):
     node_type: str
     properties: List[str]
-    out_relations: List[str]
-    in_relations: List[str]
-    patterns: List[Pattern]
     samples: List[str]
     embeddings: List[float]
+    out_relations: Optional[List[str]]
+    in_relations: Optional[List[str]]
+    patterns: Optional[List[Pattern]]
 
     model_config = {
         "json_encoders": {
