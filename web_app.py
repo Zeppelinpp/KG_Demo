@@ -40,6 +40,10 @@ class WorkflowEventHandler:
         self.events_log.append(
             {"timestamp": datetime.now().isoformat(), "type": event_type, "data": data}
         )
+        # Debug logging
+        if event_type in ['report_status', 'report_chunk']:
+            print(f"[EMIT] Sending {event_type} to session {self.session_id}")
+        
         self.socketio.emit(
             "workflow_event", {"type": event_type, "data": data}, room=self.session_id
         )
@@ -53,8 +57,11 @@ async def process_workflow_with_events(query: str, session_id: str, socketio_ins
         # Initialize workflow
         workflow = KGWorkflow(timeout=1000, verbose=False)
 
-        # Start workflow
-        workflow_handler = workflow.run(query=query)
+        # Start workflow with session_id
+        from llama_index.core.workflow import StartEvent
+        start_event = StartEvent(query=query)
+        start_event.session_id = session_id  # Attach session_id to the StartEvent
+        workflow_handler = workflow.run(start_event=start_event)
 
         # Track state
         current_agent = None
@@ -63,6 +70,19 @@ async def process_workflow_with_events(query: str, session_id: str, socketio_ins
 
         # Stream events
         async for event in workflow_handler.stream_events():
+            # Log all events for debugging
+            event_type = type(event).__name__
+            if event_type in ['GraphKnowledgeEvent', 'ReportChunkEvent']:
+                event_session_id = getattr(event, 'session_id', 'None')
+                print(f"[WEB_APP] Received {event_type}, event_session_id: {event_session_id}, handler_session_id: {session_id}")
+                if event_session_id != session_id:
+                    print(f"[WEB_APP] WARNING: Session mismatch! Event will be filtered.")
+            
+            # Filter events by session_id if present
+            # Only filter events that have session_id and it doesn't match
+            if hasattr(event, 'session_id') and event.session_id is not None and event.session_id != session_id:
+                continue  # Skip events not meant for this session
+            
             if isinstance(event, AnalyzeResultEvent):
                 # Analysis complete event
                 handler.emit_event(
@@ -138,9 +158,8 @@ async def process_workflow_with_events(query: str, session_id: str, socketio_ins
                                 {
                                     "message": event.message,
                                     "status": event.metadata.get("status", "pending"),
-                                    "total_queries": event.metadata.get(
-                                        "queries_count", 0
-                                    ),
+                                    "total_queries": event.metadata.get("queries_count", 0),
+                                    "total_results": event.metadata.get("total_results", 0),
                                 },
                             )
 
@@ -158,6 +177,7 @@ async def process_workflow_with_events(query: str, session_id: str, socketio_ins
 
             elif isinstance(event, ReportChunkEvent):
                 # Stream report chunks
+                print(f"[WEB_APP] Processing ReportChunkEvent, chunk length: {len(event.chunk)}")
                 handler.emit_event("report_chunk", {"chunk": event.chunk})
 
             elif isinstance(event, ToolCallEvent):
@@ -173,7 +193,7 @@ async def process_workflow_with_events(query: str, session_id: str, socketio_ins
                         )
                         agent_name = f"Insight Agent {idx}"
                 else:
-                    agent_name = current_agent or "Unknown Agent"
+                    agent_name = current_agent or "Graph Agent"
 
                 tool_key = (
                     f"{agent_name}_{event.tool_name}_{datetime.now().timestamp()}"
@@ -217,6 +237,8 @@ def handle_connect():
     """Handle client connection"""
     session_id = request.sid
     print(f"Client connected: {session_id}")
+    # Socket.IO automatically creates a room with the session_id
+    # No need to explicitly join the room
     emit("connected", {"session_id": session_id})
 
 

@@ -6,6 +6,22 @@
     <title>Knowledge Graph Assistant</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- MathJax for rendering math formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
     <style>
         * {
             margin: 0;
@@ -581,7 +597,7 @@
             
             // Use marked.js to render markdown
             if (role === 'assistant') {
-                contentDiv.innerHTML = marked.parse(content);
+                renderMarkdownWithMath(content, contentDiv);
             } else {
                 // For user messages, just escape HTML
                 contentDiv.textContent = content;
@@ -820,6 +836,7 @@
         }
         
         function handleReportStatus(data) {
+            console.log('[REPORT] Status event:', data);
             const status = data.status === 'done' ? 'completed' : 'running';
             const stepDiv = createOrUpdateWorkflowStep('report', '📝 报告生成', status);
             
@@ -833,6 +850,7 @@
         }
         
         function handleReportChunk(data) {
+            console.log('[REPORT] Received chunk:', data.chunk.substring(0, 50) + '...');
             currentReport += data.chunk;
             
             // Check if we already have a report message in chat
@@ -854,8 +872,8 @@
             
             // Update report content with streaming markdown
             const contentDiv = document.getElementById('report-content-chat');
-            // Use marked.js to render markdown
-            contentDiv.innerHTML = marked.parse(currentReport);
+            // Use marked.js to render markdown with MathJax support
+            renderMarkdownWithMath(currentReport, contentDiv);
             
             // Auto scroll to bottom
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -904,6 +922,19 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+        
+        // Function to render markdown with MathJax support
+        function renderMarkdownWithMath(content, targetElement) {
+            // First render markdown
+            targetElement.innerHTML = marked.parse(content);
+            
+            // Then tell MathJax to process the math
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([targetElement]).catch((e) => {
+                    console.error('MathJax typeset error:', e);
+                });
+            }
         }
         
         // Toggle Cypher query visibility

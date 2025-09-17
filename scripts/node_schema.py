@@ -226,6 +226,3 @@ if __name__ == "__main__":
     # Write node schema to markdown file
     print("\n正在写入节点模式信息到 graph_schema.md...")
     write_node_schema_to_md()
-
-    # Sync to Milvus (optional)
-    sync_node_schema_to_milvus()

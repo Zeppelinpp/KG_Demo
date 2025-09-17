@@ -46,7 +46,7 @@ def generate_business_mapping(df):
         # 只处理有问题描述的行
         if pd.notna(question) and question.strip():
             # 拼接数据源和期望结果
-            value = str(data_source) if pd.notna(data_source) else ''
+            value = str("相关节点:" + data_source) if pd.notna(data_source) else ''
             if pd.notna(expected_result) and expected_result.strip():
                 if value:
                     value += '\\n' + str(expected_result)

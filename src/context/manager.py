@@ -92,6 +92,19 @@ class ContextManager:
 
         message = {"role": role, "content": content}
         return message
+    
+    def load_mapping_knowledge(self, query: str):
+        collection = self.collections["mapping"]
+        results = collection.search(query, top_k=2)[0]
+
+        messages = []
+        for result in results:
+            hit_key = result["entity"]["term"]
+            hit_value = result["entity"]["description"]
+            content = f"问题:{hit_key}\n思路: {hit_value}"
+            messages.append(content)
+        
+        return "\n".join(messages)
 
     def add_context_to_history(
         self, history: List[Dict[str, Any]], context_messages: List[Dict[str, Any]]

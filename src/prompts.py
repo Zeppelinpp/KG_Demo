@@ -150,10 +150,6 @@ ANALYZE_PROMPT = """
 {business_knowledge}
 </业务知识>
 
-<图谱Schema>
-{schema}
-</图谱Schema>
-
 <当前时间>
 {current_time}
 </当前时间>
@@ -190,20 +186,19 @@ GRAPH_QUERY_RPOMPT = """
 </角色>
 
 <任务>
-1. 根据查询指令和schema信息, 调用 `query_neo4j` 工具执行查询，得到查询结果
-2. 根据查询结果生成合法的Cypher查询语句:
-- 注意GROUP BY在Cypher中是错误语法
-- 数值类型需要使用toFloat()并筛除null值
-- 数字计算使用聚合函数或者Cypher的算术运算符
+1. 根据相关问题的思路和提供的schema信息，决定涉及的节点和属性名称或关系边
+2. 调用 `query_neo4j` 工具执行查询，注意Cypher中的属性名称等必须严格遵循schema信息，不要做任何假设或者计算
+3. 直接用Markdown展示本次任务的查询目的和查询结果
 </任务>
 
 <图谱Schema>
 {schema}
 </图谱Schema>
 
-<相关知识>
+<与当前问提可能相关的问题和对应的思路>
+科目余额表主要关注的金额是本期发生_本位币_借，本期发生_本位币_贷
 {related_knowledge}
-</相关知识>
+</与当前问提可能相关的问题和对应的思路>
 
 <当前时间>
 {current_time}
