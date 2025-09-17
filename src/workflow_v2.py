@@ -3,11 +3,6 @@ import os
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from llama_index.embeddings.ollama import OllamaEmbedding
-from llama_index.core import VectorStoreIndex, StorageContext
-from llama_index.vector_stores.milvus import MilvusVectorStore
-from llama_index.core import Settings
-from llama_index.core import SimpleDirectoryReader
 from llama_index.core.workflow import (
     StartEvent,
     Workflow,
