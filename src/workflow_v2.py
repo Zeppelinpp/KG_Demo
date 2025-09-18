@@ -154,6 +154,10 @@ class KGWorkflow(Workflow):
     async def analyze(self, ctx: Context, ev: StartEvent) -> AnalyzeResultEvent:
         """
         Analyze the user query to generate a query plan
+
+        归因分析
+        多跳推理
+        趋势预测
         """
         # Get session_id from StartEvent if available
         session_id = getattr(ev, "session_id", None)

@@ -6,10 +6,9 @@ from pymilvus.milvus_client.index import IndexParams
 
 load_dotenv()
 
-
+client = MilvusClient("http://172.20.236.27:19530")
 def init_mapping_collection():
     """Initialize mapping collection for business term mappings"""
-    client = MilvusClient("milvus.db")
     collection_name = "mapping"
 
     fields = [
@@ -49,7 +48,7 @@ def init_mapping_collection():
 
 def init_node_schema_collection():
     """Initialize node schema collection for graph schema storage"""
-    client = MilvusClient("milvus.db")
+    
     collection_name = "node_schema"
 
     if client.has_collection(collection_name):

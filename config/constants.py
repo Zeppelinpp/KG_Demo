@@ -12,4 +12,284 @@ BUSSINESS_MAPPING = {
     "销售费用率远超行业均值的原因分析": "相关节点:科目余额表、凭证表、指标库、行业/同行公司销售费用率大数据\n分析思路​​：首先进行​​行业对标​​，对比行业平均销售费用率。然后进行​​结构分析​​，计算各费用项目（广告费、渠道返利、人员薪酬等）的同比增长率及对总费用增长的贡献度。\n\n\n​​示例回答​​：“经分析，我司本季度销售费用率为30%，较行业平均水平（15%）高出15个百分点。​​主要驱动因素​​是广告宣传费（同比增80%，对总费用增长贡献率达50%）和渠道返利（同比增40%，贡献率30%）。建议立即对这两项进行专项审计，评估广告投放ROI和返利政策的有效性，优化合约条款或投放策略。",
 }
 
+CYPHER_MAPPING = {
+    "本月销售费用主要花在哪里，是否合理？": """
+MATCH (科目余额:科目余额) 
+WHERE 科目余额.科目名称 CONTAINS '销售费用' 
+  AND 科目余额.期间 >= '2023年1期'
+WITH 科目余额.科目名称 AS 明细科目, 
+     SUM(科目余额.本期发生_本位币_借) AS 金额
+// 先算总支出（只含正数）
+WITH COLLECT({科目: 明细科目, 金额: 金额}) AS 列表
+WITH 列表,
+     REDUCE(s=0, x IN 列表 | CASE WHEN x.金额 > 0 THEN s + x.金额 ELSE s END) AS 总支出
+UNWIND 列表 AS item
+RETURN 
+  item.科目 AS 明细科目,
+  item.金额 AS 金额,
+  CASE WHEN item.金额 > 0 
+       THEN item.金额 * 1.0 / 总支出 
+       ELSE NULL END AS 占比,
+  CASE WHEN item.金额 > 0 
+       THEN '正常' 
+       ELSE '异常值' END AS 标记
+ORDER BY 
+  CASE WHEN item.金额 > 0 THEN item.金额 * 1.0 / 总支出 ELSE -1 END DESC
+LIMIT 20
+    """,
+    "本月销售费用是增还是降，是否和收入匹配？": """
+// 参数定义
+WITH '2024年11期' AS currentPeriod,
+     '2024年10期' AS lastPeriod,
+     '2023年11期' AS lastYearSamePeriod,
+     '2024年' AS currentYearPrefix,
+     '2023年' AS lastYearPrefix
+
+// 1. 获取销售费用和销售收入各期间金额
+MATCH (k:科目余额)
+WHERE (k.科目名称 CONTAINS '销售费用' OR k.科目名称 CONTAINS '销售收入')
+  AND (k.期间 IN [currentPeriod, lastPeriod, lastYearSamePeriod] OR k.期间 STARTS WITH currentYearPrefix OR k.期间 STARTS WITH lastYearPrefix)
+WITH 
+  SUM(CASE WHEN k.科目名称 CONTAINS '销售费用' AND k.期间 = currentPeriod THEN k.`本期发生_本位币_借` ELSE 0 END) AS 销售费用本月,
+  SUM(CASE WHEN k.科目名称 CONTAINS '销售收入' AND k.期间 = currentPeriod THEN k.`本期发生_本位币_贷` ELSE 0 END) AS 销售收入本月,
+  SUM(CASE WHEN k.科目名称 CONTAINS '销售费用' AND k.期间 = lastPeriod THEN k.`本期发生_本位币_借` ELSE 0 END) AS 销售费用上月,
+  SUM(CASE WHEN k.科目名称 CONTAINS '销售收入' AND k.期间 = lastPeriod THEN k.`本期发生_本位币_贷` ELSE 0 END) AS 销售收入上月,
+  SUM(CASE WHEN k.科目名称 CONTAINS '销售费用' AND k.期间 = lastYearSamePeriod THEN k.`本期发生_本位币_借` ELSE 0 END) AS 销售费用去年同期,
+  SUM(CASE WHEN k.科目名称 CONTAINS '销售收入' AND k.期间 = lastYearSamePeriod THEN k.`本期发生_本位币_贷` ELSE 0 END) AS 销售收入去年同期,
+  SUM(CASE WHEN k.科目名称 CONTAINS '销售费用' AND k.期间 STARTS WITH currentYearPrefix THEN k.`本年累计_本位币_借` ELSE 0 END) AS 销售费用本年累计,
+  SUM(CASE WHEN k.科目名称 CONTAINS '销售收入' AND k.期间 STARTS WITH currentYearPrefix THEN k.`本年累计_本位币_贷` ELSE 0 END) AS 销售收入本年累计,
+  SUM(CASE WHEN k.科目名称 CONTAINS '销售费用' AND k.期间 STARTS WITH lastYearPrefix THEN k.`本年累计_本位币_借` ELSE 0 END) AS 销售费用去年累计,
+  SUM(CASE WHEN k.科目名称 CONTAINS '销售收入' AND k.期间 STARTS WITH lastYearPrefix THEN k.`本年累计_本位币_贷` ELSE 0 END) AS 销售收入去年累计
+
+// 2. 计算环比、同比、累计同比
+WITH *,
+  (销售费用本月 - 销售费用上月)/CASE WHEN 销售费用上月=0 THEN 1 ELSE 销售费用上月 END AS 销售费用环比,
+  (销售收入本月 - 销售收入上月)/CASE WHEN 销售收入上月=0 THEN 1 ELSE 销售收入上月 END AS 销售收入环比,
+  (销售费用本月 - 销售费用去年同期)/CASE WHEN 销售费用去年同期=0 THEN 1 ELSE 销售费用去年同期 END AS 销售费用同比,
+  (销售收入本月 - 销售收入去年同期)/CASE WHEN 销售收入去年同期=0 THEN 1 ELSE 销售收入去年同期 END AS 销售收入同比,
+  (销售费用本年累计 - 销售费用去年累计)/CASE WHEN 销售费用去年累计=0 THEN 1 ELSE 销售费用去年累计 END AS 销售费用累计同比,
+  (销售收入本年累计 - 销售收入去年累计)/CASE WHEN 销售收入去年累计=0 THEN 1 ELSE 销售收入去年累计 END AS 销售收入累计同比
+
+// 3. 比较增长率匹配情况
+WITH *,
+  CASE 
+    WHEN (销售费用环比 * 销售收入环比 > 0) AND (销售费用同比 * 销售收入同比 > 0) THEN '匹配'
+    ELSE '不匹配'
+  END AS 增长率匹配情况
+
+// 4. 输出结果
+RETURN 销售费用本月, 销售收入本月,
+       销售费用环比, 销售收入环比,
+       销售费用同比, 销售收入同比,
+       销售费用本年累计, 销售收入本年累计,
+       销售费用累计同比, 销售收入累计同比,
+       增长率匹配情况;
+    """,
+    "本季度销售费用增长率远超销售收入增长率，主要原因是什么？哪些区域或产品线贡献了最大的费用增幅？": """
+MATCH (pl:利润表)
+WHERE pl.期间 IN ['2024年8期', '2024年9期', '2024年10期']
+WITH sum(toFloat(pl.营业收入_本期金额)) as current_revenue,
+     sum(toFloat(pl.销售费用_本期金额)) as current_expense
+MATCH (pl:利润表)
+WHERE pl.期间 IN ['2023年8期', '2023年9期', '2023年10期']
+WITH current_revenue,
+     current_expense,
+     sum(toFloat(pl.营业收入_本期金额)) as prev_revenue,
+     sum(toFloat(pl.销售费用_本期金额)) as prev_expense
+WITH current_revenue,
+     current_expense,
+     prev_revenue,
+     prev_expense,
+     (current_revenue - prev_revenue) / prev_revenue * 100 as revenue_growth_rate,
+     (current_expense - prev_expense) / prev_expense * 100 as expense_growth_rate
+RETURN current_revenue AS 本季度销售收入,
+       current_expense AS 本季度销售费用,
+       prev_revenue as 上季度销售收入,
+       prev_expense as 上季度销售费用,
+       revenue_growth_rate as 销售收入增长率百分比,
+       expense_growth_rate as 销售费用增长率百分比;
+MATCH (ab:科目余额)
+WHERE ab.期间 IN ['2024年11期', '2024年10期', '2024年9期']
+  AND ab.科目类别 CONTAINS '营业收入'
+  AND ab.物料_名称 IS NOT NULL
+  AND ab.物料_名称 <> ' '
+WITH ab.物料_名称 AS 物料名称,
+      sum(toFloat(ab.本期发生_本位币_贷)) as 本期营业收入
+RETURN 物料名称,本期营业收入
+ order by 本期营业收入 desc
+ limit 10;
+    """,
+    "我们的销售费用率处于什么水平？我们的费用结构（如广告费、差旅费、人员薪酬等）有何异同？": """
+MATCH (pl:利润表)
+WHERE pl.期间 STARTS WITH '2024'
+WITH sum(toFloat(pl.营业收入_本期金额)) AS revenue,
+     sum(toFloat(pl.销售费用_本期金额)) AS expense
+RETURN expense AS 销售费用,
+       revenue AS 营业收入,
+       expense / revenue * 100 AS 销售费用率;
+MATCH (v:凭证分录)
+WHERE v.当前年度 = '2024'
+  AND v.科目编码 STARTS WITH '6601'
+WITH v.当前期间 AS 期间,
+     split(v.科目全名, '_')[1] AS 费用类别,
+     toFloat(v.原币金额) AS amount
+RETURN 期间,
+       费用类别,
+       sum(amount) AS 总金额
+ORDER BY 期间, 费用类别
+    """,
+    "销售投入最高的三个部门分别是哪些？": """
+MATCH (n:`科目余额`)
+WHERE (n.`科目名称` CONTAINS '主营业务成本' OR n.`科目名称` CONTAINS '销售费用')
+  AND n.`部门_名称` <> " " 
+WITH 
+  n.`部门_名称` AS 部门名称,
+  SUM(n.`本期实际损益发生额_本位币`) AS 总费用
+ORDER BY 总费用 DESC  
+LIMIT 3 
+RETURN 部门名称, 总费用
+    """,
+    "各销售团队的费效比差异原因及优化方案​​": """
+// 1. 匹配节点并按部门聚合，计算销售费用和收入总和
+MATCH (bal:科目余额)
+WHERE bal.科目名称 CONTAINS '销售费用' OR bal.科目名称 CONTAINS '主营业务收入' and bal.期间='2024年11期'
+WITH 
+  bal.客户_名称 AS 团队,
+  SUM(CASE WHEN bal.科目名称 CONTAINS '销售费用' THEN bal.本期实际损益发生额_本位币 ELSE 0 END) AS 销售费用总和,
+  SUM(CASE WHEN bal.科目名称 CONTAINS '主营业务收入' THEN bal.本期发生_本位币_贷 ELSE 0 END) AS 销售收入总和// 
+
+// 2. 计算比率并按比率排序
+WITH 
+  团队,
+  销售费用总和,
+  销售收入总和,
+  toFloat(销售收入总和) / toFloat(销售费用总和) AS 比率
+ORDER BY 比率 DESC  // 按比率降序排序
+
+// 3. 用聚合+索引的方式生成排名
+WITH COLLECT({
+  团队: 团队,
+  销售费用总和: 销售费用总和,
+  销售收入总和: 销售收入总和,
+  比率: 比率
+}) AS 结果列表
+UNWIND range(0, size(结果列表)-1) AS 索引
+RETURN 
+  结果列表[索引].团队 AS 团队,
+  结果列表[索引].销售费用总和 AS 销售费用总和,
+  结果列表[索引].销售收入总和 AS 销售收入总和,
+  结果列表[索引].比率 AS 比率,
+  索引 + 1 AS 排名  // 索引从0开始，排名+1
+    """,
+    "差旅与招待费用上升但对应区域业绩未同步提升的原因​": """
+MATCH (n:`科目余额`) WHERE n.科目名称 =~ '.*招待.*' or n.科目名称 =~ '.*差旅.*' RETURN n.期间, n.科目名称, n.本期发生_原币_借, n.员工_名称;
+MATCH (n:`科目余额`)
+WHERE (n.科目名称 =~ '.*差旅.*' or n.科目名称 =~'.*招待.*') AND n.员工_名称 IS NOT NULL
+RETURN
+    n.员工_名称 AS 员工_名称,
+    n.期间 AS 期间,
+    SUM(n.本期实际损益发生额_本位币) AS 差旅费
+ORDER BY
+    员工_名称,
+    期间,
+    差旅费 DESC;
+MATCH (n:`科目余额`)
+WHERE n.员工_名称 IS NOT NULL AND n.员工_名称 <> " " and n.期间 = '2024年11期'
+RETURN
+    n.员工_名称 AS 员工_名称,
+    n.期间 AS 期间,
+    n.科目名称 AS 科目名称,
+    SUM(n.本期实际损益发生额_本位币) AS 款
+ORDER BY
+    员工_名称,
+    期间,
+    科目名称,
+    款 DESC
+    """,
+    "过去12个月中，销售费用的月度波动与业务季节性规律（如旺季促销）的吻合度如何？哪些月份的偏差超过30%？这些异常波动是否由特定事件（如大型展会、新品发布）驱动，其投入产出比（ROI）是否经过事后验证？": """
+MATCH (n:`利润表`) 
+Where n.期间 >= '2021年1期'
+RETURN n.期间, n.销售费用_本期金额
+order by n.期间;
+MATCH (n:`利润表`) 
+Where n.期间 > '2021年1期'
+RETURN n.期间, n.营业收入_本期金额; 
+    """,
+    "各销售团队费效比差异分析": """
+// 1. 匹配节点并按部门聚合，计算销售费用和收入总和
+MATCH (bal:科目余额)
+WHERE bal.科目名称 CONTAINS '销售费用' OR bal.科目名称 CONTAINS '主营业务收入' and bal.期间>='2020年1期'
+WITH 
+  bal.部门_名称 AS 部门,
+  SUM(CASE WHEN bal.科目名称 CONTAINS '销售费用' THEN bal.本期实际损益发生额_本位币 ELSE 0 END) AS 销售费用总和,
+  SUM(CASE WHEN bal.科目名称 CONTAINS '主营业务收入' THEN bal.本期发生_本位币_贷 ELSE 0 END) AS 销售收入总和
+WHERE 销售收入总和 <> 0  
+
+// 2. 计算比率并按比率排序
+WITH 
+  部门,
+  销售费用总和,
+  销售收入总和,
+  toFloat(销售收入总和) / toFloat(销售费用总和) AS 比率
+ORDER BY 比率 DESC  // 按比率降序排序
+
+// 3. 用聚合+索引的方式生成排名（兼容低版本）
+WITH COLLECT({
+  部门: 部门,
+  销售费用总和: 销售费用总和,
+  销售收入总和: 销售收入总和,
+  比率: 比率
+}) AS 结果列表
+UNWIND range(0, size(结果列表)-1) AS 索引
+RETURN 
+  结果列表[索引].部门 AS 部门,
+  结果列表[索引].销售费用总和 AS 销售费用总和,
+  结果列表[索引].销售收入总和 AS 销售收入总和,
+  结果列表[索引].比率 AS 比率,
+  索引 + 1 AS 排名  // 索引从0开始，排名+1
+    """,
+    "销售费用率远超行业均值的原因分析": """
+// 1. 计算本期各明细费用
+MATCH (bal:科目余额)
+WHERE bal.期间 = '2024年11期' 
+  AND bal.科目名称 STARTS WITH '销售费用_'
+WITH 
+  split(bal.科目名称, '_')[1] AS 科目明细,
+  SUM(bal.本期实际损益发生额_本位币) AS 科目金额
+// 收集明细数据并计算总费用
+WITH 
+  COLLECT({明细: 科目明细, 金额: 科目金额}) AS 费用明细列表,
+  SUM(科目金额) AS 总费用  
+
+// 2. 展开明细列表，关联总费用
+UNWIND 费用明细列表 AS 费用项
+WITH 
+  费用项.明细 AS 科目明细,
+  费用项.金额 AS 科目金额,
+  总费用
+
+// 3. 匹配去年同期数据
+OPTIONAL MATCH (prev:科目余额)
+WHERE prev.期间 = '2023年11期' 
+  AND prev.科目名称 = '销售费用_' + 科目明细
+WITH 
+  科目明细,
+  科目金额,
+  总费用,
+  COALESCE(SUM(prev.本期实际损益发生额_本位币), 0) AS 去年同期金额  // 无数据时默认为0
+
+// 4. 返回结果
+RETURN 
+  科目明细 AS 二级科目,
+  科目金额,
+  ROUND(科目金额 / 总费用 * 100, 2) AS 占比百分比,
+  去年同期金额,
+  CASE 
+    WHEN 去年同期金额 = 0 THEN NULL 
+    ELSE ROUND((科目金额 - 去年同期金额) / 去年同期金额 * 100, 2) 
+  END AS 同比增长百分比
+ORDER BY 科目金额 DESC
+    """
+}
+
 MAX_CONTEXT_WINDOW = 20

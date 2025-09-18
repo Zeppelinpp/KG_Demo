@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Graph Assistant V3</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- MathJax for rendering math formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Chat Section - Left 2/3 */
+        .chat-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .chat-header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.assistant {
+            text-align: left;
+        }
+
+        .message-content {
+            display: inline-block;
+            max-width: 75%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background-color: #ffffff;
+            color: #333;
+            border: 1px solid #e9ecef;
+        }
+        
+        /* Markdown content styling */
+        .message-content h1, .message-content h2, .message-content h3 {
+            margin-top: 16px;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .message-content h1 { font-size: 1.5em; }
+        .message-content h2 { font-size: 1.3em; }
+        .message-content h3 { font-size: 1.1em; }
+        
+        .message-content p {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .message-content ul, .message-content ol {
+            margin-left: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .message-content li {
+            margin-bottom: 4px;
+            line-height: 1.5;
+        }
+        
+        .message-content code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #d14;
+        }
+        
+        /* MathJax styles */
+        .message-content mjx-container {
+            margin: 0.5em 0;
+        }
+        
+        .message-content mjx-container[display="true"] {
+            margin: 1em 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            max-width: 100%;
+        }
+        
+        .json-result mjx-container {
+            display: inline-block;
+            margin: 0 0.2em;
+        }
+        
+        .message-content pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 14px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .message-content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .message-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .message-content th, .message-content td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .message-content th {
+            background-color: #f4f4f4;
+            font-weight: 600;
+        }
+        
+        .message-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 14px;
+            margin: 10px 0;
+            color: #555;
+            font-style: italic;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background-color: #ffffff;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-button:disabled {
+            background: linear-gradient(135deg, #a8a8a8 0%, #888888 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Workflow Section - Right 1/3 */
+        .workflow-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .workflow-header {
+            padding: 25px;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+        }
+
+        .workflow-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .workflow-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+        }
+
+        .workflow-step {
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            animation: slideIn 0.4s ease-out;
+            border: 1px solid #e9ecef;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+
+        .workflow-step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .workflow-step-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 17px;
+        }
+
+        .workflow-step-status {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-matching,
+        .status-executing,
+        .status-generating {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .status-matched,
+        .status-completed {
+            background: linear-gradient(135deg, #55efc4, #00b894);
+            color: white;
+        }
+
+        .status-error {
+            background: linear-gradient(135deg, #ff7675, #d63031);
+            color: white;
+        }
+
+        .workflow-step-content {
+            color: #555;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .cypher-container {
+            margin-top: 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .cypher-header {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s;
+        }
+        
+        .cypher-header:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+        }
+        
+        .cypher-toggle-icon {
+            margin-right: 10px;
+            transition: transform 0.3s;
+            color: #667eea;
+        }
+        
+        .cypher-header.expanded .cypher-toggle-icon {
+            transform: rotate(90deg);
+        }
+        
+        .cypher-query {
+            display: none;
+            background-color: #1e1e1e;
+            color: #4fc3f7;
+            padding: 14px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .json-result {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            max-height: 300px;
+            overflow: auto;
+            position: relative;
+        }
+        
+        .json-key {
+            color: #e06c75;
+        }
+        
+        .json-string {
+            color: #98c379;
+        }
+        
+        .json-number {
+            color: #d19a66;
+        }
+        
+        .json-boolean {
+            color: #56b6c2;
+        }
+        
+        .json-null {
+            color: #c678dd;
+        }
+        
+        .cypher-query.show {
+            display: block;
+        }
+
+        .status-message {
+            padding: 12px 16px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #495057;
+            border-left: 4px solid #667eea;
+        }
+
+        /* Loading animation */
+        .loading-dots {
+            display: inline-block;
+            position: relative;
+            width: 60px;
+            height: 10px;
+        }
+
+        .loading-dots div {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: loading-dots 1.4s linear infinite;
+        }
+
+        .loading-dots div:nth-child(1) {
+            left: 6px;
+            animation-delay: -0.24s;
+        }
+
+        .loading-dots div:nth-child(2) {
+            left: 26px;
+            animation-delay: -0.12s;
+        }
+
+        .loading-dots div:nth-child(3) {
+            left: 45px;
+            animation-delay: 0;
+        }
+
+        @keyframes loading-dots {
+            0% {
+                top: 0;
+                opacity: 1;
+            }
+            50%, 100% {
+                top: 4px;
+                opacity: 0.3;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46a1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Chat Section -->
+        <div class="chat-section">
+            <div class="chat-header">
+                <h1>🧠 Knowledge Graph Assistant V3</h1>
+                <div class="subtitle">基于知识图谱的财务分析系统</div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome message -->
+                <div class="message assistant">
+                    <div class="message-content">
+                        👋 您好！我财务分析Knowledge Graph Assistant V3版本，请输入您的问题，我会为您提供详细的分析。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        class="chat-input" 
+                        placeholder="请输入您的问题..."
+                        autocomplete="off"
+                    >
+                    <button id="sendButton" class="send-button">发送</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Workflow Section -->
+        <div class="workflow-section">
+            <div class="workflow-header">
+                <h2>⚙️ 工作流状态</h2>
+            </div>
+            
+            <div class="workflow-content" id="workflowContent">
+                <!-- Initial state -->
+                <div class="workflow-step">
+                    <div class="workflow-step-header">
+                        <div class="workflow-step-title">💡 系统就绪</div>
+                        <div class="workflow-step-status status-completed">就绪</div>
+                    </div>
+                    <div class="workflow-step-content">
+                        系统已准备就绪，等待您的查询...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        // DOM elements
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const workflowContent = document.getElementById('workflowContent');
+        
+        // State
+        let isProcessing = false;
+        let currentReport = '';
+        let workflowSteps = {};
+        let executedQueries = [];
+        let executingQueries = {};
+        
+        // Connect to server
+        socket.on('connected', (data) => {
+            console.log('Connected with session ID:', data.session_id);
+        });
+        
+        // Handle query submission
+        function submitQuery() {
+            const query = chatInput.value.trim();
+            if (!query || isProcessing) return;
+            
+            // Add user message
+            addMessage('user', query);
+            
+            // Clear input
+            chatInput.value = '';
+            
+            // Set processing state
+            isProcessing = true;
+            sendButton.disabled = true;
+            sendButton.textContent = '处理中...';
+            
+            // Clear workflow content
+            workflowContent.innerHTML = '';
+            workflowSteps = {};
+            currentReport = '';
+            executedQueries = [];
+            executingQueries = {};
+            
+            // Send query to server
+            socket.emit('submit_query', { query });
+        }
+        
+        // Add message to chat
+        function addMessage(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            // Use marked.js to render markdown
+            if (role === 'assistant') {
+                renderMarkdownWithMath(content, contentDiv);
+            } else {
+                contentDiv.textContent = content;
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Create or update workflow step
+        function createOrUpdateWorkflowStep(id, title, status = 'pending', content = '') {
+            let stepDiv = workflowSteps[id];
+            
+            if (!stepDiv) {
+                stepDiv = document.createElement('div');
+                stepDiv.className = 'workflow-step';
+                stepDiv.id = `step-${id}`;
+                workflowContent.appendChild(stepDiv);
+                workflowSteps[id] = stepDiv;
+            }
+            
+            stepDiv.innerHTML = `
+                <div class="workflow-step-header">
+                    <div class="workflow-step-title">${title}</div>
+                    <div class="workflow-step-status status-${status}">${getStatusText(status)}</div>
+                </div>
+                <div class="workflow-step-content">${content}</div>
+            `;
+            
+            return stepDiv;
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': '等待',
+                'matching': '匹配中',
+                'matched': '已匹配',
+                'executing': '执行中',
+                'generating': '生成中',
+                'completed': '完成',
+                'error': '错误'
+            };
+            return statusMap[status] || status;
+        }
+        
+        // Handle workflow events
+        socket.on('workflow_event', (event) => {
+            console.log('Workflow event:', event);
+            
+            switch (event.type) {
+                case 'workflow_status':
+                    handleWorkflowStatus(event.data);
+                    break;
+                    
+                case 'cypher_matched':
+                    handleCypherMatched(event.data);
+                    break;
+                    
+                case 'matching_completed':
+                    handleMatchingCompleted(event.data);
+                    break;
+                    
+                case 'query_executing':
+                    handleQueryExecuting(event.data);
+                    break;
+                    
+                case 'query_executed':
+                    handleQueryExecuted(event.data);
+                    break;
+                    
+                case 'report_chunk':
+                    handleReportChunk(event.data);
+                    break;
+                    
+                case 'workflow_complete':
+                    handleWorkflowComplete(event.data);
+                    break;
+                    
+                case 'workflow_error':
+                    handleWorkflowError(event.data);
+                    break;
+            }
+        });
+        
+        function handleWorkflowStatus(data) {
+            console.log('[DEBUG] handleWorkflowStatus called with:', data);
+            
+            const stepMap = {
+                'match_mapping': { id: 'matching', title: '🔍 查询分析' },
+                'execute_query': { id: 'executing', title: '📊 执行图谱查询' },
+                'query_execution': { id: 'queries', title: '🔧 查询执行详情' },
+                'generate_report': { id: 'reporting', title: '📝 生成分析报告' }
+            };
+            
+            const step = stepMap[data.step];
+            if (step) {
+                let content = `<div class="status-message">${data.message}</div>`;
+                
+                // No additional content for match_mapping completion - just show the status message
+                
+                // Add cypher display for execute_query step
+                if (data.step === 'execute_query' && data.cypher) {
+                    content += `
+                        <div class="cypher-container" style="margin-top: 12px;">
+                            <div class="cypher-header expanded" onclick="toggleCypher('executing-cypher')">
+                                <span class="cypher-toggle-icon" style="transform: rotate(90deg);">▶</span>
+                                <span>待执行的 Cypher 查询</span>
+                            </div>
+                            <div id="executing-cypher" class="cypher-query show">${escapeHtml(data.cypher)}</div>
+                        </div>
+                    `;
+                }
+                
+                // Add executed queries display for query_execution step
+                if (data.step === 'query_execution' && executedQueries.length > 0) {
+                    content += '<div class="executed-queries" style="margin-top: 12px;">';
+                    executedQueries.forEach((q, idx) => {
+                        content += `
+                            <div class="query-item" style="margin-bottom: 10px;">
+                                <div class="cypher-container">
+                                    <div class="cypher-header" onclick="toggleCypher('query-${idx}')">
+                                        <span class="cypher-toggle-icon">▶</span>
+                                        <span>查询 ${idx + 1}</span>
+                                    </div>
+                                    <div id="query-${idx}" class="cypher-query">
+                                        <div style="color: #4fc3f7; margin-bottom: 8px;">Cypher:</div>
+                                        <div style="margin-bottom: 12px;">${escapeHtml(q.cypher)}</div>
+                                        <div style="color: #81c784; margin-bottom: 8px;">Result Preview:</div>
+                                        <div style="color: #aaa; font-size: 12px;">${escapeHtml(q.result)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    content += '</div>';
+                }
+                
+                console.log('[DEBUG] Creating/updating step:', step.id, 'with content:', content);
+                createOrUpdateWorkflowStep(
+                    step.id,
+                    step.title,
+                    data.status,
+                    content
+                );
+            }
+        }
+        
+        function handleCypherMatched(data) {
+            // Cypher is now displayed in handleWorkflowStatus
+        }
+        
+        function handleMatchingCompleted(data) {
+            console.log('[DEBUG] Matching completed:', data);
+            // The matching completion is now handled in handleWorkflowStatus
+            // This function can be used for additional processing if needed
+        }
+        
+        function handleQueryExecuting(data) {
+            // Mark query as executing
+            executingQueries[data.index] = {
+                cypher: data.cypher,
+                status: 'executing'
+            };
+            
+            // Update the query execution display
+            updateQueryExecutionDisplay();
+        }
+        
+        function handleQueryExecuted(data) {
+            // Mark query as completed
+            if (executingQueries[data.index]) {
+                executingQueries[data.index].status = 'completed';
+                executingQueries[data.index].result = data.result;
+            }
+            
+            // Store executed query
+            executedQueries.push({
+                index: data.index,
+                cypher: data.cypher,
+                result: data.result
+            });
+            
+            // Update the display
+            updateQueryExecutionDisplay();
+        }
+        
+        function updateQueryExecutionDisplay() {
+            // Combine executing and executed queries for display
+            const allQueries = [];
+            
+            // Add all queries in order
+            for (let i = 0; i < Object.keys(executingQueries).length + executedQueries.length; i++) {
+                if (executingQueries[i]) {
+                    allQueries.push(executingQueries[i]);
+                }
+            }
+            
+            // Also ensure executed queries are included
+            executedQueries.forEach(q => {
+                if (!allQueries[q.index]) {
+                    allQueries[q.index] = q;
+                }
+            });
+            
+            let content = `<div class="status-message">`;
+            const executingCount = Object.values(executingQueries).filter(q => q.status === 'executing').length;
+            const completedCount = executedQueries.length;
+            
+            if (executingCount > 0) {
+                content += `⏳ 正在执行查询 ${executingCount + completedCount}...`;
+            } else if (completedCount > 0) {
+                content += `✅ 已执行 ${completedCount} 个查询`;
+            }
+            content += `</div>`;
+            
+            content += '<div class="executed-queries" style="margin-top: 12px;">';
+            
+            // Display all queries
+            Object.keys(executingQueries).forEach(idx => {
+                const q = executingQueries[idx];
+                const isExecuting = q.status === 'executing';
+                const statusIcon = isExecuting ? '⏳' : '✅';
+                const statusText = isExecuting ? '执行中...' : '已完成';
+                const statusColor = isExecuting ? '#ffa726' : '#66bb6a';
+                
+                content += `
+                    <div class="query-item" style="margin-bottom: 10px;">
+                        <div class="cypher-container">
+                            <div class="cypher-header ${!isExecuting ? '' : 'expanded'}" onclick="toggleCypher('query-${idx}')">
+                                <span class="cypher-toggle-icon">${!isExecuting ? '▶' : '▼'}</span>
+                                <span>${statusIcon} 查询 ${parseInt(idx) + 1} - ${statusText}</span>
+                            </div>
+                            <div id="query-${idx}" class="cypher-query ${!isExecuting ? '' : 'show'}">
+                                <div style="color: #4fc3f7; margin-bottom: 8px; font-weight: 600;">Cypher:</div>
+                                <div style="margin-bottom: 12px;">${escapeHtml(q.cypher)}</div>
+                                ${q.result ? `
+                                    <div style="color: #81c784; margin-bottom: 8px; font-weight: 600;">Result:</div>
+                                    <div class="json-result" id="result-${idx}">
+                                        ${formatJSON(q.result)}
+                                    </div>
+                                ` : `
+                                    <div style="color: ${statusColor}; font-style: italic;">
+                                        ${statusText}
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            content += '</div>';
+            
+            createOrUpdateWorkflowStep(
+                'queries',
+                '🔧 查询执行详情',
+                executingCount > 0 ? 'running' : 'completed',
+                content
+            );
+            
+            // Process any LaTeX in the results
+            setTimeout(() => {
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    const resultElements = document.querySelectorAll('.json-result');
+                    if (resultElements.length > 0) {
+                        window.MathJax.typesetPromise(Array.from(resultElements)).catch((e) => {
+                            console.error('MathJax typeset error in results:', e);
+                        });
+                    }
+                }
+            }, 100);
+        }
+        
+        function handleReportChunk(data) {
+            // Update report generation status if first chunk
+            if (!currentReport) {
+                createOrUpdateWorkflowStep(
+                    'reporting',
+                    '📝 生成分析报告',
+                    'generating',
+                    '<div class="status-message">正在生成综合分析报告...</div>'
+                );
+            }
+            
+            currentReport += data.chunk;
+            
+            // Check if we already have a report message in chat
+            let reportMessageDiv = document.getElementById('report-message');
+            
+            if (!reportMessageDiv) {
+                // Create new assistant message for report
+                reportMessageDiv = document.createElement('div');
+                reportMessageDiv.className = 'message assistant';
+                reportMessageDiv.id = 'report-message';
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.id = 'report-content-chat';
+                
+                reportMessageDiv.appendChild(contentDiv);
+                chatMessages.appendChild(reportMessageDiv);
+            }
+            
+            // Update report content with streaming markdown
+            const contentDiv = document.getElementById('report-content-chat');
+            renderMarkdownWithMath(currentReport, contentDiv);
+            
+            // Auto scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function handleWorkflowComplete(data) {
+            // Update all workflow steps to completed
+            Object.keys(workflowSteps).forEach(stepId => {
+                const stepDiv = workflowSteps[stepId];
+                const statusDiv = stepDiv.querySelector('.workflow-step-status');
+                if (statusDiv && !statusDiv.classList.contains('status-error')) {
+                    statusDiv.className = 'workflow-step-status status-completed';
+                    statusDiv.textContent = getStatusText('completed');
+                }
+            });
+            
+            // Add completion step
+            createOrUpdateWorkflowStep(
+                'complete',
+                '✅ 分析完成',
+                'completed',
+                `<div class="status-message">${data.message}</div>`
+            );
+            
+            // Reset state
+            isProcessing = false;
+            sendButton.disabled = false;
+            sendButton.textContent = '发送';
+        }
+        
+        function handleWorkflowError(data) {
+            // Add error message to chat
+            addMessage('assistant', `❌ ${data.message}`);
+            
+            // Add error step
+            createOrUpdateWorkflowStep(
+                'error',
+                '❌ 处理错误',
+                'error',
+                `<div class="status-message">${data.error}</div>`
+            );
+            
+            // Reset state
+            isProcessing = false;
+            sendButton.disabled = false;
+            sendButton.textContent = '发送';
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatJSON(jsonStr) {
+            try {
+                // Try to parse the JSON string
+                let obj;
+                if (typeof jsonStr === 'string') {
+                    // Clean up the string - remove "..." at the end if present
+                    const cleanStr = jsonStr.replace(/\.\.\.$/g, '');
+                    try {
+                        obj = JSON.parse(cleanStr);
+                    } catch (e) {
+                        // If not valid JSON, try to evaluate as Python dict/list representation
+                        // Convert Python-style to JSON-style
+                        const jsonLikeStr = cleanStr
+                            .replace(/'/g, '"')  // Replace single quotes with double quotes
+                            .replace(/True/g, 'true')  // Python True to JSON true
+                            .replace(/False/g, 'false')  // Python False to JSON false
+                            .replace(/None/g, 'null');  // Python None to JSON null
+                        
+                        try {
+                            obj = JSON.parse(jsonLikeStr);
+                        } catch (e2) {
+                            // If still fails, return the original text with basic formatting
+                            return `<pre style="color: #abb2bf;">${escapeHtml(jsonStr)}</pre>`;
+                        }
+                    }
+                } else {
+                    obj = jsonStr;
+                }
+                
+                // Format the JSON with syntax highlighting
+                const formatted = JSON.stringify(obj, null, 2);
+                
+                // Apply syntax highlighting
+                const highlighted = formatted
+                    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, 
+                        function (match) {
+                            let cls = 'json-number';
+                            if (/^"/.test(match)) {
+                                if (/:$/.test(match)) {
+                                    cls = 'json-key';
+                                    match = match.replace(/"/g, '');
+                                    match = '"' + match;
+                                } else {
+                                    cls = 'json-string';
+                                }
+                            } else if (/true|false/.test(match)) {
+                                cls = 'json-boolean';
+                            } else if (/null/.test(match)) {
+                                cls = 'json-null';
+                            }
+                            return '<span class="' + cls + '">' + match + '</span>';
+                        });
+                
+                return highlighted;
+            } catch (e) {
+                // If all parsing fails, return escaped original text
+                return `<pre style="color: #abb2bf;">${escapeHtml(jsonStr)}</pre>`;
+            }
+        }
+        
+        // Function to render markdown with MathJax support
+        function renderMarkdownWithMath(content, targetElement) {
+            // Configure marked to not escape LaTeX
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                sanitize: false,
+                smartypants: false
+            });
+            
+            // Protect LaTeX expressions from markdown parsing
+            let protectedContent = content;
+            const mathExpressions = [];
+            let mathIndex = 0;
+            
+            // Protect display math $$...$$ and \[...\]
+            protectedContent = protectedContent.replace(/\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\]/g, (match) => {
+                const placeholder = `__MATH_DISPLAY_${mathIndex}__`;
+                mathExpressions[mathIndex] = match;
+                mathIndex++;
+                return placeholder;
+            });
+            
+            // Protect inline math $...$ and \(...\)
+            protectedContent = protectedContent.replace(/\$[^\$\n]+?\$|\\\([^\)]+?\\\)/g, (match) => {
+                const placeholder = `__MATH_INLINE_${mathIndex}__`;
+                mathExpressions[mathIndex] = match;
+                mathIndex++;
+                return placeholder;
+            });
+            
+            // Render markdown
+            let html = marked.parse(protectedContent);
+            
+            // Restore math expressions
+            mathExpressions.forEach((expr, idx) => {
+                if (html.includes(`__MATH_DISPLAY_${idx}__`)) {
+                    html = html.replace(`__MATH_DISPLAY_${idx}__`, expr);
+                } else if (html.includes(`__MATH_INLINE_${idx}__`)) {
+                    html = html.replace(`__MATH_INLINE_${idx}__`, expr);
+                }
+            });
+            
+            // Set the HTML
+            targetElement.innerHTML = html;
+            
+            // Tell MathJax to process the math
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([targetElement]).catch((e) => {
+                    console.error('MathJax typeset error:', e);
+                });
+            }
+        }
+        
+        // Toggle Cypher query visibility
+        function toggleCypher(id) {
+            const cypherDiv = document.getElementById(id);
+            const headerDiv = cypherDiv.previousElementSibling;
+            
+            cypherDiv.classList.toggle('show');
+            headerDiv.classList.toggle('expanded');
+            
+            // Update toggle text
+            const textSpan = headerDiv.querySelector('span:last-child');
+            if (cypherDiv.classList.contains('show')) {
+                textSpan.textContent = 'Cypher查询语句 (点击收起)';
+            } else {
+                textSpan.textContent = 'Cypher查询语句 (点击展开)';
+            }
+        }
+        
+        // Event listeners
+        sendButton.addEventListener('click', submitQuery);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitQuery();
+            }
+        });
+        
+        // Focus on input
+        chatInput.focus();
+    </script>
+</body>
+</html>
